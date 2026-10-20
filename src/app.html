@@ -358,7 +358,6 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <button class="tool" id="btnHistory" data-i18n="history">Histórico</button>
       <button class="tool" id="btnSound" aria-pressed="true">Som</button>
       <button class="tool" id="btnSettings" aria-label="Settings">⚙</button>
-      <button class="tool" id="btnFs" aria-label="Fullscreen">⛶</button>
     </div>
     <button class="tool icon" id="btnSun" aria-pressed="false" aria-label="Light / dark">
       <svg class="ico-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
@@ -757,12 +756,9 @@ function doPit(n){
     S.tankStart=n; S.phase='running'; S.fired={}; if(S.autoLock) S.locked=true; audioInit();
     toast(t('t_tank_counting')); beep('pit'); vibrate([60]); save(); render(); return;
   }
+  if(S.phase!=='running'||!S.raceStart||!S.tankStart) return;   // in semi/final the tank starts with INÍCIO
   if(inCooldown(n)){ rejectPit(n); return; }
-  if(!S.tankStart){
-    S.tankStart=n; audioInit(); toast(t('t_grid_full')); beep('pit'); vibrate([60]); save(); render(); return;
-  }
   const te=(n-S.tankStart)/1000;
-  if(!S.raceStart){ S.tankStart=n; toast(t('t_grid_restart')); beep('pit'); save(); render(); return; }
   S.pits.push({at:(n-S.raceStart)/1000,run:te});
   S.undo={until:n+UNDO_WIN*1000,prev:S.tankStart};
   S.tankStart=n; S.fired={}; beep('pit'); vibrate([60]); save(); render();
@@ -775,7 +771,7 @@ function doUndo(){
 // n = moment the press began (the "go")
 function doStart(n){
   const m=M();
-  if(m.race){ if(S.phase!=='idle') return; S.raceStart=n; if(!S.tankStart) S.tankStart=n; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true; toast(t('t_started',m.name)+(S.locked?t('t_locked_suffix'):'')); }
+  if(m.race){ if(S.phase!=='idle') return; S.raceStart=n; S.tankStart=n; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true; toast(t('t_started',m.name)+(S.locked?t('t_locked_suffix'):'')); }
   else { if(S.phase!=='running'||S.raceStart) return; S.raceStart=n; S.fired={}; toast(t('t_heat_started')); }
   audioInit(); beep('start'); vibrate([120]); save(); render();
 }
@@ -818,6 +814,7 @@ function pitButton(btn){
     if(btn.hidden||S.phase==='finished') return; e.preventDefault(); try{ btn.setPointerCapture(e.pointerId); }catch(x){} audioInit();
     pressedAt=Date.now();
     if(!M().race){ doPit(pressedAt); return; }
+    if(S.phase!=='running') return;
     if(inCooldown(pressedAt)){ rejectPit(pressedAt); return; }
     t0=performance.now(); tick();
   });
@@ -1042,8 +1039,7 @@ function render(){
   setText(el.tankVal,clock(S.tankSec));
   el.btnSound.setAttribute('aria-pressed',S.sound?'true':'false'); setText(el.btnSound,S.sound?t('sound'):t('sound_off'));
   el.btnCalc.disabled=running; el.btnHistory.disabled=running;
-  const lockable=running||(idle&&!!S.tankStart);
-  el.btnLock.hidden=!(lockable||S.locked);
+  el.btnLock.hidden=!(running||S.locked);
   setText(el.lockLbl,S.locked?t('locked_hold'):t('lock_hold'));
 
   // tank panel
@@ -1113,13 +1109,12 @@ function render(){
   }
 
   // footer
-  el.btnPit.hidden=fin||(q&&!!S.tankStart);
+  el.btnPit.hidden=q?(fin||!!S.tankStart):!running;
   const cool=!q&&te!=null&&te<S.cooldown&&!fin;
   el.btnPit.classList.toggle('cool',cool);
   if(q) setText(el.pitSub,t('tap_fill'));
-  else if(te==null) setText(el.pitSub,t('hold_grid'));
   else if(cool) setText(el.pitSub,t('logged_locked',Math.ceil(S.cooldown-te)));
-  else setText(el.pitSub,tt==null?t('hold_restart'):t('hold_pit'));
+  else setText(el.pitSub,t('hold_pit'));
   const undoOk=S.undo&&Date.now()<S.undo.until&&running&&!q;
   el.btnUndo.hidden=!undoOk; if(undoOk) setText(el.undoSub,t('hold_s',Math.ceil((S.undo.until-Date.now())/1000)));
   const heatStart=q&&running&&!S.raceStart;
@@ -1127,7 +1122,7 @@ function render(){
   el.btnStart.classList.toggle('heat',heatStart); setText(el.startLbl,q?t('heat_start'):t('start'));
   el.actions.classList.toggle('q-run',q&&!!S.tankStart&&!fin);
   el.btnStop.hidden=!running;
-  el.btnReset.hidden=!(fin||(idle&&S.tankStart));
+  el.btnReset.hidden=!fin;
   if(S.undo&&Date.now()>S.undo.until){ S.undo=null; }
 
   alerts(m,r,st);
@@ -1165,7 +1160,6 @@ document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>set
 el.tankMinus.addEventListener('click',()=>adjTank(-STEP));
 el.tankPlus.addEventListener('click',()=>adjTank(STEP));
 el.btnSound.addEventListener('click',()=>{ S.sound=!S.sound; if(S.sound){ audioInit(); beep('pit'); } save(); render(); });
-$('btnFs').addEventListener('click',()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); else toast(t('t_fs')); }catch(e){} });
 
 el.btnCalc.addEventListener('click',()=>openCalc(S.lastRun));
 $('calcClose').addEventListener('click',closeCalc);
