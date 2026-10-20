@@ -77,6 +77,13 @@ button:disabled{cursor:default}
 .tool:disabled{opacity:.35}
 .toggle[aria-pressed="true"]{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
 .seg{display:flex; gap:4px}
+.tool.icon{padding:0; width:46px; display:inline-flex; align-items:center; justify-content:center; color:var(--muted)}
+.tool.icon svg{display:block}
+.tool.icon .ico-moon{display:none}
+.tool.icon[aria-pressed="true"]{border-color:var(--line); color:var(--muted)}
+.tool.icon[aria-pressed="true"] .ico-sun{display:none}
+.tool.icon[aria-pressed="true"] .ico-moon{display:block}
+#chartSheet{z-index:35}
 #btnLock{position:relative; overflow:hidden; touch-action:none; min-width:150px}
 #btnLock::after{content:""; position:absolute; inset:0; background:var(--accent); opacity:.45; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
 #btnLock>*{position:relative}
@@ -282,6 +289,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   .setting output{font-size:20px; min-width:3ch}
   .tool{height:42px; min-width:42px; padding:0 10px; font-size:13px}
   #btnLock{order:2; height:42px; padding:0 10px}
+  .tool.icon{width:42px; height:42px; order:1}
   #app.compact .modes,#app.compact .tools{display:none}
   #app.compact .hdr-info{display:block; width:100%; order:5}
   .panel{padding:10px 14px; gap:6px; border-radius:12px}
@@ -351,7 +359,10 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <button class="tool" id="btnSettings" aria-label="Settings">⚙</button>
       <button class="tool" id="btnFs" aria-label="Fullscreen">⛶</button>
     </div>
-    <button class="tool" id="btnSun" aria-pressed="false">☀ <span data-i18n="sun">Sol</span></button>
+    <button class="tool icon" id="btnSun" aria-pressed="false" aria-label="Light / dark">
+      <svg class="ico-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+      <svg class="ico-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+    </button>
     <button class="tool" id="btnLock"><span id="lockLbl">Bloquear</span></button>
     <span class="hdr-info" id="hdrInfo"></span>
   </header>
@@ -472,7 +483,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <div class="set-row"><div><span class="set-name" data-i18n="set_chart">Gráfico de consumo</span><span class="set-hint" id="setChartHint">da final ou sub-final mais recente</span></div>
         <button class="tool" id="setChart" data-i18n="generate">Gerar</button></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_ask">Pedir o combustível que sobrou ao parar</span><span class="set-hint" data-i18n="set_ask_hint">abre a calculadora de runtime no fim de cada manga; desligado, abres pelo botão Runtime quando quiseres</span></div>
-        <button class="tool toggle" id="setAsk" aria-pressed="true">Sim</button></div>
+        <button class="tool toggle" id="setAsk" aria-pressed="false">Não</button></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_autolock">Bloquear ecrã ao iniciar</span><span class="set-hint" data-i18n="set_autolock_hint">durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo</span></div>
         <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
     </div>
@@ -591,9 +602,9 @@ const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
 const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120],leadPit:[15,180],leadEnd:[15,180]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:true,alertMode:'both',leadPit:60,leadEnd:60,sun:false,
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
-const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','alertMode','leadPit','leadEnd','sun','lastRun','calib'];
+const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','v','alertMode','leadPit','leadEnd','sun','lastRun','calib'];
 
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
@@ -608,7 +619,8 @@ if(!Array.isArray(S.calib)) S.calib=[];
 if(['both','vib','snd'].indexOf(S.alertMode)<0) S.alertMode='both';
 if(typeof S.sun!=='boolean') S.sun=false;
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
-if(typeof S.askRuntime!=='boolean') S.askRuntime=true;
+if(typeof S.askRuntime!=='boolean') S.askRuntime=false;
+if(!(S.v>=2)){ S.askRuntime=false; S.v=2; }
 if(S.lang!=='pt'&&S.lang!=='en'){ const nl=String(navigator.language||'pt').toLowerCase(); S.lang=nl.indexOf('pt')===0?'pt':'en'; }
 
 const $=id=>document.getElementById(id);
