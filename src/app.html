@@ -457,6 +457,8 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="−5 s">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="+5 s">+</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_chart">Gráfico de consumo</span><span class="set-hint" id="setChartHint">da final ou sub-final mais recente</span></div>
         <button class="tool" id="setChart" data-i18n="generate">Gerar</button></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_ask">Pedir o combustível que sobrou ao parar</span><span class="set-hint" data-i18n="set_ask_hint">abre a calculadora de runtime no fim de cada manga; desligado, abres pelo botão Runtime quando quiseres</span></div>
+        <button class="tool toggle" id="setAsk" aria-pressed="true">Sim</button></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_autolock">Bloquear ecrã ao iniciar</span><span class="set-hint" data-i18n="set_autolock_hint">durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo</span></div>
         <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
     </div>
@@ -505,6 +507,7 @@ pt:{
   language:'Idioma',language_hint:'aplica-se a toda a app',set_q_hint:'duração da manga · passos de 30 s',set_race_hint:'duração da corrida · passos de 1 min',
   set_cap:'Capacidade do depósito',set_cap_hint:'usada na calculadora de runtime',set_hold:'Duração do toque longo',set_hold_hint:'Início, Arranque, Parar, Anular, Nova corrida, bloqueio e Abasteci em sub-final/final',
   set_cool:'Bloqueio após pit',set_cool_hint:'tempo em que um novo Abasteci é ignorado',set_autolock:'Bloquear ecrã ao iniciar',set_autolock_hint:'durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo',
+  set_ask:'Pedir o combustível que sobrou ao parar',set_ask_hint:'abre a calculadora de runtime no fim de cada manga; desligado, abres pelo botão Runtime quando quiseres',
   yes:'Sim',no:'Não',set_locked:'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).',defaults:'Repor valores de origem',t_defaults:'Valores de origem repostos',
   set_chart:'Gráfico de consumo',set_chart_hint:r=>r?'mais recente: '+r:'sem finais ou sub-finais no histórico',generate:'Gerar',chart:'Gráfico',
   chart_title:(m,d)=>'Consumo de combustível · '+m+' '+d,chart_level:'Nível do depósito ao longo da corrida',chart_total:'Total estimado',chart_rate:'Ritmo',chart_time:'Tempo em pista',
@@ -548,6 +551,7 @@ en:{
   language:'Language',language_hint:'applies to the whole app',set_q_hint:'heat length · 30 s steps',set_race_hint:'race length · 1 min steps',
   set_cap:'Tank capacity',set_cap_hint:'used by the runtime calculator',set_hold:'Long-press duration',set_hold_hint:'Start, Heat start, Stop, Undo, New race, lock and Fuelled in semi/final',
   set_cool:'Lock-out after pit',set_cool_hint:'time during which a new Fuelled is ignored',set_autolock:'Lock screen at start',set_autolock_hint:'during the race only Fuelled, Undo and Stop respond; unlock with a long press',
+  set_ask:'Ask for fuel left when stopping',set_ask_hint:'opens the runtime calculator at the end of each heat; when off, open it with the Runtime button whenever you want',
   yes:'Yes',no:'No',set_locked:'Race lengths can only be changed with the clock stopped (New race).',defaults:'Restore defaults',t_defaults:'Defaults restored',
   set_chart:'Fuel consumption chart',set_chart_hint:r=>r?'latest: '+r:'no finals or semi-finals in the history',generate:'Generate',chart:'Chart',
   chart_title:(m,d)=>'Fuel consumption · '+m+' '+d,chart_level:'Tank level through the race',chart_total:'Estimated total',chart_rate:'Rate',chart_time:'Track time',
@@ -563,9 +567,9 @@ const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
 const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:true,
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
-const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','lastRun','calib'];
+const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','lastRun','calib'];
 
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
@@ -578,6 +582,7 @@ if(!Array.isArray(S.pits)) S.pits=[];
 if(!Array.isArray(S.calib)) S.calib=[];
 ['margin','capCc','holdMs','cooldown'].forEach(k=>{ if(typeof S[k]!=='number') S[k]=DEF[k]; });
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
+if(typeof S.askRuntime!=='boolean') S.askRuntime=true;
 if(S.lang!=='pt'&&S.lang!=='en'){ const nl=String(navigator.language||'pt').toLowerCase(); S.lang=nl.indexOf('pt')===0?'pt':'en'; }
 
 const $=id=>document.getElementById(id);
@@ -737,7 +742,7 @@ function doStop(){
     elapsed:S.raceStart?Math.round((S.stopAt-S.raceStart)/1000):null,lastRun:S.lastRun,calib:null};
   H.unshift(rec); if(H.length>HIST_MAX) H.length=HIST_MAX; saveH(); S.lastHist=rec.id;
   beep('end'); vibrate([300]); save(); render();
-  openCalc(S.lastRun);
+  if(S.askRuntime) openCalc(S.lastRun);
 }
 function doReset(){
   const keep={}; SETTINGS_KEYS.forEach(k=>keep[k]=S[k]);
@@ -928,6 +933,7 @@ function renderSettings(){
   setText(el.setQ,clock(S.dur.q)); setText(el.setSF,clock(S.dur.sf)); setText(el.setF,clock(S.dur.f));
   setText(el.setCap,S.capCc+' cc'); setText(el.setHold,num(S.holdMs/1000,1)+' s'); setText(el.setCool,S.cooldown+' s');
   el.setAutoLock.setAttribute('aria-pressed',S.autoLock?'true':'false'); setText(el.setAutoLock,S.autoLock?t('yes'):t('no'));
+  $('setAsk').setAttribute('aria-pressed',S.askRuntime?'true':'false'); setText($('setAsk'),S.askRuntime?t('yes'):t('no'));
   const lr=lastRaceRec(); $('setChart').disabled=!lr;
   setText($('setChartHint'),t('set_chart_hint',lr?(t('mode_'+lr.mode+'_short')+' '+durLabel(lr.dur)+' · '+fmtDate(lr.when)):null));
   const locked=!canChangeMode();
@@ -1100,7 +1106,8 @@ $('chartClose').addEventListener('click',closeChart);
 el.langPt.addEventListener('click',()=>setLang('pt'));
 el.langEn.addEventListener('click',()=>setLang('en'));
 el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
-$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; save(); renderSettings(); render(); toast(t('t_defaults')); });
+$('setAsk').addEventListener('click',()=>{ S.askRuntime=!S.askRuntime; save(); renderSettings(); });
+$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; S.askRuntime=DEF.askRuntime; save(); renderSettings(); render(); toast(t('t_defaults')); });
 
 applyLang();
 keepAwake();
