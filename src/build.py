@@ -58,6 +58,8 @@ if('serviceWorker' in navigator){
 </script>
 """
 index_html = pwa_head + head_part + "</head>\n<body>\n" + body_part + sw_script + "</body>\n</html>\n"
+ver = hashlib.sha256(index_html.encode()).hexdigest()[:10]
+index_html = index_html.replace("build dev", "build " + ver)
 open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(index_html)
 
 # ---- icons ----
@@ -112,19 +114,30 @@ manifest = {
 }
 json.dump(manifest, open(os.path.join(out, "manifest.webmanifest"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
-# ---- service worker: cache-first app shell, versioned by content hash ----
-ver = hashlib.sha256(index_html.encode()).hexdigest()[:10]
+# ---- service worker: the page itself is network-first (short timeout) so a new build is used on the
+# first opening with network; everything else is cache-first. Offline always falls back to the cache. ----
 sw = """// NOSPONSOR NOFUEL · service worker · build %s
 const CACHE='nsnf-%s';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
+function withTimeout(p,ms){ return new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error('timeout')),ms); p.then(v=>{clearTimeout(t);res(v);},e=>{clearTimeout(t);rej(e);}); }); }
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET') return;
+  const url=new URL(e.request.url);
+  if(url.origin!==self.location.origin) return;
+  const isPage=e.request.mode==='navigate'||url.pathname.endsWith('/')||url.pathname.endsWith('/index.html');
+  if(isPage){
+    e.respondWith(withTimeout(fetch(e.request),2500).then(res=>{
+      if(res&&res.ok){ const copy=res.clone(); caches.open(CACHE).then(c=>{ c.put('./index.html',copy.clone()); c.put('./',copy); }); }
+      return res;
+    }).catch(()=>caches.match('./index.html')));
+    return;
+  }
   e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(hit=>hit||fetch(e.request).then(res=>{
-    if(res&&res.ok&&new URL(e.request.url).origin===self.location.origin){ const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); }
+    if(res&&res.ok){ const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); }
     return res;
-  }).catch(()=>caches.match('./index.html'))));
+  })));
 });
 """ % (ver, ver)
 open(os.path.join(out, "sw.js"), "w", encoding="utf-8").write(sw)
