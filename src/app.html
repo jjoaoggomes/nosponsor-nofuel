@@ -207,6 +207,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 .stepper input{width:88px; height:48px; text-align:center; font-family:var(--font-display); font-size:30px; font-weight:600; background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:8px; -webkit-user-select:text; user-select:text; -moz-appearance:textfield}
 .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
 .stepper .unit{font-family:var(--font-display); font-size:20px; color:var(--muted); margin:0 6px 0 2px}
+.stepper .runin{width:112px}
 .hint{font-size:13px; color:var(--muted)}
 .calc-apply{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
 .apply{background:var(--accent); color:var(--accent-fg); border-radius:12px; padding:0 20px; min-height:56px; font-family:var(--font-display); font-weight:700; font-size:22px; text-transform:uppercase; letter-spacing:.06em; flex:1 1 260px}
@@ -414,9 +415,9 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   <div class="card" role="dialog" aria-labelledby="calcTitle">
     <div class="panel-head"><span class="lbl" id="calcTitle">Calculadora de runtime</span><button class="tool" id="calcClose" data-i18n="close">Fechar</button></div>
     <div class="calc-grid">
-      <div class="chip"><span class="lbl" data-i18n="run_time">Tempo da run</span><span class="v" id="calcRun">0:00</span>
-        <div class="stepper"><button data-run="-10">−10 s</button><button data-run="10">+10 s</button></div>
-        <span class="hint" data-i18n="run_time_hint">Preenchido com o último depósito ao parar; ajusta se mediste noutro cronómetro.</span></div>
+      <div class="chip"><span class="lbl" data-i18n="run_time">Tempo da run</span>
+        <div class="stepper"><button data-run="-10">−10</button><button data-run="-1">−1</button><input id="calcRunIn" class="runin" type="text" inputmode="numeric" value="0:00" aria-label="m:ss" autocomplete="off"><button data-run="1">+1</button><button data-run="10">+10</button></div>
+        <span class="hint" data-i18n="run_time_hint">Preenchido com o último depósito ao parar; escreve m:ss (ou 748 para 7:48) se mediste noutro cronómetro.</span></div>
       <div class="chip"><span class="lbl" data-i18n="fuel_left">Combustível que sobrou</span>
         <div class="stepper"><button data-cc="-5">−5</button><button data-cc="-1">−1</button><input id="calcLeft" type="number" inputmode="decimal" min="0" max="125" step="1" value="0" aria-label="cc"><span class="unit">cc</span><button data-cc="1">+1</button><button data-cc="5">+5</button></div>
         <span class="hint" data-i18n="fuel_left_hint">Mede o que ficou no depósito e introduz aqui.</span></div>
@@ -519,7 +520,7 @@ pt:{
   t_tank_counting:'Depósito a contar · no "go" mantém ARRANQUE',t_grid_full:'Depósito cheio na grelha · a contar',t_grid_restart:'Depósito reiniciado na grelha',
   t_undone:'Último pit anulado',t_started:n=>n+' iniciada',t_locked_suffix:' · ecrã bloqueado',t_heat_started:'Manga de qualificação a contar',t_reset:'Pronto para nova corrida',
   t_locked:'Ecrã bloqueado · só Abasteci, Anular e Parar',t_unlocked:'Ecrã desbloqueado',t_fs:'Neste aparelho, adiciona a app ao ecrã inicial para ficar em ecrã inteiro',
-  calc_title:c=>'Calculadora de runtime · depósito de '+c+' cc',run_time:'Tempo da run',run_time_hint:'Preenchido com o último depósito ao parar; ajusta se mediste noutro cronómetro.',
+  calc_title:c=>'Calculadora de runtime · depósito de '+c+' cc',run_time:'Tempo da run',run_time_hint:'Preenchido com o último depósito ao parar; escreve m:ss (ou 748 para 7:48) se mediste noutro cronómetro.',
   fuel_left:'Combustível que sobrou',fuel_left_hint:'Mede o que ficou no depósito e introduz aqui.',consumption:'Consumo',used_in:(cc,t)=>'gastou '+cc+' cc em '+t,
   full_runtime:'Runtime do depósito cheio',avg_of:(n,t)=>'média de '+n+': '+t,margin:'Margem',use_as_tank:'Usar como depósito',use_t_as_tank:t=>'Usar '+t+' como depósito',
   calibs:'Calibrações: ',no_calibs:'Ainda sem calibrações guardadas.',t_tank_set:(d,r,m)=>'Depósito definido em '+d+' (runtime '+r+' − '+m+' s)',cc_per_min:' cc/min',
@@ -568,7 +569,7 @@ en:{
   t_tank_counting:'Tank counting · on the "go" hold HEAT START',t_grid_full:'Tank filled on the grid · counting',t_grid_restart:'Tank restarted on the grid',
   t_undone:'Last pit undone',t_started:n=>n+' started',t_locked_suffix:' · screen locked',t_heat_started:'Qualifying heat counting',t_reset:'Ready for a new race',
   t_locked:'Screen locked · only Fuelled, Undo and Stop',t_unlocked:'Screen unlocked',t_fs:'On this device, add the app to the home screen to get full screen',
-  calc_title:c=>'Runtime calculator · '+c+' cc tank',run_time:'Run time',run_time_hint:'Filled with the last tank when you stopped; adjust if you timed it elsewhere.',
+  calc_title:c=>'Runtime calculator · '+c+' cc tank',run_time:'Run time',run_time_hint:'Filled with the last tank when you stopped; type m:ss (or 748 for 7:48) if you timed it elsewhere.',
   fuel_left:'Fuel left',fuel_left_hint:'Measure what was left in the tank and enter it here.',consumption:'Consumption',used_in:(cc,t)=>'used '+cc+' cc in '+t,
   full_runtime:'Full-tank runtime',avg_of:(n,t)=>'average of '+n+': '+t,margin:'Margin',use_as_tank:'Use as tank',use_t_as_tank:t=>'Use '+t+' as tank',
   calibs:'Calibrations: ',no_calibs:'No calibrations saved yet.',t_tank_set:(d,r,m)=>'Tank set to '+d+' (runtime '+r+' − '+m+' s)',cc_per_min:' cc/min',
@@ -631,7 +632,7 @@ const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),bt
   qualHint:$('qualHint'),planPanel:$('planPanel'),planMeta:$('planMeta'),planList:$('planList'),
   btnPit:$('btnPit'),pitSub:$('pitSub'),btnUndo:$('btnUndo'),undoSub:$('undoSub'),btnStart:$('btnStart'),startLbl:$('startLbl'),btnStop:$('btnStop'),btnReset:$('btnReset'),
   tankVal:$('tankVal'),tankMinus:$('tankMinus'),tankPlus:$('tankPlus'),btnSound:$('btnSound'),btnCalc:$('btnCalc'),btnHistory:$('btnHistory'),btnSettings:$('btnSettings'),toast:$('toast'),
-  calc:$('calc'),calcTitle:$('calcTitle'),calcRun:$('calcRun'),calcLeft:$('calcLeft'),calcRate:$('calcRate'),calcUsed:$('calcUsed'),calcRuntime:$('calcRuntime'),calcAvg:$('calcAvg'),calcApply:$('calcApply'),marginVal:$('marginVal'),calibList:$('calibList'),
+  calc:$('calc'),calcTitle:$('calcTitle'),calcRunIn:$('calcRunIn'),calcLeft:$('calcLeft'),calcRate:$('calcRate'),calcUsed:$('calcUsed'),calcRuntime:$('calcRuntime'),calcAvg:$('calcAvg'),calcApply:$('calcApply'),marginVal:$('marginVal'),calibList:$('calibList'),
   history:$('history'),histList:$('histList'),histClearAll:$('histClearAll'),
   stratHint:$('stratHint'),tankWinTick:$('tankWinTick'),btnSun:$('btnSun'),
   settings:$('settings'),setQ:$('setQ'),setSF:$('setSF'),setF:$('setF'),setCap:$('setCap'),setHold:$('setHold'),setCool:$('setCool'),setAutoLock:$('setAutoLock'),setLocked:$('setLocked'),langPt:$('langPt'),langEn:$('langEn')};
@@ -832,11 +833,18 @@ function runtimeFor(run,left){ // seconds a full tank lasts, from a partial run
   const used=S.capCc-left; if(run<=0||used<=0||left<0) return null;
   return {used:used, rate:used/(run/60), runtime:run*S.capCc/used};
 }
-function openCalc(run){ if(S.locked) return; C.run=Math.max(0,Math.round(run||0)); C.left=0; el.calcLeft.value='0'; el.calcLeft.max=String(S.capCc); el.calc.hidden=false; renderCalc(); }
+function parseRun(str){ // "7:48" → 468 · "748" → 468 · "90" → 90 s
+  const v=String(str||'').trim().replace(',',':').replace('.',':'); if(!v) return 0;
+  if(v.indexOf(':')>=0){ const a=v.split(':'); const m=parseInt(a[0],10)||0, sec=parseInt(a[1],10)||0; return Math.max(0,m*60+sec); }
+  const d=v.replace(/\D/g,''); if(!d) return 0;
+  if(d.length>=3) return Math.max(0,parseInt(d.slice(0,-2),10)*60+parseInt(d.slice(-2),10));
+  return parseInt(d,10);
+}
+function openCalc(run){ if(S.locked) return; C.run=Math.max(0,Math.round(run||0)); C.left=0; el.calcLeft.value='0'; el.calcLeft.max=String(S.capCc); el.calcRunIn.value=clock(C.run); el.calc.hidden=false; renderCalc(); }
 function closeCalc(){ el.calc.hidden=true; }
 function renderCalc(){
   setText(el.calcTitle,t('calc_title',S.capCc));
-  setText(el.calcRun,clock(C.run));
+  if(document.activeElement!==el.calcRunIn) el.calcRunIn.value=clock(C.run);
   const r=runtimeFor(C.run,C.left);
   setText(el.marginVal,S.margin+' s');
   if(!r){ setText(el.calcRate,'—'); setText(el.calcUsed,''); setText(el.calcRuntime,'—'); el.calcApply.disabled=true; setText(el.calcApply,t('use_as_tank')); }
@@ -1162,7 +1170,10 @@ $('btnFs').addEventListener('click',()=>{ try{ if(document.fullscreenElement) do
 el.btnCalc.addEventListener('click',()=>openCalc(S.lastRun));
 $('calcClose').addEventListener('click',closeCalc);
 el.calcApply.addEventListener('click',applyCalc);
-el.calc.querySelectorAll('[data-run]').forEach(b=>b.addEventListener('click',()=>{ C.run=Math.max(0,C.run+Number(b.dataset.run)); renderCalc(); }));
+el.calc.querySelectorAll('[data-run]').forEach(b=>b.addEventListener('click',()=>{ C.run=Math.max(0,C.run+Number(b.dataset.run)); el.calcRunIn.value=clock(C.run); renderCalc(); }));
+el.calcRunIn.addEventListener('input',()=>{ C.run=parseRun(el.calcRunIn.value); renderCalc(); });
+el.calcRunIn.addEventListener('blur',()=>{ el.calcRunIn.value=clock(C.run); });
+el.calcRunIn.addEventListener('focus',()=>{ try{ el.calcRunIn.select(); }catch(e){} });
 el.calc.querySelectorAll('[data-cc]').forEach(b=>b.addEventListener('click',()=>{ C.left=Math.min(S.capCc,Math.max(0,C.left+Number(b.dataset.cc))); el.calcLeft.value=String(C.left); renderCalc(); }));
 el.calcLeft.addEventListener('input',()=>{ const v=parseFloat(String(el.calcLeft.value).replace(',','.')); C.left=isNaN(v)?0:Math.min(S.capCc,Math.max(0,v)); renderCalc(); });
 $('marginMinus').addEventListener('click',()=>{ S.margin=Math.max(0,S.margin-5); save(); renderCalc(); });
