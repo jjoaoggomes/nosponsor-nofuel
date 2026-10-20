@@ -137,6 +137,10 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 .bar .fill{position:absolute; left:0; top:0; bottom:0; width:0; border-radius:7px; background:var(--sc,var(--accent)); transition:width .2s linear}
 .bar .tick{position:absolute; top:-4px; bottom:-4px; width:3px; margin-left:-1px; border-radius:2px; background:var(--fg)}
 .bar .tick.planned{background:transparent; border:2px solid var(--muted); width:5px; margin-left:-2px; border-radius:3px}
+.bar .tick.win{background:var(--ok)}
+.strat{color:var(--muted); font-size:15px}
+.strat b{color:var(--fg); font-family:var(--font-display); font-size:18px; font-variant-numeric:tabular-nums}
+.strat.save b{color:var(--ok)}
 
 .chips{display:flex; gap:10px; flex-wrap:wrap}
 .chip{
@@ -368,6 +372,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <button class="tool" id="btnSettings" aria-label="Settings">⚙</button>
       <button class="tool" id="btnFs" aria-label="Fullscreen">⛶</button>
     </div>
+    <button class="tool" id="btnSun" aria-pressed="false">☀ <span data-i18n="sun">Sol</span></button>
     <button class="tool" id="btnLock"><span id="lockLbl">Bloquear</span></button>
     <span class="hdr-info" id="hdrInfo"></span>
   </header>
@@ -389,13 +394,14 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <span class="state" id="tankState"></span>
       </div>
       <div class="digits" id="tankDigits"></div>
-      <div class="bar" id="tankBar"><div class="fill" id="tankFill"></div><div class="tick planned" id="tankPlannedTick" hidden></div></div>
+      <div class="bar" id="tankBar"><div class="fill" id="tankFill"></div><div class="tick planned" id="tankPlannedTick" hidden></div><div class="tick win" id="tankWinTick" hidden></div></div>
       <div class="chips">
         <div class="chip next" id="chipNext"><span class="lbl" id="chipNextLbl">Pit planeado</span><span class="v" id="chipNextV">—</span></div>
         <div class="chip limit" id="chipLimit"><span class="lbl" data-i18n="tank_limit">Limite do depósito</span><span class="v" id="chipLimitV">—</span></div>
         <div class="chip ok" id="chipStops"><span class="lbl" data-i18n="stops">Paragens</span><span class="v" id="chipStopsV">—</span></div>
       </div>
       <div class="runs" id="qualHint" hidden></div>
+      <div class="strat" id="stratHint" hidden></div>
     </section>
 
     <section class="panel plan" id="planPanel">
@@ -476,6 +482,14 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <div class="setting"><button data-set="holdMs" data-d="-200" aria-label="−0.2 s">−</button><output id="setHold">1,2 s</output><button data-set="holdMs" data-d="200" aria-label="+0.2 s">+</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_cool">Bloqueio após pit</span><span class="set-hint" data-i18n="set_cool_hint">tempo em que um novo Abasteci é ignorado</span></div>
         <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="−5 s">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="+5 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_alerts">Avisos</span><span class="set-hint" data-i18n="set_alerts_hint">som e vibração, só vibração para pits barulhentos, ou só som (iOS não vibra)</span></div>
+        <div class="seg"><button class="tool toggle" data-amode="both" data-i18n="alerts_both">Som + vibração</button><button class="tool toggle" data-amode="vib" data-i18n="alerts_vib">Só vibração</button><button class="tool toggle" data-amode="snd" data-i18n="alerts_snd">Só som</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_lead_pit">Antecedência do aviso de pit</span><span class="set-hint" data-i18n="set_lead_pit_hint">segundos antes do pit planeado (na qualificação, antes do limite do depósito)</span></div>
+        <div class="setting"><button data-set="leadPit" data-d="-15" aria-label="−15 s">−</button><output id="setLeadPit">60 s</output><button data-set="leadPit" data-d="15" aria-label="+15 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_lead_end">Aviso de fim</span><span class="set-hint" data-i18n="set_lead_end_hint">segundos antes do fim da corrida ou da manga</span></div>
+        <div class="setting"><button data-set="leadEnd" data-d="-15" aria-label="−15 s">−</button><output id="setLeadEnd">60 s</output><button data-set="leadEnd" data-d="15" aria-label="+15 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_backup">Cópia de segurança</span><span class="set-hint" data-i18n="set_backup_hint">histórico, calibrações e configurações num ficheiro; importar junta as corridas que faltam e repõe as configurações</span></div>
+        <div class="seg"><button class="tool" id="btnExport" data-i18n="export">Exportar</button><button class="tool" id="btnImport" data-i18n="import">Importar</button><input type="file" id="importFile" accept=".json,application/json" hidden></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_chart">Gráfico de consumo</span><span class="set-hint" id="setChartHint">da final ou sub-final mais recente</span></div>
         <button class="tool" id="setChart" data-i18n="generate">Gerar</button></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_ask">Pedir o combustível que sobrou ao parar</span><span class="set-hint" data-i18n="set_ask_hint">abre a calculadora de runtime no fim de cada manga; desligado, abres pelo botão Runtime quando quiseres</span></div>
@@ -484,7 +498,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
     </div>
     <div class="set-foot"><span class="hint" id="setLocked"></span><button class="tool" id="setDefaults" data-i18n="defaults">Repor valores de origem</button></div>
-    <div class="hint">NOSPONSOR NOFUEL · build 3f3c32316d</div>
+    <div class="hint">NOSPONSOR NOFUEL · build 485b363112</div>
   </div>
 </div>
 
@@ -530,6 +544,11 @@ pt:{
   set_cool:'Bloqueio após pit',set_cool_hint:'tempo em que um novo Abasteci é ignorado',set_autolock:'Bloquear ecrã ao iniciar',set_autolock_hint:'durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo',
   set_ask:'Pedir o combustível que sobrou ao parar',set_ask_hint:'abre a calculadora de runtime no fim de cada manga; desligado, abres pelo botão Runtime quando quiseres',
   yes:'Sim',no:'Não',set_locked:'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).',defaults:'Repor valores de origem',t_defaults:'Valores de origem repostos',
+  sun:'Sol',strat_more:(n,w,k,l)=>'Parar agora: '+n+' paragens · espera '+w+' e ficas com '+k+' (limite em '+l+')',strat_ok:(n,m)=>'Parar agora: '+n+' '+(n===1?'paragem':'paragens')+' · folga '+m+' por depósito',
+  set_alerts:'Avisos',set_alerts_hint:'som e vibração, só vibração para pits barulhentos, ou só som (iOS não vibra)',alerts_both:'Som + vibração',alerts_vib:'Só vibração',alerts_snd:'Só som',
+  set_lead_pit:'Antecedência do aviso de pit',set_lead_pit_hint:'segundos antes do pit planeado (na qualificação, antes do limite do depósito)',set_lead_end:'Aviso de fim',set_lead_end_hint:'segundos antes do fim da corrida ou da manga',
+  set_backup:'Cópia de segurança',set_backup_hint:'histórico, calibrações e configurações num ficheiro; importar junta as corridas que faltam e repõe as configurações',export:'Exportar',import:'Importar',
+  t_exported:'Ficheiro de cópia de segurança criado',t_export_copied:'Aqui não há partilha de ficheiros: cópia de segurança copiada como texto',t_import_ok:(a,c)=>'Importado: '+a+' corridas novas, '+c+' calibrações e as configurações',t_import_bad:'Ficheiro inválido',t_import_running:'Importa com o cronómetro parado',
   set_chart:'Gráfico de consumo',set_chart_hint:r=>r?'mais recente: '+r:'sem finais ou sub-finais no histórico',generate:'Gerar',chart:'Gráfico',
   chart_title:(m,d)=>'Consumo de combustível · '+m+' '+d,chart_level:'Nível do depósito ao longo da corrida',chart_total:'Total estimado',chart_rate:'Ritmo',chart_time:'Tempo em pista',
   th_tank:'Depósito',th_start:'Início',th_dur:'Duração',th_used:'Consumo',th_rate:'Ritmo',total:'Total',grid_fill:t=>'cheio '+t+' antes da partida',ran_dry:'secou?',measured:'medido',
@@ -574,6 +593,11 @@ en:{
   set_cool:'Lock-out after pit',set_cool_hint:'time during which a new Fuelled is ignored',set_autolock:'Lock screen at start',set_autolock_hint:'during the race only Fuelled, Undo and Stop respond; unlock with a long press',
   set_ask:'Ask for fuel left when stopping',set_ask_hint:'opens the runtime calculator at the end of each heat; when off, open it with the Runtime button whenever you want',
   yes:'Yes',no:'No',set_locked:'Race lengths can only be changed with the clock stopped (New race).',defaults:'Restore defaults',t_defaults:'Defaults restored',
+  sun:'Sun',strat_more:(n,w,k,l)=>'Pit now: '+n+' stops · wait '+w+' to keep it at '+k+' (limit in '+l+')',strat_ok:(n,m)=>'Pit now: '+n+' stop'+(n===1?'':'s')+' · '+m+' spare per tank',
+  set_alerts:'Alerts',set_alerts_hint:'sound and vibration, vibration only for loud pits, or sound only (iOS does not vibrate)',alerts_both:'Sound + vibration',alerts_vib:'Vibration only',alerts_snd:'Sound only',
+  set_lead_pit:'Pit warning lead time',set_lead_pit_hint:'seconds before the planned pit (in qualifying, before the tank limit)',set_lead_end:'End warning',set_lead_end_hint:'seconds before the end of the race or heat',
+  set_backup:'Backup',set_backup_hint:'history, calibrations and settings in one file; importing adds the missing races and restores the settings',export:'Export',import:'Import',
+  t_exported:'Backup file created',t_export_copied:'No file sharing here: backup copied as text',t_import_ok:(a,c)=>'Imported: '+a+' new races, '+c+' calibrations and the settings',t_import_bad:'Invalid file',t_import_running:'Import with the clock stopped',
   set_chart:'Fuel consumption chart',set_chart_hint:r=>r?'latest: '+r:'no finals or semi-finals in the history',generate:'Generate',chart:'Chart',
   chart_title:(m,d)=>'Fuel consumption · '+m+' '+d,chart_level:'Tank level through the race',chart_total:'Estimated total',chart_rate:'Rate',chart_time:'Track time',
   th_tank:'Tank',th_start:'Start',th_dur:'Length',th_used:'Used',th_rate:'Rate',total:'Total',grid_fill:t=>'filled '+t+' before the start',ran_dry:'ran dry?',measured:'measured',
@@ -586,11 +610,11 @@ function t(k){ const d=L[S.lang]||L.pt; let v=d[k]; if(v==null) v=L.pt[k]; if(v=
 
 const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
-const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120]};
+const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120],leadPit:[15,180],leadEnd:[15,180]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:true,
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:true,alertMode:'both',leadPit:60,leadEnd:60,sun:false,
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
-const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','lastRun','calib'];
+const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','alertMode','leadPit','leadEnd','sun','lastRun','calib'];
 
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
@@ -601,7 +625,9 @@ let H=loadH();
 if(!S.fired) S.fired={};
 if(!Array.isArray(S.pits)) S.pits=[];
 if(!Array.isArray(S.calib)) S.calib=[];
-['margin','capCc','holdMs','cooldown'].forEach(k=>{ if(typeof S[k]!=='number') S[k]=DEF[k]; });
+['margin','capCc','holdMs','cooldown','leadPit','leadEnd'].forEach(k=>{ if(typeof S[k]!=='number') S[k]=DEF[k]; });
+if(['both','vib','snd'].indexOf(S.alertMode)<0) S.alertMode='both';
+if(typeof S.sun!=='boolean') S.sun=false;
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
 if(typeof S.askRuntime!=='boolean') S.askRuntime=true;
 if(S.lang!=='pt'&&S.lang!=='en'){ const nl=String(navigator.language||'pt').toLowerCase(); S.lang=nl.indexOf('pt')===0?'pt':'en'; }
@@ -616,6 +642,7 @@ const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),bt
   tankVal:$('tankVal'),tankMinus:$('tankMinus'),tankPlus:$('tankPlus'),btnSound:$('btnSound'),btnCalc:$('btnCalc'),btnHistory:$('btnHistory'),btnSettings:$('btnSettings'),toast:$('toast'),
   calc:$('calc'),calcTitle:$('calcTitle'),calcRun:$('calcRun'),calcLeft:$('calcLeft'),calcRate:$('calcRate'),calcUsed:$('calcUsed'),calcRuntime:$('calcRuntime'),calcAvg:$('calcAvg'),calcApply:$('calcApply'),marginVal:$('marginVal'),calibList:$('calibList'),
   history:$('history'),histList:$('histList'),histClearAll:$('histClearAll'),
+  stratHint:$('stratHint'),tankWinTick:$('tankWinTick'),btnSun:$('btnSun'),
   settings:$('settings'),setQ:$('setQ'),setSF:$('setSF'),setF:$('setF'),setCap:$('setCap'),setHold:$('setHold'),setCool:$('setCool'),setAutoLock:$('setAutoLock'),setLocked:$('setLocked'),langPt:$('langPt'),langEn:$('langEn')};
 
 /* ---------- helpers ---------- */
@@ -636,6 +663,9 @@ function setText(node,str){ if(node.textContent!==str) node.textContent=str; }
 let toastT=null;
 function toast(msg){ el.toast.textContent=msg; el.toast.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.toast.classList.remove('show'),2400); }
 function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function vibAlert(p){ if(S.alertMode!=='snd') vibrate(p); }
+const SUN={'--bg':'#ffffff','--panel':'#ffffff','--panel2':'#eef0f3','--line':'#8e98a6','--fg':'#000000','--muted':'#2f3640','--accent':'#c40c6a','--accent-fg':'#ffffff','--ok':'#0a7a3c','--ok-fg':'#ffffff','--warn':'#8a5200','--warn-fg':'#ffffff','--crit':'#c01414','--crit-fg':'#ffffff'};
+function applySun(){ const r=document.documentElement.style; if(S.sun){ for(const k in SUN) r.setProperty(k,SUN[k]); r.setProperty('color-scheme','light'); } else { for(const k in SUN) r.removeProperty(k); r.removeProperty('color-scheme'); } el.btnSun.setAttribute('aria-pressed',S.sun?'true':'false'); }
 function applyLang(){
   document.documentElement.lang=S.lang;
   document.querySelectorAll('[data-i18n]').forEach(n=>setText(n,t(n.dataset.i18n)));
@@ -651,8 +681,9 @@ function tone(freq,dur,when,type,vol){
     const tt=AC.currentTime+when; g.gain.setValueAtTime(0,tt); g.gain.linearRampToValueAtTime(vol,tt+.01); g.gain.setValueAtTime(vol,tt+dur-.02); g.gain.linearRampToValueAtTime(0,tt+dur); o.start(tt); o.stop(tt+dur+.05); }catch(e){}
 }
 function beep(kind){
-  if(!S.sound) return; audioInit(); if(!AC) return;
+  if(!S.sound||S.alertMode==='vib') return; audioInit(); if(!AC) return;
   switch(kind){
+    case 'window': tone(700,.1); tone(900,.12,.16); break;
     case 'start': tone(880,.12); tone(1320,.3,.15); break;
     case 'pit': tone(660,.08); break;
     case 'warn': tone(1000,.15); tone(1000,.15,.25); break;
@@ -696,13 +727,16 @@ function planFor(R,T,tt,te){
   r.stopsLeft=tanks-1; r.stint=win/tanks;    // even split, each stint <= T
   r.nextIn=r.stint-te; r.limitIn=r.tankLeft;
   r.schedule=[]; for(let i=1;i<=r.stopsLeft;i++) r.schedule.push(tankAt+i*r.stint);
+  // pit window: pitting now needs ceil(remaining/T) stops; waiting until remaining <= stopsLeft*T keeps the plan's count
+  const rem=r.remaining, stopsIfNow=Math.ceil(rem/T), waitNeeded=Math.max(0,rem-r.stopsLeft*T);
+  r.win={stopsIfNow:stopsIfNow,waitNeeded:waitNeeded,saves:stopsIfNow>r.stopsLeft,marginNow:stopsIfNow>0?Math.max(0,(stopsIfNow*T-rem)/stopsIfNow):0};
   return r;
 }
 function statusOf(m,r,tt,te){
   if(te==null) return 'idle';
   if(!m.race){ // qualifying: one tank, heat of m.dur
     if(r.tankLeft<=0) return 'over';
-    if(r.tankLeft<=60) return 'soon';
+    if(r.tankLeft<=S.leadPit) return 'soon';
     if(tt!=null){ const rem=m.dur-tt; if(rem<=0) return 'ok'; return r.tankLeft>=rem?'covers':'short'; }
     return (r.tankLeft-m.dur)<0?'short':'ok';
   }
@@ -710,7 +744,7 @@ function statusOf(m,r,tt,te){
   if(r.last) return 'last';
   if(r.limitIn<=0) return 'over';
   if(r.nextIn<=0) return 'now';
-  if(r.nextIn<=60) return 'soon';
+  if(r.nextIn<=S.leadPit) return 'soon';
   return 'ok';
 }
 
@@ -940,6 +974,31 @@ function openChart(rec){
 }
 function closeChart(){ $('chartSheet').hidden=true; }
 
+/* ---------- backup / restore ---------- */
+function stamp(){ const d=new Date(), z=x=>(x<10?'0':'')+x; return d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes()); }
+function exportBackup(){
+  const st={}; SETTINGS_KEYS.forEach(k=>st[k]=S[k]);
+  const json=JSON.stringify({app:'NOSPONSOR NOFUEL',format:1,exportedAt:new Date().toISOString(),settings:st,history:H},null,1);
+  const name='nsnf-backup-'+stamp()+'.json';
+  if(/claude\.ai$/.test(location.hostname)){ copyText(json); toast(t('t_export_copied')); return; }
+  try{ const file=new File([json],name,{type:'application/json'}); if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){ navigator.share({files:[file],title:name}).then(()=>toast(t('t_exported'))).catch(()=>{}); return; } }catch(e){}
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([json],{type:'application/json'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },3000); toast(t('t_exported')); }catch(e){ copyText(json); }
+}
+function importBackup(file){
+  if(!file) return; if(S.phase==='running'){ toast(t('t_import_running')); return; }
+  const rd=new FileReader();
+  rd.onload=()=>{ try{
+    const d=JSON.parse(rd.result); if(!d||d.format!==1||!Array.isArray(d.history)) throw new Error('bad');
+    const ids=new Set(H.map(x=>x.id)); let added=0;
+    d.history.forEach(r=>{ if(r&&typeof r.id==='number'&&typeof r.when==='number'&&Array.isArray(r.pits)&&!ids.has(r.id)){ H.push(r); ids.add(r.id); added++; } });
+    H.sort((a,b)=>b.when-a.when); if(H.length>HIST_MAX) H.length=HIST_MAX; saveH();
+    const st=d.settings||{}; SETTINGS_KEYS.forEach(k=>{ if(k in st&&k!=='mode'&&k!=='lastRun') S[k]=st[k]; });
+    S.dur=Object.assign({},DEF.dur,S.dur||{}); if(!Array.isArray(S.calib)) S.calib=[]; if(S.lang!=='pt'&&S.lang!=='en') S.lang='pt'; if(['both','vib','snd'].indexOf(S.alertMode)<0) S.alertMode='both';
+    save(); applyLang(); applySun(); renderSettings(); render(); toast(t('t_import_ok',added,S.calib.length));
+  }catch(e){ toast(t('t_import_bad')); } };
+  rd.readAsText(file);
+}
+
 /* ---------- settings ---------- */
 function openSettings(){ if(S.locked) return; el.settings.hidden=false; renderSettings(); }
 function closeSettings(){ el.settings.hidden=true; }
@@ -955,6 +1014,9 @@ function renderSettings(){
   setText(el.setCap,S.capCc+' cc'); setText(el.setHold,num(S.holdMs/1000,1)+' s'); setText(el.setCool,S.cooldown+' s');
   el.setAutoLock.setAttribute('aria-pressed',S.autoLock?'true':'false'); setText(el.setAutoLock,S.autoLock?t('yes'):t('no'));
   $('setAsk').setAttribute('aria-pressed',S.askRuntime?'true':'false'); setText($('setAsk'),S.askRuntime?t('yes'):t('no'));
+  setText($('setLeadPit'),S.leadPit+' s'); setText($('setLeadEnd'),S.leadEnd+' s');
+  el.settings.querySelectorAll('[data-amode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.amode===S.alertMode?'true':'false'));
+  $('btnImport').disabled=S.phase==='running';
   const lr=lastRaceRec(); $('setChart').disabled=!lr;
   setText($('setChartHint'),t('set_chart_hint',lr?(t('mode_'+lr.mode+'_short')+' '+durLabel(lr.dur)+' · '+fmtDate(lr.when)):null));
   const locked=!canChangeMode();
@@ -994,6 +1056,14 @@ function render(){
   const frac=te==null?0:Math.min(1,te/S.tankSec); el.tankFill.style.width=(frac*100)+'%';
   if(!q&&r.stint!=null&&!r.last){ el.tankPlannedTick.hidden=false; el.tankPlannedTick.style.left=(Math.min(1,r.stint/S.tankSec)*100)+'%'; }
   else el.tankPlannedTick.hidden=true;
+  if(!q&&r.win&&!r.last&&running&&r.win.saves){ el.tankWinTick.hidden=false; el.tankWinTick.style.left=(Math.min(1,(te+r.win.waitNeeded)/S.tankSec)*100)+'%'; }
+  else el.tankWinTick.hidden=true;
+  if(!q&&r.win&&!r.last&&running&&tt!=null&&st!=='over'){
+    el.stratHint.hidden=false; el.stratHint.classList.toggle('save',r.win.saves);
+    el.stratHint.innerHTML=r.win.saves
+      ?esc(t('strat_more',r.win.stopsIfNow,'\u200b'+clock(r.win.waitNeeded),r.stopsLeft,clock(Math.max(0,r.limitIn)))).replace('\u200b'+clock(r.win.waitNeeded),'<b>'+clock(r.win.waitNeeded)+'</b>')
+      :esc(t('strat_ok',r.win.stopsIfNow,'\u200b'+clock(r.win.marginNow))).replace('\u200b'+clock(r.win.marginNow),'<b>'+clock(r.win.marginNow)+'</b>');
+  } else el.stratHint.hidden=true;
 
   el.chipNext.classList.remove('crit');
   if(!q){
@@ -1066,20 +1136,21 @@ function render(){
 
 function alerts(m,r,st){
   if(S.phase!=='running') return; const f=S.fired;
-  const fire=(k,snd,vib)=>{ if(!f[k]){ f[k]=1; beep(snd); if(vib) vibrate(vib); save(); } };
+  const fire=(k,snd,vib)=>{ if(!f[k]){ f[k]=1; beep(snd); if(vib) vibAlert(vib); save(); } };
   if(m.race){
     if(st==='soon') fire('soon','warn',[150,80,150]);
     if(st==='now') fire('now','now',[400]);
     if(!r.last&&r.limitIn!=null&&r.limitIn<=30&&r.limitIn>0) fire('lim30','urgent',[200,80,200,80,200]);
     if(st==='over') fire('over','urgent',[500]);
     if(r.last) fire('last','last',[100,60,100]);
-    if(r.remaining<=60&&r.remaining>0) fire('end60','warn');
+    if(r.remaining<=S.leadEnd&&r.remaining>0) fire('end60','warn');
     if(r.remaining<=0) fire('end','end',[600]);
+    if(r.win&&r.win.waitNeeded<=0&&r.win.saves) fire('win','window',[80,60,80]);
   } else {
     if(st==='short') fire('short','warn',[150,80,150]);
     if(st==='soon') fire('soon','warn',[150,80,150]);
     if(st==='over') fire('over','urgent',[500]);
-    if(r.remaining!=null&&r.remaining<=60&&r.remaining>0) fire('end60','warn');
+    if(r.remaining!=null&&r.remaining<=S.leadEnd&&r.remaining>0) fire('end60','warn');
     if(r.remaining!=null&&r.remaining<=0) fire('end','end',[600]);
   }
 }
@@ -1128,9 +1199,15 @@ el.langPt.addEventListener('click',()=>setLang('pt'));
 el.langEn.addEventListener('click',()=>setLang('en'));
 el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
 $('setAsk').addEventListener('click',()=>{ S.askRuntime=!S.askRuntime; save(); renderSettings(); });
-$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; S.askRuntime=DEF.askRuntime; save(); renderSettings(); render(); toast(t('t_defaults')); });
+el.settings.querySelectorAll('[data-amode]').forEach(b=>b.addEventListener('click',()=>{ S.alertMode=b.dataset.amode; save(); renderSettings(); if(S.alertMode!=='vib'){ audioInit(); beep('pit'); } if(S.alertMode!=='snd') vibrate([60]); }));
+$('btnExport').addEventListener('click',exportBackup);
+$('btnImport').addEventListener('click',()=>{ const f=$('importFile'); f.value=''; f.click(); });
+$('importFile').addEventListener('change',e=>importBackup(e.target.files&&e.target.files[0]));
+el.btnSun.addEventListener('click',()=>{ S.sun=!S.sun; save(); applySun(); });
+$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; S.askRuntime=DEF.askRuntime; S.alertMode=DEF.alertMode; S.leadPit=DEF.leadPit; S.leadEnd=DEF.leadEnd; save(); renderSettings(); render(); toast(t('t_defaults')); });
 
 applyLang();
+applySun();
 keepAwake();
 render();
 setInterval(render,100);
