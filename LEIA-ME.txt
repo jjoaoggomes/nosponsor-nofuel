@@ -6,7 +6,6 @@ Conteúdo desta pasta (publicar tal e qual, todos os ficheiros na mesma pasta):
   sw.js                 service worker: guarda a app no aparelho para funcionar sem rede
   manifest.webmanifest  nome, ícone e modo ecrã inteiro para "Adicionar ao ecrã inicial"
   icon-192.png, icon-512.png, apple-touch-icon.png (ícones a partir do logótipo)
-  splash.mp4, splash-poster.jpg  animação de abertura (NO SPONSOR NO PROBLEM)
 
 1. Publicar numa morada HTTPS (obrigatório para funcionar offline e para instalar)
    Qualquer uma serve, todas gratuitas:
@@ -29,4 +28,4 @@ Notas
    - iOS não vibra (limitação do sistema); os sons funcionam depois do primeiro toque.
    - Para não perder o histórico no iPhone/iPad, usar sempre a app instalada no ecrã inicial, não o Safari.
 
-Build 56a74caeee
+Build 7af9113d87

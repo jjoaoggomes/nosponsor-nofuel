@@ -71,7 +71,7 @@ tight.resize((192, 192), Image.LANCZOS).save(os.path.join(out, "icon-192.png"), 
 tight.resize((180, 180), Image.LANCZOS).save(os.path.join(out, "apple-touch-icon.png"), optimize=True)  # iOS rounds it itself
 
 # ---- opening animation ----
-for name in ("splash.mp4", "splash-poster.jpg", "keepawake.mp4"):
+for name in ("keepawake.mp4",):
     shutil.copyfile(os.path.join(assets, name), os.path.join(out, name))
 
 # ---- manifest ----
@@ -97,7 +97,7 @@ json.dump(manifest, open(os.path.join(out, "manifest.webmanifest"), "w", encodin
 # first opening with network; everything else is cache-first. Offline always falls back to the cache. ----
 sw = """// NOSPONSOR NOFUEL · service worker · build %s
 const CACHE='nsnf-%s';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./splash.mp4','./splash-poster.jpg','./keepawake.mp4'];
+const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./keepawake.mp4'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
 function withTimeout(p,ms){ return new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error('timeout')),ms); p.then(v=>{clearTimeout(t);res(v);},e=>{clearTimeout(t);rej(e);}); }); }
@@ -141,7 +141,6 @@ Conteúdo desta pasta (publicar tal e qual, todos os ficheiros na mesma pasta):
   sw.js                 service worker: guarda a app no aparelho para funcionar sem rede
   manifest.webmanifest  nome, ícone e modo ecrã inteiro para "Adicionar ao ecrã inicial"
   icon-192.png, icon-512.png, apple-touch-icon.png (ícones a partir do logótipo)
-  splash.mp4, splash-poster.jpg  animação de abertura (NO SPONSOR NO PROBLEM)
 
 1. Publicar numa morada HTTPS (obrigatório para funcionar offline e para instalar)
    Qualquer uma serve, todas gratuitas:

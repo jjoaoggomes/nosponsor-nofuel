@@ -243,11 +243,27 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 .hist .acts .danger{border-color:var(--crit); color:var(--crit)}
 .hist-empty{color:var(--muted); padding:20px 0; text-align:center}
 
-/* ---------- opening animation ---------- */
-.splash{position:fixed; inset:0; z-index:60; background:#2a0618; display:flex; align-items:center; justify-content:center; transition:opacity .35s ease}
-.splash video,.splash img{width:100%; height:100%; object-fit:cover; display:block}
-.splash.fade{opacity:0; pointer-events:none}
-.splash .skip{position:absolute; right:calc(16px + env(safe-area-inset-right,0px)); bottom:calc(20px + env(safe-area-inset-bottom,0px)); color:#fff; font-family:var(--font-display); font-size:15px; letter-spacing:.12em; text-transform:uppercase; opacity:.7; padding:10px 14px; border:1px solid rgba(255,255,255,.5); border-radius:10px; background:rgba(0,0,0,.25)}
+/* ---------- fuel consumption chart ---------- */
+.chart-wrap{width:100%; overflow-x:auto}
+.chart{width:100%; height:auto; display:block; font-family:var(--font-display)}
+.chart .axis{stroke:var(--line); stroke-width:1}
+.chart .grid{stroke:var(--line); stroke-width:1; stroke-dasharray:3 4}
+.chart .lvl{fill:none; stroke:var(--accent); stroke-width:3; stroke-linejoin:round}
+.chart .area{fill:var(--accent); opacity:.12}
+.chart .reserve{stroke:var(--crit); stroke-width:2; stroke-dasharray:6 5}
+.chart .flag{stroke:var(--muted); stroke-width:2; stroke-dasharray:6 5}
+.chart .pitdot{fill:var(--ok)}
+.chart text{fill:var(--muted); font-size:12px; letter-spacing:.06em}
+.chart text.pit{fill:var(--ok); font-weight:600}
+.chart text.big{fill:var(--fg); font-size:13px}
+.ctable{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.ctable th,.ctable td{padding:6px 8px; text-align:right; border-bottom:1px solid var(--line); font-size:14px; white-space:nowrap}
+.ctable th{font-family:var(--font-display); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:12px; color:var(--muted)}
+.ctable th:first-child,.ctable td:first-child{text-align:left}
+.ctable tr.total td{font-weight:600; color:var(--fg); border-bottom:0}
+.ctable td.ok{color:var(--ok)} .ctable td.crit{color:var(--crit)}
+.chart-meta{display:flex; gap:12px; flex-wrap:wrap; align-items:baseline}
+.chart-meta .big{font-family:var(--font-display); font-weight:600; font-size:26px; font-variant-numeric:tabular-nums}
 
 /* ---------- compact header (phone or low screen while running) ---------- */
 .hdr-info{display:none; font-family:var(--font-display); font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); white-space:nowrap}
@@ -398,11 +414,6 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 </div>
 <div class="toast" id="toast" role="status"></div>
 
-<div class="splash" id="splash" hidden>
-  <video id="splashVideo" muted playsinline preload="auto" poster="splash-poster.jpg" aria-label="NO SPONSOR NO PROBLEM"><source src="splash.mp4" type="video/mp4"></video>
-  <button class="skip" id="splashSkip" data-i18n="skip">Saltar</button>
-</div>
-
 <div class="sheet" id="calc" hidden>
   <div class="card" role="dialog" aria-labelledby="calcTitle">
     <div class="panel-head"><span class="lbl" id="calcTitle">Calculadora de runtime</span><button class="tool" id="calcClose" data-i18n="close">Fechar</button></div>
@@ -437,6 +448,16 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   </div>
 </div>
 
+<div class="sheet" id="chartSheet" hidden>
+  <div class="card" role="dialog" aria-labelledby="chartTitle">
+    <div class="panel-head"><span class="lbl" id="chartTitle">Consumo</span><button class="tool" id="chartClose" data-i18n="close">Fechar</button></div>
+    <div class="chart-meta" id="chartMeta"></div>
+    <div class="chart-wrap" id="chartBox"></div>
+    <div class="chart-wrap"><table class="ctable" id="chartTable"></table></div>
+    <div class="hint" id="chartNote"></div>
+  </div>
+</div>
+
 <div class="sheet" id="settings" hidden>
   <div class="card" role="dialog" aria-labelledby="setTitle">
     <div class="panel-head"><span class="lbl" id="setTitle" data-i18n="settings">Configurações</span><button class="tool" id="setClose" data-i18n="close">Fechar</button></div>
@@ -455,11 +476,13 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <div class="setting"><button data-set="holdMs" data-d="-200" aria-label="−0.2 s">−</button><output id="setHold">1,2 s</output><button data-set="holdMs" data-d="200" aria-label="+0.2 s">+</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_cool">Bloqueio após pit</span><span class="set-hint" data-i18n="set_cool_hint">tempo em que um novo Abasteci é ignorado</span></div>
         <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="−5 s">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="+5 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_chart">Gráfico de consumo</span><span class="set-hint" id="setChartHint">da final ou sub-final mais recente</span></div>
+        <button class="tool" id="setChart" data-i18n="generate">Gerar</button></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_autolock">Bloquear ecrã ao iniciar</span><span class="set-hint" data-i18n="set_autolock_hint">durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo</span></div>
         <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
     </div>
     <div class="set-foot"><span class="hint" id="setLocked"></span><button class="tool" id="setDefaults" data-i18n="defaults">Repor valores de origem</button></div>
-    <div class="hint">NOSPONSOR NOFUEL · build 56a74caeee</div>
+    <div class="hint">NOSPONSOR NOFUEL · build 7af9113d87</div>
   </div>
 </div>
 
@@ -504,6 +527,11 @@ pt:{
   set_cap:'Capacidade do depósito',set_cap_hint:'usada na calculadora de runtime',set_hold:'Duração do toque longo',set_hold_hint:'Início, Arranque, Parar, Anular, Nova corrida, bloqueio e Abasteci em sub-final/final',
   set_cool:'Bloqueio após pit',set_cool_hint:'tempo em que um novo Abasteci é ignorado',set_autolock:'Bloquear ecrã ao iniciar',set_autolock_hint:'durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo',
   yes:'Sim',no:'Não',set_locked:'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).',defaults:'Repor valores de origem',t_defaults:'Valores de origem repostos',
+  set_chart:'Gráfico de consumo',set_chart_hint:r=>r?'mais recente: '+r:'sem finais ou sub-finais no histórico',generate:'Gerar',chart:'Gráfico',
+  chart_title:(m,d)=>'Consumo de combustível · '+m+' '+d,chart_level:'Nível do depósito ao longo da corrida',chart_total:'Total estimado',chart_rate:'Ritmo',chart_time:'Tempo em pista',
+  th_tank:'Depósito',th_start:'Início',th_dur:'Duração',th_used:'Consumo',th_rate:'Ritmo',total:'Total',grid_fill:t=>'cheio '+t+' antes da partida',ran_dry:'secou?',measured:'medido',
+  src_measured:'ritmo medido no fim desta corrida (combustível que sobrou)',src_avg:n=>'ritmo da média das '+n+' calibrações guardadas',src_plan:'ritmo estimado a partir do depósito de planeamento; faz uma calibração para ter valores reais',
+  chart_note:'Cada depósito parte cheio. A linha tracejada vermelha é o nível a que o plano previa parar; a cinzenta é o fim da corrida.',reserve_lbl:'limite plano',end_lbl:'fim',
   date_locale:'pt-PT',dec:','
 },
 en:{
@@ -542,6 +570,11 @@ en:{
   set_cap:'Tank capacity',set_cap_hint:'used by the runtime calculator',set_hold:'Long-press duration',set_hold_hint:'Start, Heat start, Stop, Undo, New race, lock and Fuelled in semi/final',
   set_cool:'Lock-out after pit',set_cool_hint:'time during which a new Fuelled is ignored',set_autolock:'Lock screen at start',set_autolock_hint:'during the race only Fuelled, Undo and Stop respond; unlock with a long press',
   yes:'Yes',no:'No',set_locked:'Race lengths can only be changed with the clock stopped (New race).',defaults:'Restore defaults',t_defaults:'Defaults restored',
+  set_chart:'Fuel consumption chart',set_chart_hint:r=>r?'latest: '+r:'no finals or semi-finals in the history',generate:'Generate',chart:'Chart',
+  chart_title:(m,d)=>'Fuel consumption · '+m+' '+d,chart_level:'Tank level through the race',chart_total:'Estimated total',chart_rate:'Rate',chart_time:'Track time',
+  th_tank:'Tank',th_start:'Start',th_dur:'Length',th_used:'Used',th_rate:'Rate',total:'Total',grid_fill:t=>'filled '+t+' before the start',ran_dry:'ran dry?',measured:'measured',
+  src_measured:'rate measured at the end of this race (fuel left)',src_avg:n=>'rate from the average of the '+n+' saved calibrations',src_plan:'rate estimated from the planning tank; run a calibration for real figures',
+  chart_note:'Each tank starts full. The red dashed line is the level at which the plan expected to pit; the grey one is the end of the race.',reserve_lbl:'plan limit',end_lbl:'end',
   date_locale:'en-GB',dec:'.'
 }};
 L.pt.planned_pit='Pit planeado';
@@ -683,7 +716,7 @@ function rejectPit(n){
   toast(t('t_reject',Math.round((n-S.tankStart)/1000)));
   el.btnPit.classList.remove('shake'); void el.btnPit.offsetWidth; el.btnPit.classList.add('shake'); vibrate([40,40,40]);
 }
-function lock(on){ S.locked=!!on; if(S.locked){ closeCalc(); closeSettings(); closeHistory(); } save(); render(); }
+function lock(on){ S.locked=!!on; if(S.locked){ closeCalc(); closeSettings(); closeHistory(); closeChart(); } save(); render(); }
 // n = moment the press began (the car left the pit), not when the hold completed
 function doPit(n){
   const m=M();
@@ -825,6 +858,7 @@ function renderHistory(){
       h+='<div class="pit fim"><span class="n">'+esc(t('end'))+'</span><span class="t">'+(rec.elapsed!=null?clock(rec.elapsed):'—')+'</span><span class="r">'+esc(t('tank_abbr',clock(rec.lastRun)))+'</span></div></div>';
       h+='<div class="hint">'+esc(t('planning_tank',clock(rec.tankSec))+(rec.calib?t('measured_runtime',clock(rec.calib.runtime),rec.calib.left):t('no_fuel_measure')))+'</div>';
       h+='<div class="acts"><button class="tool" data-copy="'+rec.id+'">'+esc(t('copy_summary'))+'</button>';
+      if(rec.mode!=='q') h+='<button class="tool" data-chart="'+rec.id+'">'+esc(t('chart'))+'</button>';
       h+=histConfirm===rec.id?'<button class="tool danger" data-del="'+rec.id+'">'+esc(t('confirm_del'))+'</button>':'<button class="tool" data-ask="'+rec.id+'">'+esc(t('del'))+'</button>';
       h+='</div></div>';
     }
@@ -840,6 +874,67 @@ function fallbackCopy(txt){
   try{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast(t('t_copied')); }catch(e){ toast(t('t_copy_fail')); }
 }
 
+/* ---------- fuel consumption chart ---------- */
+function lastRaceRec(){ return H.find(x=>x.mode!=='q')||null; }
+function chartModel(rec){
+  const cap=S.capCc; let rate, src;             // rate in cc per second
+  if(rec.calib&&rec.calib.run>0&&rec.calib.left<cap){ rate=(cap-rec.calib.left)/rec.calib.run; src='measured'; }
+  else if(S.calib.length){ const avg=S.calib.reduce((a,c)=>a+c.runtime,0)/S.calib.length; rate=cap/avg; src='avg'; }
+  else { rate=cap/rec.tankSec; src='plan'; }
+  const pits=rec.pits.slice();
+  const stop=rec.elapsed!=null?rec.elapsed:(pits.length?pits[pits.length-1].at:0)+rec.lastRun;
+  const first=pits.length?pits[0].at-pits[0].run:stop-rec.lastRun;   // may be negative: filled on the grid before the start
+  const stints=[];
+  for(let i=0;i<=pits.length;i++){
+    const a=i===0?first:pits[i-1].at, b=i<pits.length?pits[i].at:stop;
+    const run=Math.max(0,b-a); let used=rate*run, measured=false;
+    if(i===pits.length&&src==='measured'){ used=cap-rec.calib.left; measured=true; }
+    stints.push({i:i+1,a:a,b:b,run:run,used:used,rate:run>0?used/run:0,measured:measured});
+  }
+  return {cap:cap,rate:rate,src:src,stints:stints,stop:stop,first:first,dur:rec.dur};
+}
+function chartSVG(md){
+  const W=760,Hh=300,L=52,R=16,T=18,B=34, cap=md.cap;
+  const x0=Math.min(0,md.first), x1=Math.max(md.stop,md.dur);
+  const X=v=>L+(v-x0)/(x1-x0||1)*(W-L-R), Y=v=>T+(1-Math.max(0,Math.min(cap,v))/cap)*(Hh-T-B);
+  let g='<svg class="chart" viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="'+esc(t('chart_level'))+'">';
+  [0,.25,.5,.75,1].forEach(f=>{ const y=Y(cap*f); g+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'"/><text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end">'+Math.round(cap*f)+'</text>'; });
+  const step=x1-x0>1800?600:300;
+  for(let v=Math.ceil(x0/step)*step; v<=x1; v+=step){ const x=X(v); g+='<line class="axis" x1="'+x+'" x2="'+x+'" y1="'+(Hh-B)+'" y2="'+(Hh-B+4)+'"/><text x="'+x+'" y="'+(Hh-B+16)+'" text-anchor="middle">'+clock(v)+'</text>'; }
+  g+='<line class="axis" x1="'+L+'" x2="'+(W-R)+'" y1="'+(Hh-B)+'" y2="'+(Hh-B)+'"/><line class="axis" x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+(Hh-B)+'"/>';
+  const lvlPlan=cap-md.rate*(md.planTank||0);   // level the plan expected at pit time
+  if(lvlPlan>0){ g+='<line class="reserve" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(lvlPlan)+'" y2="'+Y(lvlPlan)+'"/><text x="'+(W-R-4)+'" y="'+(Y(lvlPlan)-5)+'" text-anchor="end">'+esc(t('reserve_lbl'))+' '+Math.round(lvlPlan)+' cc</text>'; }
+  const xe=X(md.dur); g+='<line class="flag" x1="'+xe+'" x2="'+xe+'" y1="'+T+'" y2="'+(Hh-B)+'"/><text x="'+(xe+5)+'" y="'+(T+12)+'">'+esc(t('end_lbl'))+' '+clock(md.dur)+'</text>';
+  let d='', area='';
+  md.stints.forEach((s,i)=>{ const ya=Y(cap), yb=Y(cap-s.used); const xa=X(s.a), xb=X(s.b);
+    d+=(i===0?'M':'L')+xa+' '+ya+' L'+xb+' '+yb; if(i<md.stints.length-1) d+=' L'+xb+' '+ya;
+    area+='<path class="area" d="M'+xa+' '+Y(0)+' L'+xa+' '+ya+' L'+xb+' '+yb+' L'+xb+' '+Y(0)+'Z"/>'; });
+  g+=area+'<path class="lvl" d="'+d+'"/>';
+  md.stints.slice(0,-1).forEach((s,i)=>{ const x=X(s.b); g+='<circle class="pitdot" cx="'+x+'" cy="'+Y(cap)+'" r="5"/><text class="pit" x="'+x+'" y="'+(Y(cap)-9)+'" text-anchor="middle">P'+(i+1)+'</text>'; });
+  const last=md.stints[md.stints.length-1]; if(last){ g+='<text class="big" x="'+Math.min(X(last.b),W-R-60)+'" y="'+(Y(cap-last.used)-8)+'" text-anchor="middle">'+Math.round(cap-last.used)+' cc</text>'; }
+  return g+'</svg>';
+}
+function openChart(rec){
+  if(S.locked||!rec) return;
+  const md=chartModel(rec); md.planTank=rec.tankSec;
+  const m=rec.mode; const name=t('mode_'+(MODE_META[m]?m:'f')+'_name');
+  $('chartTitle').textContent=t('chart_title',name,clock(rec.dur))+' · '+fmtDate(rec.when);
+  const total=md.stints.reduce((a,s)=>a+s.used,0), time=md.stop-md.first;
+  $('chartMeta').innerHTML='<span><span class="lbl">'+esc(t('chart_total'))+'</span><br><span class="big">'+Math.round(total)+' cc</span></span>'+
+    '<span><span class="lbl">'+esc(t('chart_rate'))+'</span><br><span class="big">'+num(md.rate*60,1)+esc(t('cc_per_min'))+'</span></span>'+
+    '<span><span class="lbl">'+esc(t('chart_time'))+'</span><br><span class="big">'+clock(time)+'</span></span>'+
+    '<span><span class="lbl">'+esc(t('stops'))+'</span><br><span class="big">'+rec.pits.length+'</span></span>';
+  $('chartBox').innerHTML=chartSVG(md);
+  let tb='<tr><th>'+esc(t('th_tank'))+'</th><th>'+esc(t('th_start'))+'</th><th>'+esc(t('th_dur'))+'</th><th>'+esc(t('th_used'))+'</th><th>'+esc(t('th_rate'))+'</th></tr>';
+  md.stints.forEach(s=>{ const dry=s.used>md.cap+0.5; tb+='<tr><td>'+s.i+(s.measured?' · '+esc(t('measured')):'')+'</td><td>'+(s.a<0?esc(t('grid_fill',clock(-s.a))):clock(s.a))+'</td><td>'+clock(s.run)+'</td><td class="'+(dry?'crit':'')+'">'+Math.round(s.used)+' cc'+(dry?' · '+esc(t('ran_dry')):'')+'</td><td>'+num(s.rate*60,1)+esc(t('cc_per_min'))+'</td></tr>'; });
+  tb+='<tr class="total"><td>'+esc(t('total'))+'</td><td></td><td>'+clock(time)+'</td><td>'+Math.round(total)+' cc</td><td>'+num(md.rate*60,1)+esc(t('cc_per_min'))+'</td></tr>';
+  $('chartTable').innerHTML=tb;
+  const src=md.src==='measured'?t('src_measured'):md.src==='avg'?t('src_avg',S.calib.length):t('src_plan');
+  $('chartNote').textContent=src+'. '+t('chart_note');
+  $('chartSheet').hidden=false;
+}
+function closeChart(){ $('chartSheet').hidden=true; }
+
 /* ---------- settings ---------- */
 function openSettings(){ if(S.locked) return; el.settings.hidden=false; renderSettings(); }
 function closeSettings(){ el.settings.hidden=true; }
@@ -854,6 +949,8 @@ function renderSettings(){
   setText(el.setQ,clock(S.dur.q)); setText(el.setSF,clock(S.dur.sf)); setText(el.setF,clock(S.dur.f));
   setText(el.setCap,S.capCc+' cc'); setText(el.setHold,num(S.holdMs/1000,1)+' s'); setText(el.setCool,S.cooldown+' s');
   el.setAutoLock.setAttribute('aria-pressed',S.autoLock?'true':'false'); setText(el.setAutoLock,S.autoLock?t('yes'):t('no'));
+  const lr=lastRaceRec(); $('setChart').disabled=!lr;
+  setText($('setChartHint'),t('set_chart_hint',lr?(t('mode_'+lr.mode+'_short')+' '+durLabel(lr.dur)+' · '+fmtDate(lr.when)):null));
   const locked=!canChangeMode();
   el.settings.querySelectorAll('[data-set="q"],[data-set="sf"],[data-set="f"]').forEach(b=>b.disabled=locked);
   setText(el.setLocked,locked?t('set_locked'):'');
@@ -1009,6 +1106,7 @@ el.histList.addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   if(b.dataset.open){ const id=Number(b.dataset.open); histOpen=histOpen===id?null:id; histConfirm=null; renderHistory(); }
   else if(b.dataset.copy){ const rec=H.find(x=>x.id===Number(b.dataset.copy)); if(rec) copyText(recSummary(rec)); }
+  else if(b.dataset.chart){ const rec=H.find(x=>x.id===Number(b.dataset.chart)); if(rec) openChart(rec); }
   else if(b.dataset.ask){ histConfirm=Number(b.dataset.ask); renderHistory(); }
   else if(b.dataset.del){ const id=Number(b.dataset.del); H=H.filter(x=>x.id!==id); saveH(); histConfirm=null; histOpen=null; renderHistory(); toast(t('t_race_deleted')); }
 });
@@ -1018,27 +1116,12 @@ el.histClearAll.addEventListener('click',()=>{ if(!clearArmed){ clearArmed=true;
 el.btnSettings.addEventListener('click',openSettings);
 $('setClose').addEventListener('click',closeSettings);
 el.settings.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>adjSetting(b.dataset.set,Number(b.dataset.d))));
+$('setChart').addEventListener('click',()=>openChart(lastRaceRec()));
+$('chartClose').addEventListener('click',closeChart);
 el.langPt.addEventListener('click',()=>setLang('pt'));
 el.langEn.addEventListener('click',()=>setLang('en'));
 el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
 $('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; save(); renderSettings(); render(); toast(t('t_defaults')); });
-
-/* ---------- opening animation: only on a fresh open, never over a running race ---------- */
-(function splash(){
-  const box=$('splash'), vid=$('splashVideo'); let done=false;
-  const end=()=>{ if(done) return; done=true; box.classList.add('fade'); setTimeout(()=>{ box.hidden=true; try{ vid.pause(); }catch(e){} },400); };
-  if(S.phase!=='idle'||S.tankStart) return;
-  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  box.hidden=false;
-  $('splashSkip').addEventListener('click',end);
-  box.addEventListener('click',e=>{ if(e.target===box||e.target===vid) end(); });
-  vid.addEventListener('ended',end);
-  vid.addEventListener('error',()=>setTimeout(end,900));
-  if(reduce){ setTimeout(end,1200); return; }
-  let p=null; try{ p=vid.play(); }catch(e){}
-  if(p&&p.catch) p.catch(()=>setTimeout(end,1500));   // autoplay refused: poster for a moment, then the app
-  setTimeout(end,5500);                               // hard cap whatever happens
-})();
 
 applyLang();
 keepAwake();
