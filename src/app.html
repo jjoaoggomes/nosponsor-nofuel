@@ -1,0 +1,821 @@
+<title>NOSPONSOR NOFUEL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen pit-wall console. Header = mode tabs + tank setting + tools + lock. Main = race clock (left) and tank clock (right) with the stop plan underneath. Fixed action bar: ABASTECI plus hold-to-confirm controls. Sheets for the runtime calculator, history and settings. */
+:root{
+  --bg:#0b0e13; --panel:#141923; --panel2:#1d2430; --line:#2b3442;
+  --fg:#edf1f7; --muted:#8d99ab;
+  --accent:#4ea1ff; --accent-fg:#06111f;
+  --ok:#35d07f; --ok-fg:#04140b;
+  --warn:#ffb02e; --warn-fg:#1a1100;
+  --crit:#ff4a4a; --crit-fg:#1a0303;
+  --font-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --font-body:"Barlow","Roboto","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#e8ecf2; --panel:#ffffff; --panel2:#eef2f7; --line:#cdd5e0;
+    --fg:#10161f; --muted:#5b6778;
+    --accent:#0a63c9; --accent-fg:#ffffff;
+    --ok:#128a47; --ok-fg:#ffffff;
+    --warn:#c27400; --warn-fg:#ffffff;
+    --crit:#d61f1f; --crit-fg:#ffffff;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#e8ecf2; --panel:#ffffff; --panel2:#eef2f7; --line:#cdd5e0;
+  --fg:#10161f; --muted:#5b6778;
+  --accent:#0a63c9; --accent-fg:#ffffff;
+  --ok:#128a47; --ok-fg:#ffffff;
+  --warn:#c27400; --warn-fg:#ffffff;
+  --crit:#d61f1f; --crit-fg:#ffffff;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%; overscroll-behavior:none}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--font-body); font-size:15px;
+  -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;
+  touch-action:manipulation; overflow:hidden;
+}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer; -webkit-user-select:none; user-select:none}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+button:disabled{cursor:default}
+
+#app{
+  height:100%; display:flex; flex-direction:column; gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:10px;
+}
+
+/* ---------- header ---------- */
+.top{display:flex; align-items:center; gap:14px; flex-wrap:wrap; min-height:44px}
+.brand{font-family:var(--font-display); font-weight:700; font-size:22px; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap}
+.brand b{color:var(--accent); font-weight:700}
+.modes{display:flex; gap:4px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:4px}
+.mode{
+  font-family:var(--font-display); font-weight:600; font-size:17px; letter-spacing:.04em; text-transform:uppercase;
+  padding:9px 16px; border-radius:9px; color:var(--muted); white-space:nowrap;
+}
+.mode[aria-selected="true"]{background:var(--accent); color:var(--accent-fg)}
+.mode:disabled:not([aria-selected="true"]){opacity:.4}
+.tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap}
+.setting{display:flex; align-items:center; gap:2px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:4px 6px}
+.setting .lbl{margin:0 8px 0 6px}
+.setting button{width:44px; height:38px; border-radius:8px; background:var(--panel2); font-family:var(--font-display); font-size:24px; line-height:1}
+.setting button:disabled{opacity:.35}
+.setting output{font-family:var(--font-display); font-weight:600; font-size:24px; min-width:3.2ch; text-align:center; font-variant-numeric:tabular-nums}
+.tool{height:46px; min-width:46px; padding:0 12px; border-radius:12px; background:var(--panel); border:1px solid var(--line); font-family:var(--font-display); font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.tool[aria-pressed="true"]{color:var(--fg); border-color:var(--accent)}
+.tool:disabled{opacity:.35}
+.toggle[aria-pressed="true"]{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+#btnLock{position:relative; overflow:hidden; touch-action:none; min-width:150px}
+#btnLock::after{content:""; position:absolute; inset:0; background:var(--accent); opacity:.45; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
+#btnLock>*{position:relative}
+#app.locked #btnLock{background:var(--warn); color:var(--warn-fg); border-color:var(--warn)}
+#app.locked .modes,#app.locked .tools{opacity:.3; pointer-events:none}
+
+.lbl{font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+
+/* ---------- main ---------- */
+main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-template-rows:1fr auto; gap:10px; overflow:auto}
+.panel{
+  background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  padding:14px 20px; display:flex; flex-direction:column; gap:8px; min-width:0; container-type:inline-size;
+}
+.race{grid-column:1; grid-row:1}
+.plan{grid-column:1; grid-row:2}
+.tank{grid-column:2; grid-row:1 / 3; border-width:2px; border-color:var(--sc,var(--line))}
+#app.q-solo main{grid-template-columns:1fr}
+#app.q-solo .tank{grid-column:1; grid-row:1}
+#app.q-heat .tank{grid-row:1}
+
+.panel-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+.panel-head .state{font-family:var(--font-display); font-weight:700; font-size:clamp(18px,4.5cqw,32px); letter-spacing:.06em; text-transform:uppercase; color:var(--sc,var(--muted)); text-align:right}
+
+.digits{
+  font-family:var(--font-display); font-weight:600; line-height:1; display:flex; justify-content:center; align-items:center;
+  font-variant-numeric:tabular-nums; margin-block:4px; white-space:nowrap;
+}
+.digits span{display:inline-block; width:.56em; text-align:center}
+.digits span.sep{width:.28em}
+.digits span.sgn{width:.5em}
+.race .digits{font-size:clamp(56px,22cqw,200px)}
+.tank .digits{font-size:clamp(64px,26cqw,250px); color:var(--sc,var(--fg))}
+.race.over .digits{color:var(--crit)}
+.sub{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:15px}
+.sub b{color:var(--fg); font-weight:600; font-variant-numeric:tabular-nums}
+
+.bar{position:relative; height:14px; border-radius:7px; background:var(--panel2); overflow:visible; margin-block:6px 2px}
+.bar .fill{position:absolute; left:0; top:0; bottom:0; width:0; border-radius:7px; background:var(--sc,var(--accent)); transition:width .2s linear}
+.bar .tick{position:absolute; top:-4px; bottom:-4px; width:3px; margin-left:-1px; border-radius:2px; background:var(--fg)}
+.bar .tick.planned{background:transparent; border:2px solid var(--muted); width:5px; margin-left:-2px; border-radius:3px}
+
+.chips{display:flex; gap:10px; flex-wrap:wrap}
+.chip{
+  flex:1 1 140px; display:flex; flex-direction:column; gap:2px; padding:8px 12px; border-radius:12px;
+  background:var(--panel2); border:1px solid var(--line); min-width:0;
+}
+.chip .v{font-family:var(--font-display); font-weight:600; font-size:clamp(26px,6cqw,40px); line-height:1.05; font-variant-numeric:tabular-nums}
+.chip.next{border-color:var(--sc,var(--line))}
+.chip.limit .v{color:var(--crit)}
+.chip.ok .v{color:var(--ok)}
+.chip.crit .v{color:var(--crit)}
+
+.plan ol{list-style:none; margin:0; padding:0; display:flex; gap:8px; flex-wrap:wrap}
+.pit{
+  display:flex; flex-direction:column; align-items:center; padding:6px 12px; border-radius:10px; min-width:76px;
+  background:var(--panel2); border:1px solid var(--line); font-family:var(--font-display); font-variant-numeric:tabular-nums;
+}
+.pit .n{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.pit .t{font-size:24px; font-weight:600; line-height:1.1}
+.pit .r{font-size:13px; color:var(--muted)}
+.pit.done{border-color:var(--ok); color:var(--ok)}
+.pit.next{border-color:var(--accent); color:var(--accent)}
+.pit.fim{border-style:dashed}
+.runs{color:var(--muted); font-size:15px}
+.runs b{color:var(--fg); font-family:var(--font-display); font-size:18px; font-variant-numeric:tabular-nums}
+
+/* status colours */
+.st-ok{--sc:var(--ok); --sc-fg:var(--ok-fg)}
+.st-soon,.st-short{--sc:var(--warn); --sc-fg:var(--warn-fg)}
+.st-now,.st-over{--sc:var(--crit); --sc-fg:var(--crit-fg)}
+.st-last,.st-grid,.st-covers{--sc:var(--accent); --sc-fg:var(--accent-fg)}
+.st-over .digits,.st-now .panel-head .state{animation:flash 1s steps(2,start) infinite}
+@keyframes flash{50%{opacity:.3}}
+
+/* ---------- actions ---------- */
+.actions{display:grid; grid-template-columns:1fr auto auto; gap:10px; height:clamp(88px,15vh,132px); flex:none}
+.actions>button{border-radius:16px; position:relative; overflow:hidden; font-family:var(--font-display); font-weight:700; letter-spacing:.06em; text-transform:uppercase; line-height:1; padding:0 22px}
+.actions>button small{display:block; font-family:var(--font-body); font-weight:500; font-size:13px; letter-spacing:.08em; margin-top:6px; opacity:.8; text-transform:uppercase}
+#btnPit{background:var(--ok); color:var(--ok-fg); font-size:clamp(30px,5vw,54px); touch-action:none}
+#btnPit::after{content:""; position:absolute; inset:0; background:var(--ok-fg); opacity:.28; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
+#btnPit>*{position:relative}
+#btnPit.cool{background:var(--panel2); color:var(--muted); border:2px solid var(--line)}
+#btnPit.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.hold{background:var(--panel2); border:2px solid var(--line); color:var(--fg); font-size:clamp(20px,2.6vw,30px); min-width:170px; touch-action:none}
+.hold::after{content:""; position:absolute; inset:0; background:var(--hc,var(--accent)); opacity:.45; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
+.hold>*{position:relative}
+#btnUndo{--hc:var(--warn); border-color:var(--warn); color:var(--warn); font-size:22px; min-width:150px}
+#btnStart{--hc:var(--ok); border-color:var(--ok); color:var(--ok)}
+#btnStart.heat{--hc:var(--accent); border-color:var(--accent); color:var(--accent); min-width:220px}
+#btnStop{--hc:var(--crit); border-color:var(--crit); color:var(--crit)}
+#btnReset{--hc:var(--accent); border-color:var(--accent); color:var(--accent)}
+.actions.q-run{grid-template-columns:1fr auto}
+.actions.q-run #btnStart.heat{min-width:0}
+
+.toast{
+  position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 150px); transform:translateX(-50%);
+  background:var(--fg); color:var(--bg); padding:10px 18px; border-radius:10px; font-weight:600; font-size:16px;
+  opacity:0; transition:opacity .2s; pointer-events:none; max-width:90vw; text-align:center; z-index:40;
+}
+.toast.show{opacity:1}
+
+/* ---------- sheets (runtime calculator, history, settings) ---------- */
+.sheet{position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:30;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:16px}
+.card{background:var(--panel); border:2px solid var(--accent); border-radius:18px; padding:18px 20px; width:min(780px,100%); max-height:100%; overflow:auto;
+  display:flex; flex-direction:column; gap:14px; container-type:inline-size}
+.calc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.calc-grid .chip{flex:none}
+.calc-grid .chip .v{font-size:clamp(28px,7cqw,44px)}
+.stepper{display:flex; align-items:center; gap:4px; margin-top:4px}
+.stepper button{width:50px; height:48px; border-radius:8px; background:var(--panel); border:1px solid var(--line); font-family:var(--font-display); font-weight:600; font-size:20px}
+.stepper input{width:88px; height:48px; text-align:center; font-family:var(--font-display); font-size:30px; font-weight:600; background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:8px; -webkit-user-select:text; user-select:text; -moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+.stepper .unit{font-family:var(--font-display); font-size:20px; color:var(--muted); margin:0 6px 0 2px}
+.hint{font-size:13px; color:var(--muted)}
+.calc-apply{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.apply{background:var(--accent); color:var(--accent-fg); border-radius:12px; padding:0 20px; min-height:56px; font-family:var(--font-display); font-weight:700; font-size:22px; text-transform:uppercase; letter-spacing:.06em; flex:1 1 260px}
+.apply:disabled{opacity:.4}
+
+.set-list{display:flex; flex-direction:column}
+.set-row{display:grid; grid-template-columns:1fr auto; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line)}
+.set-row:last-child{border-bottom:0}
+.set-name{font-family:var(--font-display); font-size:21px; font-weight:600}
+.set-hint{display:block; font-size:13px; color:var(--muted)}
+.set-row .setting output{min-width:5ch}
+.set-foot{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+
+.hist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.hist li{background:var(--panel2); border:1px solid var(--line); border-radius:12px; overflow:hidden}
+.hist .row{display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center; width:100%; padding:10px 14px; text-align:left}
+.hist .row .m{font-family:var(--font-display); font-weight:700; font-size:20px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); white-space:nowrap}
+.hist .row .d{font-size:14px; color:var(--muted)}
+.hist .row .s{font-family:var(--font-display); font-size:18px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.hist .detail{padding:0 14px 12px; display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--line)}
+.hist .detail .pits{display:flex; gap:6px; flex-wrap:wrap; padding-top:10px}
+.hist .detail .pit{min-width:70px; padding:4px 10px}
+.hist .detail .pit .t{font-size:20px}
+.hist .acts{display:flex; gap:8px; flex-wrap:wrap}
+.hist .acts .tool{height:40px}
+.hist .acts .danger{border-color:var(--crit); color:var(--crit)}
+.hist-empty{color:var(--muted); padding:20px 0; text-align:center}
+
+@media (max-width:820px), (orientation:portrait) and (max-width:1000px){
+  main{display:flex; flex-direction:column}
+  .tank{order:0} .race{order:1} .plan{order:2}
+  .tools{margin-left:0; width:100%}
+  .actions{grid-template-columns:1fr 1fr; height:auto}
+  .actions>button{min-height:72px}
+  #btnPit{grid-column:1 / -1; min-height:96px}
+  .hold,#btnUndo,#btnStart.heat{min-width:0}
+  #btnLock{min-width:0}
+  .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 200px)}
+  .set-row{grid-template-columns:1fr}
+  .hist .row{grid-template-columns:auto 1fr}
+  .hist .row .s{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:reduce){
+  .st-over .digits,.st-now .panel-head .state,#btnPit.shake{animation:none}
+  .bar .fill{transition:none}
+}
+</style>
+
+<div id="app">
+  <header class="top">
+    <div class="brand">Nosponsor <b>Nofuel</b></div>
+    <nav class="modes" id="modes" role="tablist" aria-label="Tipo de manga">
+      <button class="mode" role="tab" data-mode="q" id="modeQ">Qualif. 5′</button>
+      <button class="mode" role="tab" data-mode="sf" id="modeSF">Sub-final 20′</button>
+      <button class="mode" role="tab" data-mode="f" id="modeF">Final 45′</button>
+    </nav>
+    <div class="tools" id="tools">
+      <div class="setting" title="Duração segura de um depósito">
+        <span class="lbl">Depósito</span>
+        <button id="tankMinus" aria-label="Menos 15 segundos">−</button>
+        <output id="tankVal" for="tankMinus tankPlus">7:30</output>
+        <button id="tankPlus" aria-label="Mais 15 segundos">+</button>
+      </div>
+      <button class="tool" id="btnCalc">Runtime</button>
+      <button class="tool" id="btnHistory">Histórico</button>
+      <button class="tool" id="btnSound" aria-pressed="true">Som</button>
+      <button class="tool" id="btnSettings" aria-label="Configurações">⚙</button>
+      <button class="tool" id="btnFs" aria-label="Ecrã inteiro">⛶</button>
+    </div>
+    <button class="tool" id="btnLock"><span id="lockLbl">Bloquear</span></button>
+  </header>
+
+  <main>
+    <section class="panel race" id="racePanel" aria-live="off">
+      <div class="panel-head">
+        <span class="lbl" id="raceLbl">Tempo restante</span>
+        <span class="state" id="raceState"></span>
+      </div>
+      <div class="digits" id="raceDigits"></div>
+      <div class="bar" id="raceBar"><div class="fill" id="raceFill"></div></div>
+      <div class="sub"><span>Decorrido <b id="raceElapsed">0:00</b></span><span id="raceTotal">Final 45:00</span></div>
+    </section>
+
+    <section class="panel tank st-ok" id="tankPanel">
+      <div class="panel-head">
+        <span class="lbl" id="tankLbl">Depósito</span>
+        <span class="state" id="tankState"></span>
+      </div>
+      <div class="digits" id="tankDigits"></div>
+      <div class="bar" id="tankBar"><div class="fill" id="tankFill"></div><div class="tick planned" id="tankPlannedTick" hidden></div></div>
+      <div class="chips">
+        <div class="chip next" id="chipNext"><span class="lbl" id="chipNextLbl">Pit planeado</span><span class="v" id="chipNextV">—</span></div>
+        <div class="chip limit" id="chipLimit"><span class="lbl">Limite do depósito</span><span class="v" id="chipLimitV">—</span></div>
+        <div class="chip ok" id="chipStops"><span class="lbl">Paragens</span><span class="v" id="chipStopsV">—</span></div>
+      </div>
+      <div class="runs" id="qualHint" hidden></div>
+    </section>
+
+    <section class="panel plan" id="planPanel">
+      <div class="panel-head"><span class="lbl">Plano de paragens</span><span class="lbl" id="planMeta"></span></div>
+      <ol id="planList"></ol>
+    </section>
+  </main>
+
+  <footer class="actions" id="actions">
+    <button id="btnPit"><span>Abasteci<small id="pitSub">Toca quando encheres</small></span></button>
+    <button class="hold" id="btnUndo" hidden><span>Anular pit<small id="undoSub">Manter · 15 s</small></span></button>
+    <button class="hold" id="btnStart"><span><span id="startLbl">Início</span><small>Manter premido</small></span></button>
+    <button class="hold" id="btnStop" hidden><span>Parar<small>Manter premido</small></span></button>
+    <button class="hold" id="btnReset" hidden><span>Nova corrida<small>Manter premido</small></span></button>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<div class="sheet" id="calc" hidden>
+  <div class="card" role="dialog" aria-labelledby="calcTitle">
+    <div class="panel-head"><span class="lbl" id="calcTitle">Calculadora de runtime · depósito de 125 cc</span><button class="tool" id="calcClose">Fechar</button></div>
+    <div class="calc-grid">
+      <div class="chip"><span class="lbl">Tempo da run</span><span class="v" id="calcRun">0:00</span>
+        <div class="stepper"><button data-run="-10">−10 s</button><button data-run="10">+10 s</button></div>
+        <span class="hint">Preenchido com o último depósito ao parar; ajusta se mediste noutro cronómetro.</span></div>
+      <div class="chip"><span class="lbl">Combustível que sobrou</span>
+        <div class="stepper"><button data-cc="-5">−5</button><button data-cc="-1">−1</button><input id="calcLeft" type="number" inputmode="decimal" min="0" max="125" step="1" value="0" aria-label="Combustível que sobrou em cc"><span class="unit">cc</span><button data-cc="1">+1</button><button data-cc="5">+5</button></div>
+        <span class="hint">Mede o que ficou no depósito e introduz aqui.</span></div>
+      <div class="chip"><span class="lbl">Consumo</span><span class="v" id="calcRate">—</span><span class="hint" id="calcUsed"></span></div>
+      <div class="chip ok"><span class="lbl">Runtime do depósito cheio</span><span class="v" id="calcRuntime">—</span><span class="hint" id="calcAvg"></span></div>
+    </div>
+    <div class="calc-apply">
+      <div class="setting" title="Folga retirada ao runtime para definir o depósito de planeamento">
+        <span class="lbl">Margem</span>
+        <button id="marginMinus" aria-label="Menos 5 segundos">−</button>
+        <output id="marginVal">15 s</output>
+        <button id="marginPlus" aria-label="Mais 5 segundos">+</button>
+      </div>
+      <button class="apply" id="calcApply" disabled>Usar como depósito</button>
+    </div>
+    <div class="runs" id="calibList"></div>
+  </div>
+</div>
+
+<div class="sheet" id="history" hidden>
+  <div class="card" role="dialog" aria-labelledby="histTitle">
+    <div class="panel-head"><span class="lbl" id="histTitle">Histórico</span><button class="tool" id="histClose">Fechar</button></div>
+    <ul class="hist" id="histList"></ul>
+    <div class="set-foot"><span class="hint">Cada corrida fica guardada neste aparelho ao manteres PARAR. Toca numa linha para ver os pits.</span><button class="tool" id="histClearAll">Apagar tudo</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="settings" hidden>
+  <div class="card" role="dialog" aria-labelledby="setTitle">
+    <div class="panel-head"><span class="lbl" id="setTitle">Configurações</span><button class="tool" id="setClose">Fechar</button></div>
+    <div class="set-list">
+      <div class="set-row"><div><span class="set-name">Qualificação</span><span class="set-hint">duração da manga · passos de 30 s</span></div>
+        <div class="setting"><button data-set="q" data-d="-30" aria-label="Menos 30 segundos">−</button><output id="setQ">5:00</output><button data-set="q" data-d="30" aria-label="Mais 30 segundos">+</button></div></div>
+      <div class="set-row"><div><span class="set-name">Sub-final</span><span class="set-hint">duração da corrida · passos de 1 min</span></div>
+        <div class="setting"><button data-set="sf" data-d="-60" aria-label="Menos 1 minuto">−</button><output id="setSF">20:00</output><button data-set="sf" data-d="60" aria-label="Mais 1 minuto">+</button></div></div>
+      <div class="set-row"><div><span class="set-name">Final</span><span class="set-hint">duração da corrida · passos de 1 min</span></div>
+        <div class="setting"><button data-set="f" data-d="-60" aria-label="Menos 1 minuto">−</button><output id="setF">45:00</output><button data-set="f" data-d="60" aria-label="Mais 1 minuto">+</button></div></div>
+      <div class="set-row"><div><span class="set-name">Capacidade do depósito</span><span class="set-hint">usada na calculadora de runtime</span></div>
+        <div class="setting"><button data-set="capCc" data-d="-5" aria-label="Menos 5 cc">−</button><output id="setCap">125 cc</output><button data-set="capCc" data-d="5" aria-label="Mais 5 cc">+</button></div></div>
+      <div class="set-row"><div><span class="set-name">Duração do toque longo</span><span class="set-hint">Início, Arranque, Parar, Anular, Nova corrida, bloqueio e Abasteci em sub-final/final</span></div>
+        <div class="setting"><button data-set="holdMs" data-d="-200" aria-label="Menos 0,2 s">−</button><output id="setHold">1,2 s</output><button data-set="holdMs" data-d="200" aria-label="Mais 0,2 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name">Bloqueio após pit</span><span class="set-hint">tempo em que um novo Abasteci é ignorado</span></div>
+        <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="Menos 5 segundos">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="Mais 5 segundos">+</button></div></div>
+      <div class="set-row"><div><span class="set-name">Bloquear ecrã ao iniciar</span><span class="set-hint">durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo</span></div>
+        <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
+    </div>
+    <div class="set-foot"><span class="hint" id="setLocked"></span><button class="tool" id="setDefaults">Repor valores de origem</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const MODE_META={q:{name:'Qualificação',isRace:false,short:'Qualif.'},sf:{name:'Sub-final',isRace:true,short:'Sub-final'},f:{name:'Final',isRace:true,short:'Final'}};
+const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
+const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120]};
+const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
+const DEF={mode:'f',dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,
+  phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
+const SETTINGS_KEYS=['mode','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','lastRun','calib'];
+
+function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function loadH(){ try{ const h=JSON.parse(localStorage.getItem(HKEY)); if(Array.isArray(h)) return h; }catch(e){} return []; }
+function saveH(){ try{ localStorage.setItem(HKEY,JSON.stringify(H)); }catch(e){} }
+let S=load()||JSON.parse(JSON.stringify(DEF));
+let H=loadH();
+if(!S.fired) S.fired={};
+if(!Array.isArray(S.pits)) S.pits=[];
+if(!Array.isArray(S.calib)) S.calib=[];
+['margin','capCc','holdMs','cooldown'].forEach(k=>{ if(typeof S[k]!=='number') S[k]=DEF[k]; });
+if(typeof S.autoLock!=='boolean') S.autoLock=true;
+
+const $=id=>document.getElementById(id);
+const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),btnLock:$('btnLock'),lockLbl:$('lockLbl'),
+  raceLbl:$('raceLbl'),raceState:$('raceState'),raceDigits:$('raceDigits'),raceBar:$('raceBar'),raceFill:$('raceFill'),raceElapsed:$('raceElapsed'),raceTotal:$('raceTotal'),racePanel:$('racePanel'),
+  tankPanel:$('tankPanel'),tankLbl:$('tankLbl'),tankState:$('tankState'),tankDigits:$('tankDigits'),tankFill:$('tankFill'),tankPlannedTick:$('tankPlannedTick'),
+  chipNext:$('chipNext'),chipNextLbl:$('chipNextLbl'),chipNextV:$('chipNextV'),chipLimit:$('chipLimit'),chipLimitV:$('chipLimitV'),chipStops:$('chipStops'),chipStopsV:$('chipStopsV'),
+  qualHint:$('qualHint'),planPanel:$('planPanel'),planMeta:$('planMeta'),planList:$('planList'),
+  btnPit:$('btnPit'),pitSub:$('pitSub'),btnUndo:$('btnUndo'),undoSub:$('undoSub'),btnStart:$('btnStart'),startLbl:$('startLbl'),btnStop:$('btnStop'),btnReset:$('btnReset'),
+  tankVal:$('tankVal'),tankMinus:$('tankMinus'),tankPlus:$('tankPlus'),btnSound:$('btnSound'),btnCalc:$('btnCalc'),btnHistory:$('btnHistory'),btnSettings:$('btnSettings'),toast:$('toast'),
+  calc:$('calc'),calcTitle:$('calcTitle'),calcRun:$('calcRun'),calcLeft:$('calcLeft'),calcRate:$('calcRate'),calcUsed:$('calcUsed'),calcRuntime:$('calcRuntime'),calcAvg:$('calcAvg'),calcApply:$('calcApply'),marginVal:$('marginVal'),calibList:$('calibList'),
+  history:$('history'),histList:$('histList'),histClearAll:$('histClearAll'),
+  settings:$('settings'),setQ:$('setQ'),setSF:$('setSF'),setF:$('setF'),setCap:$('setCap'),setHold:$('setHold'),setCool:$('setCool'),setAutoLock:$('setAutoLock'),setLocked:$('setLocked')};
+
+/* ---------- helpers ---------- */
+function M(){ const k=S.mode, m=MODE_META[k]; return {key:k,name:m.name,short:m.short,race:m.isRace?S.dur[k]:null,dur:S.dur[k]}; }
+function now(){ return S.phase==='finished'&&S.stopAt?S.stopAt:Date.now(); }
+function clock(sec){ sec=Math.max(0,Math.floor(sec+1e-6)); const m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
+function signed(sec){ return sec>=0?clock(sec):'+'+clock(-sec); }
+function durLabel(sec){ const m=Math.floor(sec/60), s=sec%60; return s?m+'′'+(s<10?'0':'')+s+'″':m+'′'; }
+function fmtDate(ms){ try{ return new Date(ms).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return new Date(ms).toLocaleString(); } }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function digitsHTML(str){
+  let h=''; for(const ch of str){ if(ch===':') h+='<span class="sep">:</span>'; else if(ch==='+'||ch==='−'||ch==='-') h+='<span class="sgn">'+ch+'</span>'; else h+='<span>'+ch+'</span>'; } return h;
+}
+let lastDigits={};
+function setDigits(node,str){ if(lastDigits[node.id]!==str){ node.innerHTML=digitsHTML(str); lastDigits[node.id]=str; } }
+function setText(node,str){ if(node.textContent!==str) node.textContent=str; }
+let toastT=null;
+function toast(msg){ el.toast.textContent=msg; el.toast.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.toast.classList.remove('show'),2400); }
+function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+
+/* ---------- audio ---------- */
+let AC=null;
+function audioInit(){ try{ if(!AC){ const C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } if(AC&&AC.state==='suspended') AC.resume(); }catch(e){} }
+function tone(freq,dur,when,type,vol){
+  if(!AC) return; when=when||0; type=type||'square'; vol=vol||.22;
+  try{ const o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(AC.destination);
+    const t=AC.currentTime+when; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.01); g.gain.setValueAtTime(vol,t+dur-.02); g.gain.linearRampToValueAtTime(0,t+dur); o.start(t); o.stop(t+dur+.05); }catch(e){}
+}
+function beep(kind){
+  if(!S.sound) return; audioInit(); if(!AC) return;
+  switch(kind){
+    case 'start': tone(880,.12); tone(1320,.3,.15); break;
+    case 'pit': tone(660,.08); break;
+    case 'warn': tone(1000,.15); tone(1000,.15,.25); break;
+    case 'now': tone(1250,.6); break;
+    case 'urgent': for(let i=0;i<6;i++) tone(1600,.07,i*.13); break;
+    case 'last': tone(523,.12); tone(659,.12,.14); tone(784,.35,.28); break;
+    case 'end': tone(440,.9,0,'sawtooth',.18); break;
+  }
+}
+
+/* ---------- wake lock ---------- */
+let wl=null;
+async function keepAwake(){ try{ if('wakeLock' in navigator && !wl){ wl=await navigator.wakeLock.request('screen'); wl.addEventListener('release',()=>{wl=null;}); } }catch(e){} }
+function releaseAwake(){ try{ if(wl){ wl.release(); wl=null; } }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&S.phase==='running') keepAwake(); });
+
+/* ---------- strategy (pure) ---------- */
+// R race length (s), T safe tank (s), t race elapsed (s, null before start), te tank elapsed (s).
+// Plan is anchored on the start of the current tank, so targets stay fixed until the next pit.
+function planFor(R,T,t,te){
+  const r={}; r.tankLeft=T-te;
+  if(R==null||t==null) return r;
+  r.remaining=R-t;
+  const tankAt=t-te, win=R-tankAt;          // time this tank has to cover until the flag
+  if(r.remaining<=0||win<=T){ r.last=true; r.stopsLeft=0; r.schedule=[]; return r; }
+  const tanks=Math.ceil(win/T);              // fewest tanks that cover the window
+  r.stopsLeft=tanks-1; r.stint=win/tanks;    // even split, each stint <= T
+  r.nextIn=r.stint-te; r.limitIn=r.tankLeft;
+  r.schedule=[]; for(let i=1;i<=r.stopsLeft;i++) r.schedule.push(tankAt+i*r.stint);
+  return r;
+}
+function statusOf(m,r,t,te){
+  if(te==null) return 'idle';
+  if(!m.race){ // qualifying: one tank, heat of m.dur
+    if(r.tankLeft<=0) return 'over';
+    if(r.tankLeft<=60) return 'soon';
+    if(t!=null){ const rem=m.dur-t; if(rem<=0) return 'ok'; return r.tankLeft>=rem?'covers':'short'; }
+    return (r.tankLeft-m.dur)<0?'short':'ok';
+  }
+  if(t==null) return 'grid';
+  if(r.last) return 'last';
+  if(r.limitIn<=0) return 'over';
+  if(r.nextIn<=0) return 'now';
+  if(r.nextIn<=60) return 'soon';
+  return 'ok';
+}
+const STATE_WORD={idle:'',grid:'Na grelha',ok:'OK',soon:'Preparar pit',now:'Pit agora',over:'Limite ultrapassado',last:'Último depósito',short:'Não chega à manga',covers:'Chega ao fim'};
+
+/* ---------- actions ---------- */
+function canChangeMode(){ return S.phase==='idle'&&!S.tankStart; }
+function inCooldown(n){ return S.tankStart&&(n-S.tankStart)/1000<S.cooldown; }
+function rejectPit(n){
+  toast('Pit registado há '+Math.round((n-S.tankStart)/1000)+' s · ignorado (anti-toque duplo)');
+  el.btnPit.classList.remove('shake'); void el.btnPit.offsetWidth; el.btnPit.classList.add('shake'); vibrate([40,40,40]);
+}
+function lock(on){ S.locked=!!on; if(S.locked){ closeCalc(); closeSettings(); closeHistory(); } save(); render(); }
+// n = moment the press began (the car left the pit), not when the hold completed
+function doPit(n){
+  const m=M();
+  if(S.phase==='finished') return;
+  if(!m.race){
+    if(S.tankStart){ toast('Na qualificação abastece-se uma vez; para terminar mantém PARAR.'); return; }
+    S.tankStart=n; S.phase='running'; S.fired={}; if(S.autoLock) S.locked=true; audioInit(); keepAwake();
+    toast('Depósito a contar · no "go" mantém ARRANQUE'); beep('pit'); vibrate([60]); save(); render(); return;
+  }
+  if(inCooldown(n)){ rejectPit(n); return; }
+  if(!S.tankStart){
+    S.tankStart=n; audioInit(); keepAwake(); toast('Depósito cheio na grelha · a contar'); beep('pit'); vibrate([60]); save(); render(); return;
+  }
+  const te=(n-S.tankStart)/1000;
+  if(!S.raceStart){ S.tankStart=n; toast('Depósito reiniciado na grelha'); beep('pit'); save(); render(); return; }
+  S.pits.push({at:(n-S.raceStart)/1000,run:te});
+  S.undo={until:n+UNDO_WIN*1000,prev:S.tankStart};
+  S.tankStart=n; S.fired={}; beep('pit'); vibrate([60]); save(); render();
+}
+function doUndo(){
+  if(!S.undo||Date.now()>S.undo.until) return;
+  S.pits.pop(); S.tankStart=S.undo.prev; S.undo=null; S.fired={};
+  toast('Último pit anulado'); vibrate([60,40,60]); save(); render();
+}
+// n = moment the press began (the "go")
+function doStart(n){
+  const m=M();
+  if(m.race){ if(S.phase!=='idle') return; S.raceStart=n; if(!S.tankStart) S.tankStart=n; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true; toast(m.name+' iniciada'+(S.locked?' · ecrã bloqueado':'')); }
+  else { if(S.phase!=='running'||S.raceStart) return; S.raceStart=n; S.fired={}; toast('Manga de qualificação a contar'); }
+  audioInit(); keepAwake(); beep('start'); vibrate([120]); save(); render();
+}
+function doStop(){
+  if(S.phase!=='running') return;
+  const m=M();
+  S.phase='finished'; S.stopAt=Date.now(); S.undo=null; S.locked=false;
+  S.lastRun=S.tankStart?Math.round((S.stopAt-S.tankStart)/1000):0;
+  const rec={id:S.stopAt,when:S.stopAt,mode:m.key,name:m.name,dur:m.dur,tankSec:S.tankSec,
+    pits:S.pits.map(p=>({at:Math.round(p.at),run:Math.round(p.run)})),
+    elapsed:S.raceStart?Math.round((S.stopAt-S.raceStart)/1000):null,lastRun:S.lastRun,calib:null};
+  H.unshift(rec); if(H.length>HIST_MAX) H.length=HIST_MAX; saveH(); S.lastHist=rec.id;
+  releaseAwake(); beep('end'); vibrate([300]); save(); render();
+  openCalc(S.lastRun);
+}
+function doReset(){
+  const keep={}; SETTINGS_KEYS.forEach(k=>keep[k]=S[k]);
+  S=Object.assign(JSON.parse(JSON.stringify(DEF)),keep); lastDigits={}; releaseAwake(); toast('Pronto para nova corrida'); save(); render();
+}
+function setMode(k){ if(!canChangeMode()||!MODE_META[k]) return; S.mode=k; S.fired={}; save(); render(); }
+function adjTank(d){ S.tankSec=Math.min(TANK_MAX,Math.max(TANK_MIN,S.tankSec+d)); save(); render(); }
+
+/* hold-to-confirm; onDone receives the timestamp of the press start */
+function holdButton(btn,onDone,fill){
+  let t0=null,raf=null,pressedAt=0;
+  const stop=(ok)=>{ if(t0===null) return; cancelAnimationFrame(raf); t0=null; btn.style.setProperty('--p',0); if(ok) onDone(pressedAt); };
+  const tick=()=>{ const p=Math.min(1,(performance.now()-t0)/S.holdMs); btn.style.setProperty('--p',p); if(p>=1){ vibrate([80]); stop(true);} else raf=requestAnimationFrame(tick); };
+  btn.addEventListener('pointerdown',e=>{ if(btn.disabled||btn.hidden) return; e.preventDefault(); try{ btn.setPointerCapture(e.pointerId); }catch(x){} audioInit(); pressedAt=Date.now(); t0=performance.now(); tick(); });
+  btn.addEventListener('pointerup',()=>stop(false));
+  btn.addEventListener('pointercancel',()=>stop(false));
+  btn.addEventListener('lostpointercapture',()=>stop(false));
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+}
+/* ABASTECI: single tap in qualifying, hold in sub-final/final; the pit is timed from the start of the press */
+function pitButton(btn){
+  let t0=null,raf=null,pressedAt=0;
+  const stop=(ok)=>{ if(t0===null) return; cancelAnimationFrame(raf); t0=null; btn.style.setProperty('--p',0); if(ok) doPit(pressedAt); };
+  const tick=()=>{ const p=Math.min(1,(performance.now()-t0)/S.holdMs); btn.style.setProperty('--p',p); if(p>=1){ vibrate([80]); stop(true);} else raf=requestAnimationFrame(tick); };
+  btn.addEventListener('pointerdown',e=>{
+    if(btn.hidden||S.phase==='finished') return; e.preventDefault(); try{ btn.setPointerCapture(e.pointerId); }catch(x){} audioInit();
+    pressedAt=Date.now();
+    if(!M().race){ doPit(pressedAt); return; }
+    if(inCooldown(pressedAt)){ rejectPit(pressedAt); return; }
+    t0=performance.now(); tick();
+  });
+  btn.addEventListener('pointerup',()=>stop(false));
+  btn.addEventListener('pointercancel',()=>stop(false));
+  btn.addEventListener('lostpointercapture',()=>stop(false));
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+}
+
+/* ---------- runtime calculator ---------- */
+let C={run:0,left:0};
+function runtimeFor(run,left){ // seconds a full tank lasts, from a partial run
+  const used=S.capCc-left; if(run<=0||used<=0||left<0) return null;
+  return {used:used, rate:used/(run/60), runtime:run*S.capCc/used};
+}
+function openCalc(run){ if(S.locked) return; C.run=Math.max(0,Math.round(run||0)); C.left=0; el.calcLeft.value='0'; el.calcLeft.max=String(S.capCc); el.calc.hidden=false; renderCalc(); }
+function closeCalc(){ el.calc.hidden=true; }
+function renderCalc(){
+  setText(el.calcTitle,'Calculadora de runtime · depósito de '+S.capCc+' cc');
+  setText(el.calcRun,clock(C.run));
+  const r=runtimeFor(C.run,C.left);
+  setText(el.marginVal,S.margin+' s');
+  if(!r){ setText(el.calcRate,'—'); setText(el.calcUsed,''); setText(el.calcRuntime,'—'); el.calcApply.disabled=true; setText(el.calcApply,'Usar como depósito'); }
+  else {
+    setText(el.calcRate,r.rate.toFixed(1).replace('.',',')+' cc/min');
+    setText(el.calcUsed,'gastou '+Math.round(r.used*10)/10+' cc em '+clock(C.run));
+    setText(el.calcRuntime,clock(r.runtime));
+    const dep=Math.max(TANK_MIN,Math.floor((r.runtime-S.margin)/5)*5);
+    el.calcApply.disabled=false; setText(el.calcApply,'Usar '+clock(dep)+' como depósito');
+  }
+  if(S.calib.length){
+    const avg=S.calib.reduce((a,c)=>a+c.runtime,0)/S.calib.length;
+    setText(el.calcAvg,'média de '+S.calib.length+': '+clock(avg));
+    el.calibList.innerHTML='Calibrações: '+S.calib.map(c=>'<b>'+clock(c.runtime)+'</b> ('+clock(c.run)+' · '+c.left+' cc)').join(' · ');
+  } else { setText(el.calcAvg,''); el.calibList.textContent='Ainda sem calibrações guardadas.'; }
+}
+function applyCalc(){
+  const r=runtimeFor(C.run,C.left); if(!r) return;
+  const dep=Math.max(TANK_MIN,Math.min(TANK_MAX,Math.floor((r.runtime-S.margin)/5)*5));
+  S.calib.push({run:C.run,left:C.left,runtime:Math.round(r.runtime),when:Date.now()}); if(S.calib.length>6) S.calib.shift();
+  if(S.lastHist){ const rec=H.find(x=>x.id===S.lastHist); if(rec){ rec.calib={run:C.run,left:C.left,runtime:Math.round(r.runtime)}; saveH(); } }
+  S.tankSec=dep; save(); closeCalc(); toast('Depósito definido em '+clock(dep)+' (runtime '+clock(r.runtime)+' − '+S.margin+' s)'); render();
+}
+
+/* ---------- history ---------- */
+let histOpen=null, histConfirm=null;
+function openHistory(){ if(S.locked) return; histOpen=null; histConfirm=null; el.history.hidden=false; renderHistory(); }
+function closeHistory(){ el.history.hidden=true; }
+function recSummary(rec){
+  const L=[]; L.push('NOSPONSOR NOFUEL · '+rec.name+' '+clock(rec.dur)+' · '+fmtDate(rec.when));
+  L.push('Depósito de planeamento '+clock(rec.tankSec)+(rec.mode==='q'?'':' · '+rec.pits.length+' pit'+(rec.pits.length===1?'':'s')));
+  if(rec.pits.length) L.push(rec.pits.map((p,i)=>'Pit '+(i+1)+' '+clock(p.at)+' (dep. '+clock(p.run)+')').join(' · '));
+  L.push('Último depósito '+clock(rec.lastRun)+(rec.elapsed!=null?' · parado aos '+clock(rec.elapsed):' · manga sem arranque marcado'));
+  if(rec.calib) L.push('Runtime medido '+clock(rec.calib.runtime)+' ('+rec.calib.left+' cc sobraram em '+clock(rec.calib.run)+')');
+  return L.join('\n');
+}
+function renderHistory(){
+  if(!H.length){ el.histList.innerHTML='<li class="hist-empty">Ainda sem corridas guardadas.</li>'; el.histClearAll.hidden=true; return; }
+  el.histClearAll.hidden=false;
+  el.histList.innerHTML=H.map(rec=>{
+    const open=histOpen===rec.id;
+    const stat=rec.mode==='q'?('dep. '+clock(rec.lastRun)):(rec.pits.length+' pit'+(rec.pits.length===1?'':'s')+' · '+(rec.elapsed!=null?clock(rec.elapsed):'—'));
+    let h='<li><button class="row" data-open="'+rec.id+'"><span class="m">'+esc(rec.short||MODE_META[rec.mode].short)+' '+durLabel(rec.dur)+'</span><span class="d">'+esc(fmtDate(rec.when))+(rec.calib?' · runtime '+clock(rec.calib.runtime):'')+'</span><span class="s">'+esc(stat)+'</span></button>';
+    if(open){
+      h+='<div class="detail"><div class="pits">';
+      rec.pits.forEach((p,i)=>{ h+='<div class="pit done"><span class="n">Pit '+(i+1)+'</span><span class="t">'+clock(p.at)+'</span><span class="r">dep. '+clock(p.run)+'</span></div>'; });
+      h+='<div class="pit fim"><span class="n">Fim</span><span class="t">'+(rec.elapsed!=null?clock(rec.elapsed):'—')+'</span><span class="r">dep. '+clock(rec.lastRun)+'</span></div></div>';
+      h+='<div class="hint">Depósito de planeamento '+clock(rec.tankSec)+(rec.calib?' · runtime medido '+clock(rec.calib.runtime)+' com '+rec.calib.left+' cc a sobrar':' · sem medição de combustível')+'</div>';
+      h+='<div class="acts"><button class="tool" data-copy="'+rec.id+'">Copiar resumo</button>';
+      h+=histConfirm===rec.id?'<button class="tool danger" data-del="'+rec.id+'">Confirmar apagar</button>':'<button class="tool" data-ask="'+rec.id+'">Apagar</button>';
+      h+='</div></div>';
+    }
+    return h+'</li>';
+  }).join('');
+}
+function copyText(txt){
+  const done=()=>toast('Resumo copiado');
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt)); return; } }catch(e){}
+  fallbackCopy(txt);
+}
+function fallbackCopy(txt){
+  try{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Resumo copiado'); }catch(e){ toast('Não foi possível copiar'); }
+}
+
+/* ---------- settings ---------- */
+function openSettings(){ if(S.locked) return; el.settings.hidden=false; renderSettings(); }
+function closeSettings(){ el.settings.hidden=true; }
+function adjSetting(key,d){
+  const lim=LIMITS[key]; if(!lim) return;
+  if(key==='q'||key==='sf'||key==='f'){ if(!canChangeMode()) return; S.dur[key]=Math.min(lim[1],Math.max(lim[0],S.dur[key]+d)); }
+  else S[key]=Math.min(lim[1],Math.max(lim[0],S[key]+d));
+  save(); renderSettings(); render();
+}
+function renderSettings(){
+  setText(el.setQ,clock(S.dur.q)); setText(el.setSF,clock(S.dur.sf)); setText(el.setF,clock(S.dur.f));
+  setText(el.setCap,S.capCc+' cc'); setText(el.setHold,(S.holdMs/1000).toFixed(1).replace('.',',')+' s'); setText(el.setCool,S.cooldown+' s');
+  el.setAutoLock.setAttribute('aria-pressed',S.autoLock?'true':'false'); setText(el.setAutoLock,S.autoLock?'Sim':'Não');
+  const locked=!canChangeMode();
+  el.settings.querySelectorAll('[data-set="q"],[data-set="sf"],[data-set="f"]').forEach(b=>b.disabled=locked);
+  setText(el.setLocked,locked?'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).':'');
+}
+
+/* ---------- render ---------- */
+function render(){
+  const m=M(); const n=now(); const q=!m.race;
+  const t=S.raceStart?(n-S.raceStart)/1000:null;
+  const te=S.tankStart?(n-S.tankStart)/1000:null;
+  const r=te!=null?planFor(m.race,S.tankSec,t,te):{};
+  if(q&&t!=null) r.remaining=m.dur-t;
+  const st=statusOf(m,r,t,te);
+  const idle=S.phase==='idle', running=S.phase==='running', fin=S.phase==='finished';
+
+  // header
+  el.app.className=(q?(t==null?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'');
+  try{ el.modes.inert=S.locked; el.tools.inert=S.locked; }catch(e){}
+  document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,MODE_META[k].short+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
+  setText(el.tankVal,clock(S.tankSec));
+  el.btnSound.setAttribute('aria-pressed',S.sound?'true':'false'); setText(el.btnSound,S.sound?'Som':'Som off');
+  el.btnCalc.disabled=running; el.btnHistory.disabled=running;
+  const lockable=running||(idle&&!!S.tankStart);
+  el.btnLock.hidden=!(lockable||S.locked);
+  setText(el.lockLbl,S.locked?'Bloqueado · manter para abrir':'Bloquear · manter');
+
+  // tank panel
+  el.tankPanel.className='panel tank st-'+st;
+  let word=STATE_WORD[st]||''; if(fin) word='Parado';
+  setText(el.tankState,word);
+  setText(el.tankLbl,te==null?'Depósito':(q?'Depósito · desde que encheste':'Depósito · desde o último pit'));
+  setDigits(el.tankDigits,te==null?'0:00':clock(te));
+  const frac=te==null?0:Math.min(1,te/S.tankSec); el.tankFill.style.width=(frac*100)+'%';
+  if(!q&&r.stint!=null&&!r.last){ el.tankPlannedTick.hidden=false; el.tankPlannedTick.style.left=(Math.min(1,r.stint/S.tankSec)*100)+'%'; }
+  else el.tankPlannedTick.hidden=true;
+
+  el.chipNext.classList.remove('crit');
+  if(!q){
+    el.chipStops.hidden=false; el.qualHint.hidden=true;
+    setText(el.chipNextLbl,'Pit planeado');
+    if(te==null){ setText(el.chipNextV,'—'); setText(el.chipLimitV,'—'); setText(el.chipStopsV,'—'); }
+    else if(t==null){ setText(el.chipNextV,'—'); setText(el.chipLimitV,signed(r.tankLeft)); setText(el.chipStopsV,String(Math.max(0,Math.ceil(m.race/S.tankSec)-1))); }
+    else if(r.last){ setText(el.chipNextV,'Nenhum'); setText(el.chipLimitV,signed(r.tankLeft)); setText(el.chipStopsV,S.pits.length+' feitas'); }
+    else { setText(el.chipNextV,r.nextIn>=0?'em '+clock(r.nextIn):'há '+clock(-r.nextIn)); setText(el.chipLimitV,r.limitIn>=0?'em '+clock(r.limitIn):'há '+clock(-r.limitIn)); setText(el.chipStopsV,S.pits.length+' de '+(S.pits.length+r.stopsLeft)); }
+  } else {
+    el.chipStops.hidden=true; el.qualHint.hidden=false;
+    setText(el.chipLimitV,te==null?'—':(r.tankLeft>=0?'resta '+clock(r.tankLeft):'há '+clock(-r.tankLeft)));
+    if(te==null){ setText(el.chipNextLbl,'Margem para arrancar'); setText(el.chipNextV,'—'); setText(el.qualHint,'Abastece uma vez; o depósito ('+clock(S.tankSec)+') tem de cobrir a espera na grelha mais a manga de '+clock(m.dur)+'.'); }
+    else if(t==null){ const mg=r.tankLeft-m.dur; setText(el.chipNextLbl,'Margem para arrancar'); if(mg>=0) setText(el.chipNextV,clock(mg)); else { setText(el.chipNextV,'−'+clock(-mg)); el.chipNext.classList.add('crit'); }
+      setText(el.qualHint,mg>=0?'Se a manga arrancar dentro de '+clock(mg)+' o combustível chega ao fim.':'Se arrancar agora, falta combustível para '+clock(-mg)+' da manga.'); }
+    else { const d=r.tankLeft-Math.max(0,r.remaining); setText(el.chipNextLbl,'Combustível no fim da manga'); if(d>=0) setText(el.chipNextV,'sobra '+clock(d)); else { setText(el.chipNextV,'falta '+clock(-d)); el.chipNext.classList.add('crit'); }
+      setText(el.qualHint,'Manga de '+clock(m.dur)+' em curso. No fim mantém PARAR e introduz o combustível que sobrou.'); }
+  }
+
+  // race / heat panel
+  const showRace=!q||t!=null;
+  el.racePanel.hidden=!showRace; el.planPanel.hidden=q;
+  if(showRace){
+    const R=q?m.dur:m.race;
+    const over=t!=null&&r.remaining<0;
+    el.racePanel.classList.toggle('over',over);
+    setText(el.raceLbl,over?'Tempo esgotado':'Tempo restante');
+    setText(el.raceState,fin?'Terminada':(over?'Última volta':(t==null?(S.tankStart?'Na grelha':'Pronto'):m.name)));
+    setDigits(el.raceDigits,t==null?clock(R):signed(r.remaining));
+    setText(el.raceElapsed,t==null?'0:00':clock(Math.max(0,t)));
+    setText(el.raceTotal,(q?'Manga ':m.name+' ')+clock(R));
+    el.raceFill.style.width=(t==null?0:Math.min(1,t/R)*100)+'%';
+    el.raceBar.querySelectorAll('.tick').forEach(x=>x.remove());
+    if(!q){
+      S.pits.forEach(p=>{ const d=document.createElement('div'); d.className='tick'; d.style.left=(Math.min(1,p.at/R)*100)+'%'; el.raceBar.appendChild(d); });
+      (r.schedule||[]).forEach(p=>{ const d=document.createElement('div'); d.className='tick planned'; d.style.left=(Math.min(1,Math.max(0,p)/R)*100)+'%'; el.raceBar.appendChild(d); });
+    }
+  }
+  if(!q){
+    const R=m.race; let html='';
+    S.pits.forEach((p,i)=>{ html+='<li class="pit done"><span class="n">Pit '+(i+1)+'</span><span class="t">'+clock(p.at)+'</span><span class="r">dep. '+clock(p.run)+'</span></li>'; });
+    if(te==null){ const stops=Math.max(0,Math.ceil(R/S.tankSec)-1); const stint=R/(stops+1); for(let i=1;i<=stops;i++) html+='<li class="pit"><span class="n">Pit '+i+'</span><span class="t">≈'+clock(i*stint)+'</span><span class="r">plano</span></li>'; setText(el.planMeta,stops+' paragens · depósitos de '+clock(stint)); }
+    else if(t==null){ setText(el.planMeta,'calcula-se ao iniciar'); }
+    else { (r.schedule||[]).forEach((p,i)=>{ html+='<li class="pit'+(i===0?' next':'')+'"><span class="n">Pit '+(S.pits.length+i+1)+'</span><span class="t">≈'+clock(Math.max(0,p))+'</span><span class="r">'+(i===0?'próximo':'plano')+'</span></li>'; });
+      setText(el.planMeta,r.last?'Sem mais paragens':(r.stopsLeft+' por fazer · depósitos de '+clock(r.stint))); }
+    html+='<li class="pit fim"><span class="n">Fim</span><span class="t">'+clock(R)+'</span><span class="r">'+(fin?'parado':'bandeira')+'</span></li>';
+    if(el.planList.innerHTML!==html) el.planList.innerHTML=html;
+  }
+
+  // footer
+  el.btnPit.hidden=fin||(q&&!!S.tankStart);
+  const cool=!q&&te!=null&&te<S.cooldown&&!fin;
+  el.btnPit.classList.toggle('cool',cool);
+  if(q) setText(el.pitSub,'Toca quando encheres');
+  else if(te==null) setText(el.pitSub,'Manter premido ao encher na grelha');
+  else if(cool) setText(el.pitSub,'Registado · bloqueado '+Math.ceil(S.cooldown-te)+' s');
+  else setText(el.pitSub,t==null?'Manter premido para reiniciar o depósito':'Manter premido ao sair do pit');
+  const undoOk=S.undo&&Date.now()<S.undo.until&&running&&!q;
+  el.btnUndo.hidden=!undoOk; if(undoOk) setText(el.undoSub,'Manter · '+Math.ceil((S.undo.until-Date.now())/1000)+' s');
+  const heatStart=q&&running&&!S.raceStart;
+  el.btnStart.hidden=!((idle&&!q)||heatStart);
+  el.btnStart.classList.toggle('heat',heatStart); setText(el.startLbl,q?'Arranque da manga':'Início');
+  el.actions.classList.toggle('q-run',q&&!!S.tankStart&&!fin);
+  el.btnStop.hidden=!running;
+  el.btnReset.hidden=!(fin||(idle&&S.tankStart));
+  if(S.undo&&Date.now()>S.undo.until){ S.undo=null; }
+
+  alerts(m,r,st);
+}
+
+function alerts(m,r,st){
+  if(S.phase!=='running') return; const f=S.fired;
+  const fire=(k,snd,vib)=>{ if(!f[k]){ f[k]=1; beep(snd); if(vib) vibrate(vib); save(); } };
+  if(m.race){
+    if(st==='soon') fire('soon','warn',[150,80,150]);
+    if(st==='now') fire('now','now',[400]);
+    if(!r.last&&r.limitIn!=null&&r.limitIn<=30&&r.limitIn>0) fire('lim30','urgent',[200,80,200,80,200]);
+    if(st==='over') fire('over','urgent',[500]);
+    if(r.last) fire('last','last',[100,60,100]);
+    if(r.remaining<=60&&r.remaining>0) fire('end60','warn');
+    if(r.remaining<=0) fire('end','end',[600]);
+  } else {
+    if(st==='short') fire('short','warn',[150,80,150]);
+    if(st==='soon') fire('soon','warn',[150,80,150]);
+    if(st==='over') fire('over','urgent',[500]);
+    if(r.remaining!=null&&r.remaining<=60&&r.remaining>0) fire('end60','warn');
+    if(r.remaining!=null&&r.remaining<=0) fire('end','end',[600]);
+  }
+}
+
+/* ---------- wiring ---------- */
+pitButton(el.btnPit);
+holdButton(el.btnUndo,doUndo);
+holdButton(el.btnStart,doStart);
+holdButton(el.btnStop,doStop);
+holdButton(el.btnReset,doReset);
+holdButton(el.btnLock,()=>{ lock(!S.locked); toast(S.locked?'Ecrã bloqueado · só Abasteci, Anular e Parar':'Ecrã desbloqueado'); });
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+el.tankMinus.addEventListener('click',()=>adjTank(-STEP));
+el.tankPlus.addEventListener('click',()=>adjTank(STEP));
+el.btnSound.addEventListener('click',()=>{ S.sound=!S.sound; if(S.sound){ audioInit(); beep('pit'); } save(); render(); });
+$('btnFs').addEventListener('click',()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); else toast('Neste aparelho, adiciona a app ao ecrã inicial para ficar em ecrã inteiro'); }catch(e){} });
+
+el.btnCalc.addEventListener('click',()=>openCalc(S.lastRun));
+$('calcClose').addEventListener('click',closeCalc);
+el.calcApply.addEventListener('click',applyCalc);
+el.calc.querySelectorAll('[data-run]').forEach(b=>b.addEventListener('click',()=>{ C.run=Math.max(0,C.run+Number(b.dataset.run)); renderCalc(); }));
+el.calc.querySelectorAll('[data-cc]').forEach(b=>b.addEventListener('click',()=>{ C.left=Math.min(S.capCc,Math.max(0,C.left+Number(b.dataset.cc))); el.calcLeft.value=String(C.left); renderCalc(); }));
+el.calcLeft.addEventListener('input',()=>{ const v=parseFloat(String(el.calcLeft.value).replace(',','.')); C.left=isNaN(v)?0:Math.min(S.capCc,Math.max(0,v)); renderCalc(); });
+$('marginMinus').addEventListener('click',()=>{ S.margin=Math.max(0,S.margin-5); save(); renderCalc(); });
+$('marginPlus').addEventListener('click',()=>{ S.margin=Math.min(120,S.margin+5); save(); renderCalc(); });
+
+el.btnHistory.addEventListener('click',openHistory);
+$('histClose').addEventListener('click',closeHistory);
+el.histList.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.open){ const id=Number(b.dataset.open); histOpen=histOpen===id?null:id; histConfirm=null; renderHistory(); }
+  else if(b.dataset.copy){ const rec=H.find(x=>x.id===Number(b.dataset.copy)); if(rec) copyText(recSummary(rec)); }
+  else if(b.dataset.ask){ histConfirm=Number(b.dataset.ask); renderHistory(); }
+  else if(b.dataset.del){ const id=Number(b.dataset.del); H=H.filter(x=>x.id!==id); saveH(); histConfirm=null; histOpen=null; renderHistory(); toast('Corrida apagada'); }
+});
+let clearArmed=false;
+el.histClearAll.addEventListener('click',()=>{ if(!clearArmed){ clearArmed=true; setText(el.histClearAll,'Confirmar apagar tudo'); setTimeout(()=>{ clearArmed=false; setText(el.histClearAll,'Apagar tudo'); },4000); return; } H=[]; saveH(); clearArmed=false; setText(el.histClearAll,'Apagar tudo'); renderHistory(); toast('Histórico apagado'); });
+
+el.btnSettings.addEventListener('click',openSettings);
+$('setClose').addEventListener('click',closeSettings);
+el.settings.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>adjSetting(b.dataset.set,Number(b.dataset.d))));
+el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
+$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; save(); renderSettings(); render(); toast('Valores de origem repostos'); });
+
+if(S.phase==='running') keepAwake();
+render();
+setInterval(render,100);
+})();
+</script>

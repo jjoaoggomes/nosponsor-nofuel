@@ -1,0 +1,31 @@
+NOSPONSOR NOFUEL · app offline para Android e iOS
+=================================================
+
+Conteúdo desta pasta (publicar tal e qual, todos os ficheiros na mesma pasta):
+  index.html            a app completa (fontes incluídas, sem dependências externas)
+  sw.js                 service worker: guarda a app no aparelho para funcionar sem rede
+  manifest.webmanifest  nome, ícone e modo ecrã inteiro para "Adicionar ao ecrã inicial"
+  icon-192.png, icon-512.png, apple-touch-icon.png
+
+1. Publicar numa morada HTTPS (obrigatório para funcionar offline e para instalar)
+   Qualquer uma serve, todas gratuitas:
+   - GitHub Pages: repositório novo, carregar estes ficheiros, Settings > Pages > Branch main > Save.
+     Fica em https://<utilizador>.github.io/<repositório>/
+   - Netlify Drop (app.netlify.com/drop): arrastar a pasta, fica logo publicada.
+   - Cloudflare Pages: igual, arrastar a pasta.
+
+2. Instalar nos aparelhos (uma vez, com rede)
+   Android (Chrome): abrir a morada > menu ⋮ > "Instalar app" (ou "Adicionar ao ecrã inicial").
+   iPhone/iPad (Safari, obrigatoriamente Safari): abrir a morada > botão Partilhar > "Adicionar ao Ecrã principal".
+   Abrir uma vez a partir do ícone. A partir daí funciona sem rede, em ecrã inteiro.
+
+3. Atualizar
+   Substituir os ficheiros na mesma morada. Na próxima abertura com rede o aparelho descarrega a versão nova
+   e usa-a na abertura seguinte. Histórico, calibrações e configurações ficam no aparelho e não se perdem.
+
+Notas
+   - Cada aparelho tem o seu histórico e as suas configurações (guardados localmente, sem conta nem servidor).
+   - iOS não vibra (limitação do sistema); os sons funcionam depois do primeiro toque.
+   - Para não perder o histórico no iPhone/iPad, usar sempre a app instalada no ecrã inicial, não o Safari.
+
+Build 6dd6113c64
