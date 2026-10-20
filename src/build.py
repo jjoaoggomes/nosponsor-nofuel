@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Build the offline PWA (NOSPONSOR NOFUEL) from the single-page source used for the artifact.
 
-usage: build.py SOURCE.html FONT_DIR_CONDENSED FONT_DIR_BARLOW ICON_TTF OUT_DIR
+usage: build.py SOURCE.html FONT_DIR_CONDENSED FONT_DIR_BARLOW ASSETS_DIR OUT_DIR
+ASSETS_DIR holds logo-wide.png and logo-tight.png (square frames of the logo animation), splash.mp4 and splash-poster.jpg.
 """
 import base64, hashlib, json, os, re, shutil, sys, zipfile
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
-src_path, bc_dir, b_dir, icon_ttf, out = sys.argv[1:6]
+src_path, bc_dir, b_dir, assets, out = sys.argv[1:6]
 os.makedirs(out, exist_ok=True)
 src = open(src_path, encoding="utf-8").read()
 
@@ -62,38 +63,16 @@ ver = hashlib.sha256(index_html.encode()).hexdigest()[:10]
 index_html = index_html.replace("build dev", "build " + ver)
 open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(index_html)
 
-# ---- icons ----
-BG, ACCENT, OK, FG = (11, 14, 19), (78, 161, 255), (53, 208, 127), (237, 241, 247)
+# ---- icons: frames of the logo animation (wide crop keeps the lettering inside the maskable safe zone) ----
+wide = Image.open(os.path.join(assets, "logo-wide.png")).convert("RGB")
+tight = Image.open(os.path.join(assets, "logo-tight.png")).convert("RGB")
+wide.resize((512, 512), Image.LANCZOS).save(os.path.join(out, "icon-512.png"), optimize=True)
+tight.resize((192, 192), Image.LANCZOS).save(os.path.join(out, "icon-192.png"), optimize=True)
+tight.resize((180, 180), Image.LANCZOS).save(os.path.join(out, "apple-touch-icon.png"), optimize=True)  # iOS rounds it itself
 
-def icon(size, rounded, pad_frac):
-    im = Image.new("RGBA", (size, size), BG + (255,))
-    d = ImageDraw.Draw(im)
-    if rounded:
-        mask = Image.new("L", (size, size), 0)
-        ImageDraw.Draw(mask).rounded_rectangle([0, 0, size - 1, size - 1], radius=int(size * 0.22), fill=255)
-        bg = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        bg.paste(im, mask=mask)
-        im = bg
-        d = ImageDraw.Draw(im)
-    # content inside the maskable safe zone
-    box = size * (1 - 2 * pad_frac)
-    fnt = ImageFont.truetype(icon_ttf, int(box * 0.62))
-    txt = "NF"
-    bb = d.textbbox((0, 0), txt, font=fnt)
-    tw, th = bb[2] - bb[0], bb[3] - bb[1]
-    x = (size - tw) / 2 - bb[0]
-    y = (size - th) / 2 - bb[1] - box * 0.10
-    d.text((x, y), txt, font=fnt, fill=ACCENT + (255,))
-    # tank bar under the letters, 70% full (glyph bottom is at y + bb[3])
-    bw, bh = box * 0.78, max(4, int(box * 0.09))
-    bx, by = (size - bw) / 2, y + bb[3] + box * 0.10
-    d.rounded_rectangle([bx, by, bx + bw, by + bh], radius=bh / 2, fill=(29, 36, 48, 255))
-    d.rounded_rectangle([bx, by, bx + bw * 0.7, by + bh], radius=bh / 2, fill=OK + (255,))
-    return im
-
-icon(512, False, 0.16).save(os.path.join(out, "icon-512.png"))     # maskable: safe zone respected
-icon(192, False, 0.16).save(os.path.join(out, "icon-192.png"))
-icon(180, False, 0.12).convert("RGB").save(os.path.join(out, "apple-touch-icon.png"))  # iOS rounds it itself
+# ---- opening animation ----
+for name in ("splash.mp4", "splash-poster.jpg"):
+    shutil.copyfile(os.path.join(assets, name), os.path.join(out, name))
 
 # ---- manifest ----
 manifest = {
@@ -118,14 +97,26 @@ json.dump(manifest, open(os.path.join(out, "manifest.webmanifest"), "w", encodin
 # first opening with network; everything else is cache-first. Offline always falls back to the cache. ----
 sw = """// NOSPONSOR NOFUEL · service worker · build %s
 const CACHE='nsnf-%s';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
+const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./splash.mp4','./splash-poster.jpg'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
 function withTimeout(p,ms){ return new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error('timeout')),ms); p.then(v=>{clearTimeout(t);res(v);},e=>{clearTimeout(t);rej(e);}); }); }
+// Safari asks for video with Range requests and needs 206 answers, also when served from the cache
+async function rangeResponse(req){
+  const cached=await caches.match(req.url,{ignoreSearch:true});
+  if(!cached) return fetch(req);
+  const range=req.headers.get('range'); if(!range) return cached;
+  const buf=await cached.arrayBuffer(); const total=buf.byteLength;
+  const m=/bytes=(\\d*)-(\\d*)/.exec(range);
+  let start=m&&m[1]?parseInt(m[1],10):0, end=m&&m[2]?parseInt(m[2],10):total-1; if(end>=total) end=total-1; if(start>end) start=0;
+  const chunk=buf.slice(start,end+1);
+  return new Response(chunk,{status:206,statusText:'Partial Content',headers:{'Content-Type':cached.headers.get('Content-Type')||'video/mp4','Content-Range':'bytes '+start+'-'+end+'/'+total,'Content-Length':String(chunk.byteLength),'Accept-Ranges':'bytes'}});
+}
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET') return;
   const url=new URL(e.request.url);
   if(url.origin!==self.location.origin) return;
+  if(url.pathname.endsWith('.mp4')){ e.respondWith(rangeResponse(e.request)); return; }
   const isPage=e.request.mode==='navigate'||url.pathname.endsWith('/')||url.pathname.endsWith('/index.html');
   if(isPage){
     e.respondWith(withTimeout(fetch(e.request),2500).then(res=>{
@@ -149,7 +140,8 @@ Conteúdo desta pasta (publicar tal e qual, todos os ficheiros na mesma pasta):
   index.html            a app completa (fontes incluídas, sem dependências externas)
   sw.js                 service worker: guarda a app no aparelho para funcionar sem rede
   manifest.webmanifest  nome, ícone e modo ecrã inteiro para "Adicionar ao ecrã inicial"
-  icon-192.png, icon-512.png, apple-touch-icon.png
+  icon-192.png, icon-512.png, apple-touch-icon.png (ícones a partir do logótipo)
+  splash.mp4, splash-poster.jpg  animação de abertura (NO SPONSOR NO PROBLEM)
 
 1. Publicar numa morada HTTPS (obrigatório para funcionar offline e para instalar)
    Qualquer uma serve, todas gratuitas:

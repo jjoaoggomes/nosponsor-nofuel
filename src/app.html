@@ -222,6 +222,16 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 .hist .acts .danger{border-color:var(--crit); color:var(--crit)}
 .hist-empty{color:var(--muted); padding:20px 0; text-align:center}
 
+/* ---------- opening animation ---------- */
+.splash{position:fixed; inset:0; z-index:60; background:#2a0618; display:flex; align-items:center; justify-content:center; transition:opacity .35s ease}
+.splash video,.splash img{width:100%; height:100%; object-fit:cover; display:block}
+.splash.fade{opacity:0; pointer-events:none}
+.splash .skip{position:absolute; right:calc(16px + env(safe-area-inset-right,0px)); bottom:calc(20px + env(safe-area-inset-bottom,0px)); color:#fff; font-family:var(--font-display); font-size:15px; letter-spacing:.12em; text-transform:uppercase; opacity:.7; padding:10px 14px; border:1px solid rgba(255,255,255,.5); border-radius:10px; background:rgba(0,0,0,.25)}
+
+/* ---------- compact header (phone or low screen while running) ---------- */
+.hdr-info{display:none; font-family:var(--font-display); font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); white-space:nowrap}
+
+/* ---------- tablets in portrait, phones: one column ---------- */
 @media (max-width:820px), (orientation:portrait) and (max-width:1000px){
   main{display:flex; flex-direction:column}
   .tank{order:0} .race{order:1} .plan{order:2}
@@ -235,6 +245,62 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   .set-row{grid-template-columns:1fr}
   .hist .row{grid-template-columns:auto 1fr}
   .hist .row .s{grid-column:1 / -1}
+}
+/* ---------- phones ---------- */
+@media (max-width:600px){
+  #app{gap:8px; padding-block:6px}
+  .top{gap:8px; min-height:0}
+  .brand{font-size:18px; margin-right:auto}
+  .modes{width:100%; order:3; padding:3px}
+  .mode{flex:1; padding:9px 4px; font-size:15px; text-align:center}
+  .tools{order:4; gap:6px}
+  .setting{padding:3px 4px}
+  .setting .lbl{margin:0 4px; font-size:11px}
+  .setting button{width:38px; height:36px; font-size:20px}
+  .setting output{font-size:20px; min-width:3ch}
+  .tool{height:42px; min-width:42px; padding:0 10px; font-size:13px}
+  #btnLock{order:2; height:42px; padding:0 10px}
+  #app.compact .modes,#app.compact .tools{display:none}
+  #app.compact .hdr-info{display:block; width:100%; order:5}
+  .panel{padding:10px 14px; gap:6px; border-radius:12px}
+  .panel-head .state{font-size:clamp(15px,4.5cqw,22px)}
+  .lbl{font-size:11px; letter-spacing:.1em}
+  .tank .digits{font-size:clamp(64px,30cqw,140px); margin-block:0}
+  .race .digits{font-size:clamp(40px,16cqw,90px); margin-block:0}
+  .bar{height:10px; margin-block:4px 0}
+  .sub{font-size:13px}
+  .chips{display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:6px}
+  .chip{padding:6px 8px; gap:0}
+  .chip .lbl{font-size:10px; letter-spacing:.06em}
+  .chip .v{font-size:clamp(18px,6.5cqw,28px)}
+  .runs{font-size:13px}
+  .plan ol{flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch}
+  .pit{min-width:66px; padding:4px 8px; flex:none}
+  .pit .t{font-size:19px}
+  .pit .n,.pit .r{font-size:11px}
+  .actions{gap:8px}
+  .actions>button{min-height:60px; font-size:20px; padding:0 12px}
+  .actions>button small{font-size:11px; margin-top:4px; letter-spacing:.04em}
+  #btnPit{min-height:84px; font-size:34px}
+  .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
+  .card{padding:14px 14px; border-radius:14px}
+}
+/* ---------- short screens (phone in landscape) ---------- */
+@media (max-height:520px){
+  #app{gap:6px; padding-block:4px}
+  #app.compact .modes,#app.compact .tools{display:none}
+  #app.compact .hdr-info{display:block}
+  .panel{padding:6px 14px; gap:3px}
+  .tank .digits{font-size:clamp(40px,16cqw,96px); margin-block:0}
+  .race .digits{font-size:clamp(32px,12cqw,72px); margin-block:0}
+  .bar{height:8px; margin-block:3px 0}
+  .chip{padding:4px 10px; gap:0}
+  .chip .v{font-size:clamp(16px,4cqw,24px)}
+  .plan{display:none}
+  .actions{height:64px; gap:8px}
+  .actions>button{padding:0 14px; font-size:20px}
+  .actions>button small{display:none}
+  #btnPit{font-size:26px}
 }
 @media (prefers-reduced-motion:reduce){
   .st-over .digits,.st-now .panel-head .state,#btnPit.shake{animation:none}
@@ -264,6 +330,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <button class="tool" id="btnFs" aria-label="Ecrã inteiro">⛶</button>
     </div>
     <button class="tool" id="btnLock"><span id="lockLbl">Bloquear</span></button>
+    <span class="hdr-info" id="hdrInfo"></span>
   </header>
 
   <main>
@@ -307,6 +374,11 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   </footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
+
+<div class="splash" id="splash" hidden>
+  <video id="splashVideo" muted playsinline preload="auto" poster="splash-poster.jpg" aria-label="NO SPONSOR NO PROBLEM"><source src="splash.mp4" type="video/mp4"></video>
+  <button class="skip" id="splashSkip">Saltar</button>
+</div>
 
 <div class="sheet" id="calc" hidden>
   <div class="card" role="dialog" aria-labelledby="calcTitle">
@@ -669,7 +741,9 @@ function render(){
   const idle=S.phase==='idle', running=S.phase==='running', fin=S.phase==='finished';
 
   // header
-  el.app.className=(q?(t==null?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'');
+  const compact=running||S.locked;
+  el.app.className=(q?(t==null?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'');
+  setText($('hdrInfo'),m.short+' '+durLabel(m.dur)+' · depósito '+clock(S.tankSec)+(S.sound?'':' · som off'));
   try{ el.modes.inert=S.locked; el.tools.inert=S.locked; }catch(e){}
   document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,MODE_META[k].short+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
   setText(el.tankVal,clock(S.tankSec));
@@ -817,6 +891,23 @@ $('setClose').addEventListener('click',closeSettings);
 el.settings.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>adjSetting(b.dataset.set,Number(b.dataset.d))));
 el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
 $('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; save(); renderSettings(); render(); toast('Valores de origem repostos'); });
+
+/* ---------- opening animation: only on a fresh open, never over a running race ---------- */
+(function splash(){
+  const box=$('splash'), vid=$('splashVideo'); let done=false;
+  const end=()=>{ if(done) return; done=true; box.classList.add('fade'); setTimeout(()=>{ box.hidden=true; try{ vid.pause(); }catch(e){} },400); };
+  if(S.phase!=='idle'||S.tankStart) return;
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  box.hidden=false;
+  $('splashSkip').addEventListener('click',end);
+  box.addEventListener('click',e=>{ if(e.target===box||e.target===vid) end(); });
+  vid.addEventListener('ended',end);
+  vid.addEventListener('error',()=>setTimeout(end,900));
+  if(reduce){ setTimeout(end,1200); return; }
+  let p=null; try{ p=vid.play(); }catch(e){}
+  if(p&&p.catch) p.catch(()=>setTimeout(end,1500));   // autoplay refused: poster for a moment, then the app
+  setTimeout(end,5500);                               // hard cap whatever happens
+})();
 
 if(S.phase==='running') keepAwake();
 render();
