@@ -6,7 +6,7 @@
 :root{
   --bg:#0b0e13; --panel:#141923; --panel2:#1d2430; --line:#2b3442;
   --fg:#edf1f7; --muted:#8d99ab;
-  --accent:#4ea1ff; --accent-fg:#06111f;
+  --accent:#ff4fb0; --accent-fg:#1f0512;
   --ok:#35d07f; --ok-fg:#04140b;
   --warn:#ffb02e; --warn-fg:#1a1100;
   --crit:#ff4a4a; --crit-fg:#1a0303;
@@ -18,7 +18,7 @@
   :root:not([data-theme="dark"]){
     --bg:#e8ecf2; --panel:#ffffff; --panel2:#eef2f7; --line:#cdd5e0;
     --fg:#10161f; --muted:#5b6778;
-    --accent:#0a63c9; --accent-fg:#ffffff;
+    --accent:#d8127a; --accent-fg:#ffffff;
     --ok:#128a47; --ok-fg:#ffffff;
     --warn:#c27400; --warn-fg:#ffffff;
     --crit:#d61f1f; --crit-fg:#ffffff;
@@ -28,7 +28,7 @@
 :root[data-theme="light"]{
   --bg:#e8ecf2; --panel:#ffffff; --panel2:#eef2f7; --line:#cdd5e0;
   --fg:#10161f; --muted:#5b6778;
-  --accent:#0a63c9; --accent-fg:#ffffff;
+  --accent:#d8127a; --accent-fg:#ffffff;
   --ok:#128a47; --ok-fg:#ffffff;
   --warn:#c27400; --warn-fg:#ffffff;
   --crit:#d61f1f; --crit-fg:#ffffff;
@@ -186,10 +186,11 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 .sheet .card .panel-head{position:sticky; top:0; background:var(--panel); padding-bottom:6px; z-index:1}
 .card{background:var(--panel); border:2px solid var(--accent); border-radius:18px; padding:18px 20px; width:min(780px,100%); max-height:100%; overflow:auto;
   display:flex; flex-direction:column; gap:14px; container-type:inline-size}
-.calc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.calc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr)); gap:10px}
 .calc-grid .chip{flex:none}
 .calc-grid .chip .v{font-size:clamp(28px,7cqw,44px)}
-.stepper{display:flex; align-items:center; gap:4px; margin-top:4px}
+.stepper{display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin-top:4px}
+.stepper button{flex:none}
 .stepper button{width:50px; height:48px; border-radius:8px; background:var(--panel); border:1px solid var(--line); font-family:var(--font-display); font-weight:600; font-size:20px}
 .stepper input{width:88px; height:48px; text-align:center; font-family:var(--font-display); font-size:30px; font-weight:600; background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:8px; -webkit-user-select:text; user-select:text; -moz-appearance:textfield}
 .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
@@ -512,11 +513,26 @@ function beep(kind){
   }
 }
 
-/* ---------- wake lock ---------- */
-let wl=null;
-async function keepAwake(){ try{ if('wakeLock' in navigator && !wl){ wl=await navigator.wakeLock.request('screen'); wl.addEventListener('release',()=>{wl=null;}); } }catch(e){} }
-function releaseAwake(){ try{ if(wl){ wl.release(); wl=null; } }catch(e){} }
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&S.phase==='running') keepAwake(); });
+/* ---------- always-on screen: Wake Lock API, with a looping silent video as fallback (older iOS) ---------- */
+let wl=null, awakeVid=null, awakeFallback=false;
+async function keepAwake(){
+  if(document.visibilityState!=='visible') return;
+  if('wakeLock' in navigator){
+    try{ if(!wl){ wl=await navigator.wakeLock.request('screen'); wl.addEventListener('release',()=>{ wl=null; }); } return; }
+    catch(e){ wl=null; }
+  }
+  awakeFallback=true;
+}
+function awakeByVideo(){ // must start from a user gesture
+  if(!awakeFallback) return;
+  if(awakeVid){ if(awakeVid.paused) awakeVid.play().catch(()=>{}); return; }
+  try{ const v=document.createElement('video'); v.setAttribute('playsinline',''); v.setAttribute('loop',''); v.setAttribute('title','keep awake'); v.src='keepawake.mp4';
+    v.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none'; document.body.appendChild(v);
+    v.play().then(()=>{ awakeVid=v; }).catch(()=>{ v.remove(); }); }catch(e){}
+}
+function releaseAwake(){}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ keepAwake(); if(awakeVid) awakeVid.play().catch(()=>{}); } });
+document.addEventListener('pointerdown',()=>{ keepAwake().then(awakeByVideo); },{passive:true});
 
 /* ---------- strategy (pure) ---------- */
 // R race length (s), T safe tank (s), t race elapsed (s, null before start), te tank elapsed (s).
@@ -909,7 +925,7 @@ $('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object
   setTimeout(end,5500);                               // hard cap whatever happens
 })();
 
-if(S.phase==='running') keepAwake();
+keepAwake();
 render();
 setInterval(render,100);
 })();
