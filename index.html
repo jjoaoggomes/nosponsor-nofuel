@@ -95,6 +95,7 @@ button:disabled{cursor:default}
 .tool[aria-pressed="true"]{color:var(--fg); border-color:var(--accent)}
 .tool:disabled{opacity:.35}
 .toggle[aria-pressed="true"]{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+.seg{display:flex; gap:4px}
 #btnLock{position:relative; overflow:hidden; touch-action:none; min-width:150px}
 #btnLock::after{content:""; position:absolute; inset:0; background:var(--accent); opacity:.45; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
 #btnLock>*{position:relative}
@@ -333,23 +334,23 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 <div id="app">
   <header class="top">
     <div class="brand">Nosponsor <b>Nofuel</b></div>
-    <nav class="modes" id="modes" role="tablist" aria-label="Tipo de manga">
+    <nav class="modes" id="modes" role="tablist">
       <button class="mode" role="tab" data-mode="q" id="modeQ">Qualif. 5′</button>
       <button class="mode" role="tab" data-mode="sf" id="modeSF">Sub-final 20′</button>
       <button class="mode" role="tab" data-mode="f" id="modeF">Final 45′</button>
     </nav>
     <div class="tools" id="tools">
-      <div class="setting" title="Duração segura de um depósito">
-        <span class="lbl">Depósito</span>
-        <button id="tankMinus" aria-label="Menos 15 segundos">−</button>
+      <div class="setting">
+        <span class="lbl" data-i18n="tank">Depósito</span>
+        <button id="tankMinus" aria-label="−15 s">−</button>
         <output id="tankVal" for="tankMinus tankPlus">7:30</output>
-        <button id="tankPlus" aria-label="Mais 15 segundos">+</button>
+        <button id="tankPlus" aria-label="+15 s">+</button>
       </div>
-      <button class="tool" id="btnCalc">Runtime</button>
-      <button class="tool" id="btnHistory">Histórico</button>
+      <button class="tool" id="btnCalc" data-i18n="runtime">Runtime</button>
+      <button class="tool" id="btnHistory" data-i18n="history">Histórico</button>
       <button class="tool" id="btnSound" aria-pressed="true">Som</button>
-      <button class="tool" id="btnSettings" aria-label="Configurações">⚙</button>
-      <button class="tool" id="btnFs" aria-label="Ecrã inteiro">⛶</button>
+      <button class="tool" id="btnSettings" aria-label="Settings">⚙</button>
+      <button class="tool" id="btnFs" aria-label="Fullscreen">⛶</button>
     </div>
     <button class="tool" id="btnLock"><span id="lockLbl">Bloquear</span></button>
     <span class="hdr-info" id="hdrInfo"></span>
@@ -363,7 +364,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       </div>
       <div class="digits" id="raceDigits"></div>
       <div class="bar" id="raceBar"><div class="fill" id="raceFill"></div></div>
-      <div class="sub"><span>Decorrido <b id="raceElapsed">0:00</b></span><span id="raceTotal">Final 45:00</span></div>
+      <div class="sub"><span><span data-i18n="elapsed">Decorrido</span> <b id="raceElapsed">0:00</b></span><span id="raceTotal">Final 45:00</span></div>
     </section>
 
     <section class="panel tank st-ok" id="tankPanel">
@@ -375,52 +376,52 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <div class="bar" id="tankBar"><div class="fill" id="tankFill"></div><div class="tick planned" id="tankPlannedTick" hidden></div></div>
       <div class="chips">
         <div class="chip next" id="chipNext"><span class="lbl" id="chipNextLbl">Pit planeado</span><span class="v" id="chipNextV">—</span></div>
-        <div class="chip limit" id="chipLimit"><span class="lbl">Limite do depósito</span><span class="v" id="chipLimitV">—</span></div>
-        <div class="chip ok" id="chipStops"><span class="lbl">Paragens</span><span class="v" id="chipStopsV">—</span></div>
+        <div class="chip limit" id="chipLimit"><span class="lbl" data-i18n="tank_limit">Limite do depósito</span><span class="v" id="chipLimitV">—</span></div>
+        <div class="chip ok" id="chipStops"><span class="lbl" data-i18n="stops">Paragens</span><span class="v" id="chipStopsV">—</span></div>
       </div>
       <div class="runs" id="qualHint" hidden></div>
     </section>
 
     <section class="panel plan" id="planPanel">
-      <div class="panel-head"><span class="lbl">Plano de paragens</span><span class="lbl" id="planMeta"></span></div>
+      <div class="panel-head"><span class="lbl" data-i18n="stop_plan">Plano de paragens</span><span class="lbl" id="planMeta"></span></div>
       <ol id="planList"></ol>
     </section>
   </main>
 
   <footer class="actions" id="actions">
-    <button id="btnPit"><span>Abasteci<small id="pitSub">Toca quando encheres</small></span></button>
-    <button class="hold" id="btnUndo" hidden><span>Anular pit<small id="undoSub">Manter · 15 s</small></span></button>
-    <button class="hold" id="btnStart"><span><span id="startLbl">Início</span><small>Manter premido</small></span></button>
-    <button class="hold" id="btnStop" hidden><span>Parar<small>Manter premido</small></span></button>
-    <button class="hold" id="btnReset" hidden><span>Nova corrida<small>Manter premido</small></span></button>
+    <button id="btnPit"><span><span data-i18n="refuelled">Abasteci</span><small id="pitSub">Toca quando encheres</small></span></button>
+    <button class="hold" id="btnUndo" hidden><span><span data-i18n="undo_pit">Anular pit</span><small id="undoSub">Manter · 15 s</small></span></button>
+    <button class="hold" id="btnStart"><span><span id="startLbl">Início</span><small data-i18n="hold">Manter premido</small></span></button>
+    <button class="hold" id="btnStop" hidden><span><span data-i18n="stop">Parar</span><small data-i18n="hold">Manter premido</small></span></button>
+    <button class="hold" id="btnReset" hidden><span><span data-i18n="new_race">Nova corrida</span><small data-i18n="hold">Manter premido</small></span></button>
   </footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
 <div class="splash" id="splash" hidden>
   <video id="splashVideo" muted playsinline preload="auto" poster="splash-poster.jpg" aria-label="NO SPONSOR NO PROBLEM"><source src="splash.mp4" type="video/mp4"></video>
-  <button class="skip" id="splashSkip">Saltar</button>
+  <button class="skip" id="splashSkip" data-i18n="skip">Saltar</button>
 </div>
 
 <div class="sheet" id="calc" hidden>
   <div class="card" role="dialog" aria-labelledby="calcTitle">
-    <div class="panel-head"><span class="lbl" id="calcTitle">Calculadora de runtime · depósito de 125 cc</span><button class="tool" id="calcClose">Fechar</button></div>
+    <div class="panel-head"><span class="lbl" id="calcTitle">Calculadora de runtime</span><button class="tool" id="calcClose" data-i18n="close">Fechar</button></div>
     <div class="calc-grid">
-      <div class="chip"><span class="lbl">Tempo da run</span><span class="v" id="calcRun">0:00</span>
+      <div class="chip"><span class="lbl" data-i18n="run_time">Tempo da run</span><span class="v" id="calcRun">0:00</span>
         <div class="stepper"><button data-run="-10">−10 s</button><button data-run="10">+10 s</button></div>
-        <span class="hint">Preenchido com o último depósito ao parar; ajusta se mediste noutro cronómetro.</span></div>
-      <div class="chip"><span class="lbl">Combustível que sobrou</span>
-        <div class="stepper"><button data-cc="-5">−5</button><button data-cc="-1">−1</button><input id="calcLeft" type="number" inputmode="decimal" min="0" max="125" step="1" value="0" aria-label="Combustível que sobrou em cc"><span class="unit">cc</span><button data-cc="1">+1</button><button data-cc="5">+5</button></div>
-        <span class="hint">Mede o que ficou no depósito e introduz aqui.</span></div>
-      <div class="chip"><span class="lbl">Consumo</span><span class="v" id="calcRate">—</span><span class="hint" id="calcUsed"></span></div>
-      <div class="chip ok"><span class="lbl">Runtime do depósito cheio</span><span class="v" id="calcRuntime">—</span><span class="hint" id="calcAvg"></span></div>
+        <span class="hint" data-i18n="run_time_hint">Preenchido com o último depósito ao parar; ajusta se mediste noutro cronómetro.</span></div>
+      <div class="chip"><span class="lbl" data-i18n="fuel_left">Combustível que sobrou</span>
+        <div class="stepper"><button data-cc="-5">−5</button><button data-cc="-1">−1</button><input id="calcLeft" type="number" inputmode="decimal" min="0" max="125" step="1" value="0" aria-label="cc"><span class="unit">cc</span><button data-cc="1">+1</button><button data-cc="5">+5</button></div>
+        <span class="hint" data-i18n="fuel_left_hint">Mede o que ficou no depósito e introduz aqui.</span></div>
+      <div class="chip"><span class="lbl" data-i18n="consumption">Consumo</span><span class="v" id="calcRate">—</span><span class="hint" id="calcUsed"></span></div>
+      <div class="chip ok"><span class="lbl" data-i18n="full_runtime">Runtime do depósito cheio</span><span class="v" id="calcRuntime">—</span><span class="hint" id="calcAvg"></span></div>
     </div>
     <div class="calc-apply">
-      <div class="setting" title="Folga retirada ao runtime para definir o depósito de planeamento">
-        <span class="lbl">Margem</span>
-        <button id="marginMinus" aria-label="Menos 5 segundos">−</button>
+      <div class="setting">
+        <span class="lbl" data-i18n="margin">Margem</span>
+        <button id="marginMinus" aria-label="−5 s">−</button>
         <output id="marginVal">15 s</output>
-        <button id="marginPlus" aria-label="Mais 5 segundos">+</button>
+        <button id="marginPlus" aria-label="+5 s">+</button>
       </div>
       <button class="apply" id="calcApply" disabled>Usar como depósito</button>
     </div>
@@ -430,46 +431,129 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
 
 <div class="sheet" id="history" hidden>
   <div class="card" role="dialog" aria-labelledby="histTitle">
-    <div class="panel-head"><span class="lbl" id="histTitle">Histórico</span><button class="tool" id="histClose">Fechar</button></div>
+    <div class="panel-head"><span class="lbl" id="histTitle" data-i18n="history">Histórico</span><button class="tool" id="histClose" data-i18n="close">Fechar</button></div>
     <ul class="hist" id="histList"></ul>
-    <div class="set-foot"><span class="hint">Cada corrida fica guardada neste aparelho ao manteres PARAR. Toca numa linha para ver os pits.</span><button class="tool" id="histClearAll">Apagar tudo</button></div>
+    <div class="set-foot"><span class="hint" data-i18n="history_hint">Cada corrida fica guardada neste aparelho ao manteres PARAR. Toca numa linha para ver os pits.</span><button class="tool" id="histClearAll" data-i18n="delete_all">Apagar tudo</button></div>
   </div>
 </div>
 
 <div class="sheet" id="settings" hidden>
   <div class="card" role="dialog" aria-labelledby="setTitle">
-    <div class="panel-head"><span class="lbl" id="setTitle">Configurações</span><button class="tool" id="setClose">Fechar</button></div>
+    <div class="panel-head"><span class="lbl" id="setTitle" data-i18n="settings">Configurações</span><button class="tool" id="setClose" data-i18n="close">Fechar</button></div>
     <div class="set-list">
-      <div class="set-row"><div><span class="set-name">Qualificação</span><span class="set-hint">duração da manga · passos de 30 s</span></div>
-        <div class="setting"><button data-set="q" data-d="-30" aria-label="Menos 30 segundos">−</button><output id="setQ">5:00</output><button data-set="q" data-d="30" aria-label="Mais 30 segundos">+</button></div></div>
-      <div class="set-row"><div><span class="set-name">Sub-final</span><span class="set-hint">duração da corrida · passos de 1 min</span></div>
-        <div class="setting"><button data-set="sf" data-d="-60" aria-label="Menos 1 minuto">−</button><output id="setSF">20:00</output><button data-set="sf" data-d="60" aria-label="Mais 1 minuto">+</button></div></div>
-      <div class="set-row"><div><span class="set-name">Final</span><span class="set-hint">duração da corrida · passos de 1 min</span></div>
-        <div class="setting"><button data-set="f" data-d="-60" aria-label="Menos 1 minuto">−</button><output id="setF">45:00</output><button data-set="f" data-d="60" aria-label="Mais 1 minuto">+</button></div></div>
-      <div class="set-row"><div><span class="set-name">Capacidade do depósito</span><span class="set-hint">usada na calculadora de runtime</span></div>
-        <div class="setting"><button data-set="capCc" data-d="-5" aria-label="Menos 5 cc">−</button><output id="setCap">125 cc</output><button data-set="capCc" data-d="5" aria-label="Mais 5 cc">+</button></div></div>
-      <div class="set-row"><div><span class="set-name">Duração do toque longo</span><span class="set-hint">Início, Arranque, Parar, Anular, Nova corrida, bloqueio e Abasteci em sub-final/final</span></div>
-        <div class="setting"><button data-set="holdMs" data-d="-200" aria-label="Menos 0,2 s">−</button><output id="setHold">1,2 s</output><button data-set="holdMs" data-d="200" aria-label="Mais 0,2 s">+</button></div></div>
-      <div class="set-row"><div><span class="set-name">Bloqueio após pit</span><span class="set-hint">tempo em que um novo Abasteci é ignorado</span></div>
-        <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="Menos 5 segundos">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="Mais 5 segundos">+</button></div></div>
-      <div class="set-row"><div><span class="set-name">Bloquear ecrã ao iniciar</span><span class="set-hint">durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo</span></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="language">Idioma</span><span class="set-hint" data-i18n="language_hint">aplica-se a toda a app</span></div>
+        <div class="seg"><button class="tool toggle" id="langPt" data-lang="pt">Português</button><button class="tool toggle" id="langEn" data-lang="en">English</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="mode_q_name">Qualificação</span><span class="set-hint" data-i18n="set_q_hint">duração da manga · passos de 30 s</span></div>
+        <div class="setting"><button data-set="q" data-d="-30" aria-label="−30 s">−</button><output id="setQ">5:00</output><button data-set="q" data-d="30" aria-label="+30 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="mode_sf_name">Sub-final</span><span class="set-hint" data-i18n="set_race_hint">duração da corrida · passos de 1 min</span></div>
+        <div class="setting"><button data-set="sf" data-d="-60" aria-label="−1 min">−</button><output id="setSF">20:00</output><button data-set="sf" data-d="60" aria-label="+1 min">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="mode_f_name">Final</span><span class="set-hint" data-i18n="set_race_hint">duração da corrida · passos de 1 min</span></div>
+        <div class="setting"><button data-set="f" data-d="-60" aria-label="−1 min">−</button><output id="setF">45:00</output><button data-set="f" data-d="60" aria-label="+1 min">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_cap">Capacidade do depósito</span><span class="set-hint" data-i18n="set_cap_hint">usada na calculadora de runtime</span></div>
+        <div class="setting"><button data-set="capCc" data-d="-5" aria-label="−5 cc">−</button><output id="setCap">125 cc</output><button data-set="capCc" data-d="5" aria-label="+5 cc">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_hold">Duração do toque longo</span><span class="set-hint" data-i18n="set_hold_hint">Início, Arranque, Parar, Anular, Nova corrida, bloqueio e Abasteci em sub-final/final</span></div>
+        <div class="setting"><button data-set="holdMs" data-d="-200" aria-label="−0.2 s">−</button><output id="setHold">1,2 s</output><button data-set="holdMs" data-d="200" aria-label="+0.2 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_cool">Bloqueio após pit</span><span class="set-hint" data-i18n="set_cool_hint">tempo em que um novo Abasteci é ignorado</span></div>
+        <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="−5 s">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="+5 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_autolock">Bloquear ecrã ao iniciar</span><span class="set-hint" data-i18n="set_autolock_hint">durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo</span></div>
         <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
     </div>
-    <div class="set-foot"><span class="hint" id="setLocked"></span><button class="tool" id="setDefaults">Repor valores de origem</button></div>
-    <div class="hint">NOSPONSOR NOFUEL · build 0df3f0a802</div>
+    <div class="set-foot"><span class="hint" id="setLocked"></span><button class="tool" id="setDefaults" data-i18n="defaults">Repor valores de origem</button></div>
+    <div class="hint">NOSPONSOR NOFUEL · build 56a74caeee</div>
   </div>
 </div>
 
 <script>
 (function(){
 'use strict';
-const MODE_META={q:{name:'Qualificação',isRace:false,short:'Qualif.'},sf:{name:'Sub-final',isRace:true,short:'Sub-final'},f:{name:'Final',isRace:true,short:'Final'}};
+/* ---------- languages ---------- */
+const L={
+pt:{
+  mode_q_name:'Qualificação',mode_sf_name:'Sub-final',mode_f_name:'Final',mode_q_short:'Qualif.',mode_sf_short:'Sub-final',mode_f_short:'Final',
+  tank:'Depósito',runtime:'Runtime',history:'Histórico',sound:'Som',sound_off:'Som off',settings:'Configurações',close:'Fechar',skip:'Saltar',
+  lock_hold:'Bloquear · manter',locked_hold:'Bloqueado · manter para abrir',hdr:(m,d,t)=>m+' '+d+' · depósito '+t,hdr_sound_off:' · som off',
+  time_left:'Tempo restante',time_up:'Tempo esgotado',elapsed:'Decorrido',finished:'Terminada',last_lap:'Última volta',on_grid:'Na grelha',ready:'Pronto',heat:'Manga',
+  tank_since_pit:'Depósito · desde o último pit',tank_since_fill:'Depósito · desde que encheste',stopped:'Parado',
+  planned_pit:'Planned pit',tank_limit:'Limite do depósito',stops:'Paragens',none:'Nenhum',done_n:n=>n+' feitas',n_of:(a,b)=>a+' de '+b,
+  in_t:t=>'em '+t,ago_t:t=>'há '+t,left_t:t=>'resta '+t,spare_t:t=>'sobra '+t,short_t:t=>'falta '+t,
+  margin_start:'Margem para arrancar',fuel_end_heat:'Combustível no fim da manga',
+  qual_hint_idle:(tk,h)=>'Abastece uma vez; o depósito ('+tk+') tem de cobrir a espera na grelha mais a manga de '+h+'.',
+  qual_hint_ok:m=>'Se a manga arrancar dentro de '+m+' o combustível chega ao fim.',
+  qual_hint_short:m=>'Se arrancar agora, falta combustível para '+m+' da manga.',
+  qual_hint_run:h=>'Manga de '+h+' em curso. No fim mantém PARAR e introduz o combustível que sobrou.',
+  st_grid:'Na grelha',st_ok:'OK',st_soon:'Preparar pit',st_now:'Pit agora',st_over:'Limite ultrapassado',st_last:'Último depósito',st_short:'Não chega à manga',st_covers:'Chega ao fim',
+  stop_plan:'Plano de paragens',pit_n:n=>'Pit '+n,tank_abbr:t=>'dep. '+t,plan:'plano',next:'próximo',end:'Fim',flag:'bandeira',
+  plan_meta_idle:(n,s)=>n+' paragens · depósitos de '+s,plan_meta_grid:'calcula-se ao iniciar',plan_meta_last:'Sem mais paragens',plan_meta_run:(n,s)=>n+' por fazer · depósitos de '+s,
+  refuelled:'Abasteci',tap_fill:'Toca quando encheres',hold_grid:'Manter premido ao encher na grelha',logged_locked:s=>'Registado · bloqueado '+s+' s',hold_restart:'Manter premido para reiniciar o depósito',hold_pit:'Manter premido ao sair do pit',
+  undo_pit:'Anular pit',hold_s:s=>'Manter · '+s+' s',start:'Início',heat_start:'Arranque da manga',hold:'Manter premido',stop:'Parar',new_race:'Nova corrida',
+  t_reject:s=>'Pit registado há '+s+' s · ignorado (anti-toque duplo)',t_qual_once:'Na qualificação abastece-se uma vez; para terminar mantém PARAR.',
+  t_tank_counting:'Depósito a contar · no "go" mantém ARRANQUE',t_grid_full:'Depósito cheio na grelha · a contar',t_grid_restart:'Depósito reiniciado na grelha',
+  t_undone:'Último pit anulado',t_started:n=>n+' iniciada',t_locked_suffix:' · ecrã bloqueado',t_heat_started:'Manga de qualificação a contar',t_reset:'Pronto para nova corrida',
+  t_locked:'Ecrã bloqueado · só Abasteci, Anular e Parar',t_unlocked:'Ecrã desbloqueado',t_fs:'Neste aparelho, adiciona a app ao ecrã inicial para ficar em ecrã inteiro',
+  calc_title:c=>'Calculadora de runtime · depósito de '+c+' cc',run_time:'Tempo da run',run_time_hint:'Preenchido com o último depósito ao parar; ajusta se mediste noutro cronómetro.',
+  fuel_left:'Combustível que sobrou',fuel_left_hint:'Mede o que ficou no depósito e introduz aqui.',consumption:'Consumo',used_in:(cc,t)=>'gastou '+cc+' cc em '+t,
+  full_runtime:'Runtime do depósito cheio',avg_of:(n,t)=>'média de '+n+': '+t,margin:'Margem',use_as_tank:'Usar como depósito',use_t_as_tank:t=>'Usar '+t+' como depósito',
+  calibs:'Calibrações: ',no_calibs:'Ainda sem calibrações guardadas.',t_tank_set:(d,r,m)=>'Depósito definido em '+d+' (runtime '+r+' − '+m+' s)',cc_per_min:' cc/min',
+  history_hint:'Cada corrida fica guardada neste aparelho ao manteres PARAR. Toca numa linha para ver os pits.',delete_all:'Apagar tudo',confirm_delete_all:'Confirmar apagar tudo',
+  no_races:'Ainda sem corridas guardadas.',pits_n:n=>n+' pit'+(n===1?'':'s'),planning_tank:t=>'Depósito de planeamento '+t,measured_runtime:(r,cc)=>' · runtime medido '+r+' com '+cc+' cc a sobrar',
+  no_fuel_measure:' · sem medição de combustível',copy_summary:'Copiar resumo',del:'Apagar',confirm_del:'Confirmar apagar',t_copied:'Resumo copiado',t_copy_fail:'Não foi possível copiar',
+  t_race_deleted:'Corrida apagada',t_hist_deleted:'Histórico apagado',runtime_short:r=>' · runtime '+r,
+  sum_tank:t=>'Depósito de planeamento '+t,sum_pit:(n,at,run)=>'Pit '+n+' '+at+' (dep. '+run+')',sum_last:(lr,el)=>'Último depósito '+lr+(el!=null?' · parado aos '+el:' · manga sem arranque marcado'),
+  sum_calib:(r,cc,run)=>'Runtime medido '+r+' ('+cc+' cc sobraram em '+run+')',
+  language:'Idioma',language_hint:'aplica-se a toda a app',set_q_hint:'duração da manga · passos de 30 s',set_race_hint:'duração da corrida · passos de 1 min',
+  set_cap:'Capacidade do depósito',set_cap_hint:'usada na calculadora de runtime',set_hold:'Duração do toque longo',set_hold_hint:'Início, Arranque, Parar, Anular, Nova corrida, bloqueio e Abasteci em sub-final/final',
+  set_cool:'Bloqueio após pit',set_cool_hint:'tempo em que um novo Abasteci é ignorado',set_autolock:'Bloquear ecrã ao iniciar',set_autolock_hint:'durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo',
+  yes:'Sim',no:'Não',set_locked:'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).',defaults:'Repor valores de origem',t_defaults:'Valores de origem repostos',
+  date_locale:'pt-PT',dec:','
+},
+en:{
+  mode_q_name:'Qualifying',mode_sf_name:'Semi-final',mode_f_name:'Final',mode_q_short:'Qual.',mode_sf_short:'Semi',mode_f_short:'Final',
+  tank:'Tank',runtime:'Runtime',history:'History',sound:'Sound',sound_off:'Sound off',settings:'Settings',close:'Close',skip:'Skip',
+  lock_hold:'Lock · hold',locked_hold:'Locked · hold to unlock',hdr:(m,d,t)=>m+' '+d+' · tank '+t,hdr_sound_off:' · sound off',
+  time_left:'Time left',time_up:"Time's up",elapsed:'Elapsed',finished:'Finished',last_lap:'Last lap',on_grid:'On the grid',ready:'Ready',heat:'Heat',
+  tank_since_pit:'Tank · since last pit',tank_since_fill:'Tank · since you filled',stopped:'Stopped',
+  planned_pit:'Planned pit',tank_limit:'Tank limit',stops:'Stops',none:'None',done_n:n=>n+' done',n_of:(a,b)=>a+' of '+b,
+  in_t:t=>'in '+t,ago_t:t=>t+' ago',left_t:t=>t+' left',spare_t:t=>t+' spare',short_t:t=>t+' short',
+  margin_start:'Margin to start',fuel_end_heat:'Fuel at end of heat',
+  qual_hint_idle:(tk,h)=>'Fill once; the tank ('+tk+') has to cover the wait on the grid plus the '+h+' heat.',
+  qual_hint_ok:m=>'If the heat starts within '+m+' the fuel lasts to the end.',
+  qual_hint_short:m=>'If it starts now, you are '+m+' short of fuel for the heat.',
+  qual_hint_run:h=>h+' heat running. At the end hold STOP and enter the fuel left.',
+  st_grid:'On the grid',st_ok:'OK',st_soon:'Get ready to pit',st_now:'Pit now',st_over:'Past the limit',st_last:'Last tank',st_short:'Not enough for the heat',st_covers:'Lasts to the end',
+  stop_plan:'Stop plan',pit_n:n=>'Pit '+n,tank_abbr:t=>'tank '+t,plan:'plan',next:'next',end:'End',flag:'flag',
+  plan_meta_idle:(n,s)=>n+' stops · '+s+' tanks',plan_meta_grid:'computed at start',plan_meta_last:'No more stops',plan_meta_run:(n,s)=>n+' to go · '+s+' tanks',
+  refuelled:'Fuelled',tap_fill:'Tap when you fill',hold_grid:'Hold when filling on the grid',logged_locked:s=>'Logged · locked '+s+' s',hold_restart:'Hold to restart the tank',hold_pit:'Hold as the car leaves the pit',
+  undo_pit:'Undo pit',hold_s:s=>'Hold · '+s+' s',start:'Start',heat_start:'Heat start',hold:'Hold',stop:'Stop',new_race:'New race',
+  t_reject:s=>'Pit logged '+s+' s ago · ignored (double-tap guard)',t_qual_once:'In qualifying you fill once; to finish, hold STOP.',
+  t_tank_counting:'Tank counting · on the "go" hold HEAT START',t_grid_full:'Tank filled on the grid · counting',t_grid_restart:'Tank restarted on the grid',
+  t_undone:'Last pit undone',t_started:n=>n+' started',t_locked_suffix:' · screen locked',t_heat_started:'Qualifying heat counting',t_reset:'Ready for a new race',
+  t_locked:'Screen locked · only Fuelled, Undo and Stop',t_unlocked:'Screen unlocked',t_fs:'On this device, add the app to the home screen to get full screen',
+  calc_title:c=>'Runtime calculator · '+c+' cc tank',run_time:'Run time',run_time_hint:'Filled with the last tank when you stopped; adjust if you timed it elsewhere.',
+  fuel_left:'Fuel left',fuel_left_hint:'Measure what was left in the tank and enter it here.',consumption:'Consumption',used_in:(cc,t)=>'used '+cc+' cc in '+t,
+  full_runtime:'Full-tank runtime',avg_of:(n,t)=>'average of '+n+': '+t,margin:'Margin',use_as_tank:'Use as tank',use_t_as_tank:t=>'Use '+t+' as tank',
+  calibs:'Calibrations: ',no_calibs:'No calibrations saved yet.',t_tank_set:(d,r,m)=>'Tank set to '+d+' (runtime '+r+' − '+m+' s)',cc_per_min:' cc/min',
+  history_hint:'Each race is saved on this device when you hold STOP. Tap a row to see the pits.',delete_all:'Delete all',confirm_delete_all:'Confirm delete all',
+  no_races:'No races saved yet.',pits_n:n=>n+' pit'+(n===1?'':'s'),planning_tank:t=>'Planning tank '+t,measured_runtime:(r,cc)=>' · measured runtime '+r+' with '+cc+' cc left',
+  no_fuel_measure:' · no fuel measurement',copy_summary:'Copy summary',del:'Delete',confirm_del:'Confirm delete',t_copied:'Summary copied',t_copy_fail:'Could not copy',
+  t_race_deleted:'Race deleted',t_hist_deleted:'History deleted',runtime_short:r=>' · runtime '+r,
+  sum_tank:t=>'Planning tank '+t,sum_pit:(n,at,run)=>'Pit '+n+' '+at+' (tank '+run+')',sum_last:(lr,el)=>'Last tank '+lr+(el!=null?' · stopped at '+el:' · heat start not marked'),
+  sum_calib:(r,cc,run)=>'Measured runtime '+r+' ('+cc+' cc left after '+run+')',
+  language:'Language',language_hint:'applies to the whole app',set_q_hint:'heat length · 30 s steps',set_race_hint:'race length · 1 min steps',
+  set_cap:'Tank capacity',set_cap_hint:'used by the runtime calculator',set_hold:'Long-press duration',set_hold_hint:'Start, Heat start, Stop, Undo, New race, lock and Fuelled in semi/final',
+  set_cool:'Lock-out after pit',set_cool_hint:'time during which a new Fuelled is ignored',set_autolock:'Lock screen at start',set_autolock_hint:'during the race only Fuelled, Undo and Stop respond; unlock with a long press',
+  yes:'Yes',no:'No',set_locked:'Race lengths can only be changed with the clock stopped (New race).',defaults:'Restore defaults',t_defaults:'Defaults restored',
+  date_locale:'en-GB',dec:'.'
+}};
+L.pt.planned_pit='Pit planeado';
+function t(k){ const d=L[S.lang]||L.pt; let v=d[k]; if(v==null) v=L.pt[k]; if(v==null) return k; return typeof v==='function'?v.apply(null,Array.prototype.slice.call(arguments,1)):v; }
+
+const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
 const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
-const SETTINGS_KEYS=['mode','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','lastRun','calib'];
+const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','lastRun','calib'];
 
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
@@ -482,9 +566,10 @@ if(!Array.isArray(S.pits)) S.pits=[];
 if(!Array.isArray(S.calib)) S.calib=[];
 ['margin','capCc','holdMs','cooldown'].forEach(k=>{ if(typeof S[k]!=='number') S[k]=DEF[k]; });
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
+if(S.lang!=='pt'&&S.lang!=='en'){ const nl=String(navigator.language||'pt').toLowerCase(); S.lang=nl.indexOf('pt')===0?'pt':'en'; }
 
 const $=id=>document.getElementById(id);
-const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),btnLock:$('btnLock'),lockLbl:$('lockLbl'),
+const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),btnLock:$('btnLock'),lockLbl:$('lockLbl'),hdrInfo:$('hdrInfo'),
   raceLbl:$('raceLbl'),raceState:$('raceState'),raceDigits:$('raceDigits'),raceBar:$('raceBar'),raceFill:$('raceFill'),raceElapsed:$('raceElapsed'),raceTotal:$('raceTotal'),racePanel:$('racePanel'),
   tankPanel:$('tankPanel'),tankLbl:$('tankLbl'),tankState:$('tankState'),tankDigits:$('tankDigits'),tankFill:$('tankFill'),tankPlannedTick:$('tankPlannedTick'),
   chipNext:$('chipNext'),chipNextLbl:$('chipNextLbl'),chipNextV:$('chipNextV'),chipLimit:$('chipLimit'),chipLimitV:$('chipLimitV'),chipStops:$('chipStops'),chipStopsV:$('chipStopsV'),
@@ -493,15 +578,16 @@ const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),bt
   tankVal:$('tankVal'),tankMinus:$('tankMinus'),tankPlus:$('tankPlus'),btnSound:$('btnSound'),btnCalc:$('btnCalc'),btnHistory:$('btnHistory'),btnSettings:$('btnSettings'),toast:$('toast'),
   calc:$('calc'),calcTitle:$('calcTitle'),calcRun:$('calcRun'),calcLeft:$('calcLeft'),calcRate:$('calcRate'),calcUsed:$('calcUsed'),calcRuntime:$('calcRuntime'),calcAvg:$('calcAvg'),calcApply:$('calcApply'),marginVal:$('marginVal'),calibList:$('calibList'),
   history:$('history'),histList:$('histList'),histClearAll:$('histClearAll'),
-  settings:$('settings'),setQ:$('setQ'),setSF:$('setSF'),setF:$('setF'),setCap:$('setCap'),setHold:$('setHold'),setCool:$('setCool'),setAutoLock:$('setAutoLock'),setLocked:$('setLocked')};
+  settings:$('settings'),setQ:$('setQ'),setSF:$('setSF'),setF:$('setF'),setCap:$('setCap'),setHold:$('setHold'),setCool:$('setCool'),setAutoLock:$('setAutoLock'),setLocked:$('setLocked'),langPt:$('langPt'),langEn:$('langEn')};
 
 /* ---------- helpers ---------- */
-function M(){ const k=S.mode, m=MODE_META[k]; return {key:k,name:m.name,short:m.short,race:m.isRace?S.dur[k]:null,dur:S.dur[k]}; }
+function M(){ const k=S.mode; return {key:k,name:t('mode_'+k+'_name'),short:t('mode_'+k+'_short'),race:MODE_META[k].isRace?S.dur[k]:null,dur:S.dur[k]}; }
 function now(){ return S.phase==='finished'&&S.stopAt?S.stopAt:Date.now(); }
 function clock(sec){ sec=Math.max(0,Math.floor(sec+1e-6)); const m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
 function signed(sec){ return sec>=0?clock(sec):'+'+clock(-sec); }
 function durLabel(sec){ const m=Math.floor(sec/60), s=sec%60; return s?m+'′'+(s<10?'0':'')+s+'″':m+'′'; }
-function fmtDate(ms){ try{ return new Date(ms).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return new Date(ms).toLocaleString(); } }
+function num(x,d){ return x.toFixed(d).replace('.',t('dec')); }
+function fmtDate(ms){ try{ return new Date(ms).toLocaleString(t('date_locale'),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return new Date(ms).toLocaleString(); } }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function digitsHTML(str){
   let h=''; for(const ch of str){ if(ch===':') h+='<span class="sep">:</span>'; else if(ch==='+'||ch==='−'||ch==='-') h+='<span class="sgn">'+ch+'</span>'; else h+='<span>'+ch+'</span>'; } return h;
@@ -512,6 +598,11 @@ function setText(node,str){ if(node.textContent!==str) node.textContent=str; }
 let toastT=null;
 function toast(msg){ el.toast.textContent=msg; el.toast.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.toast.classList.remove('show'),2400); }
 function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function applyLang(){
+  document.documentElement.lang=S.lang;
+  document.querySelectorAll('[data-i18n]').forEach(n=>setText(n,t(n.dataset.i18n)));
+  el.langPt.setAttribute('aria-pressed',S.lang==='pt'?'true':'false'); el.langEn.setAttribute('aria-pressed',S.lang==='en'?'true':'false');
+}
 
 /* ---------- audio ---------- */
 let AC=null;
@@ -519,7 +610,7 @@ function audioInit(){ try{ if(!AC){ const C=window.AudioContext||window.webkitAu
 function tone(freq,dur,when,type,vol){
   if(!AC) return; when=when||0; type=type||'square'; vol=vol||.22;
   try{ const o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(AC.destination);
-    const t=AC.currentTime+when; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.01); g.gain.setValueAtTime(vol,t+dur-.02); g.gain.linearRampToValueAtTime(0,t+dur); o.start(t); o.stop(t+dur+.05); }catch(e){}
+    const tt=AC.currentTime+when; g.gain.setValueAtTime(0,tt); g.gain.linearRampToValueAtTime(vol,tt+.01); g.gain.setValueAtTime(vol,tt+dur-.02); g.gain.linearRampToValueAtTime(0,tt+dur); o.start(tt); o.stop(tt+dur+.05); }catch(e){}
 }
 function beep(kind){
   if(!S.sound) return; audioInit(); if(!AC) return;
@@ -551,18 +642,17 @@ function awakeByVideo(){ // must start from a user gesture
     v.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none'; document.body.appendChild(v);
     v.play().then(()=>{ awakeVid=v; }).catch(()=>{ v.remove(); }); }catch(e){}
 }
-function releaseAwake(){}
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ keepAwake(); if(awakeVid) awakeVid.play().catch(()=>{}); } });
 document.addEventListener('pointerdown',()=>{ keepAwake().then(awakeByVideo); },{passive:true});
 
 /* ---------- strategy (pure) ---------- */
 // R race length (s), T safe tank (s), t race elapsed (s, null before start), te tank elapsed (s).
 // Plan is anchored on the start of the current tank, so targets stay fixed until the next pit.
-function planFor(R,T,t,te){
+function planFor(R,T,tt,te){
   const r={}; r.tankLeft=T-te;
-  if(R==null||t==null) return r;
-  r.remaining=R-t;
-  const tankAt=t-te, win=R-tankAt;          // time this tank has to cover until the flag
+  if(R==null||tt==null) return r;
+  r.remaining=R-tt;
+  const tankAt=tt-te, win=R-tankAt;         // time this tank has to cover until the flag
   if(r.remaining<=0||win<=T){ r.last=true; r.stopsLeft=0; r.schedule=[]; return r; }
   const tanks=Math.ceil(win/T);              // fewest tanks that cover the window
   r.stopsLeft=tanks-1; r.stint=win/tanks;    // even split, each stint <= T
@@ -570,28 +660,27 @@ function planFor(R,T,t,te){
   r.schedule=[]; for(let i=1;i<=r.stopsLeft;i++) r.schedule.push(tankAt+i*r.stint);
   return r;
 }
-function statusOf(m,r,t,te){
+function statusOf(m,r,tt,te){
   if(te==null) return 'idle';
   if(!m.race){ // qualifying: one tank, heat of m.dur
     if(r.tankLeft<=0) return 'over';
     if(r.tankLeft<=60) return 'soon';
-    if(t!=null){ const rem=m.dur-t; if(rem<=0) return 'ok'; return r.tankLeft>=rem?'covers':'short'; }
+    if(tt!=null){ const rem=m.dur-tt; if(rem<=0) return 'ok'; return r.tankLeft>=rem?'covers':'short'; }
     return (r.tankLeft-m.dur)<0?'short':'ok';
   }
-  if(t==null) return 'grid';
+  if(tt==null) return 'grid';
   if(r.last) return 'last';
   if(r.limitIn<=0) return 'over';
   if(r.nextIn<=0) return 'now';
   if(r.nextIn<=60) return 'soon';
   return 'ok';
 }
-const STATE_WORD={idle:'',grid:'Na grelha',ok:'OK',soon:'Preparar pit',now:'Pit agora',over:'Limite ultrapassado',last:'Último depósito',short:'Não chega à manga',covers:'Chega ao fim'};
 
 /* ---------- actions ---------- */
 function canChangeMode(){ return S.phase==='idle'&&!S.tankStart; }
 function inCooldown(n){ return S.tankStart&&(n-S.tankStart)/1000<S.cooldown; }
 function rejectPit(n){
-  toast('Pit registado há '+Math.round((n-S.tankStart)/1000)+' s · ignorado (anti-toque duplo)');
+  toast(t('t_reject',Math.round((n-S.tankStart)/1000)));
   el.btnPit.classList.remove('shake'); void el.btnPit.offsetWidth; el.btnPit.classList.add('shake'); vibrate([40,40,40]);
 }
 function lock(on){ S.locked=!!on; if(S.locked){ closeCalc(); closeSettings(); closeHistory(); } save(); render(); }
@@ -600,16 +689,16 @@ function doPit(n){
   const m=M();
   if(S.phase==='finished') return;
   if(!m.race){
-    if(S.tankStart){ toast('Na qualificação abastece-se uma vez; para terminar mantém PARAR.'); return; }
-    S.tankStart=n; S.phase='running'; S.fired={}; if(S.autoLock) S.locked=true; audioInit(); keepAwake();
-    toast('Depósito a contar · no "go" mantém ARRANQUE'); beep('pit'); vibrate([60]); save(); render(); return;
+    if(S.tankStart){ toast(t('t_qual_once')); return; }
+    S.tankStart=n; S.phase='running'; S.fired={}; if(S.autoLock) S.locked=true; audioInit();
+    toast(t('t_tank_counting')); beep('pit'); vibrate([60]); save(); render(); return;
   }
   if(inCooldown(n)){ rejectPit(n); return; }
   if(!S.tankStart){
-    S.tankStart=n; audioInit(); keepAwake(); toast('Depósito cheio na grelha · a contar'); beep('pit'); vibrate([60]); save(); render(); return;
+    S.tankStart=n; audioInit(); toast(t('t_grid_full')); beep('pit'); vibrate([60]); save(); render(); return;
   }
   const te=(n-S.tankStart)/1000;
-  if(!S.raceStart){ S.tankStart=n; toast('Depósito reiniciado na grelha'); beep('pit'); save(); render(); return; }
+  if(!S.raceStart){ S.tankStart=n; toast(t('t_grid_restart')); beep('pit'); save(); render(); return; }
   S.pits.push({at:(n-S.raceStart)/1000,run:te});
   S.undo={until:n+UNDO_WIN*1000,prev:S.tankStart};
   S.tankStart=n; S.fired={}; beep('pit'); vibrate([60]); save(); render();
@@ -617,36 +706,36 @@ function doPit(n){
 function doUndo(){
   if(!S.undo||Date.now()>S.undo.until) return;
   S.pits.pop(); S.tankStart=S.undo.prev; S.undo=null; S.fired={};
-  toast('Último pit anulado'); vibrate([60,40,60]); save(); render();
+  toast(t('t_undone')); vibrate([60,40,60]); save(); render();
 }
 // n = moment the press began (the "go")
 function doStart(n){
   const m=M();
-  if(m.race){ if(S.phase!=='idle') return; S.raceStart=n; if(!S.tankStart) S.tankStart=n; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true; toast(m.name+' iniciada'+(S.locked?' · ecrã bloqueado':'')); }
-  else { if(S.phase!=='running'||S.raceStart) return; S.raceStart=n; S.fired={}; toast('Manga de qualificação a contar'); }
-  audioInit(); keepAwake(); beep('start'); vibrate([120]); save(); render();
+  if(m.race){ if(S.phase!=='idle') return; S.raceStart=n; if(!S.tankStart) S.tankStart=n; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true; toast(t('t_started',m.name)+(S.locked?t('t_locked_suffix'):'')); }
+  else { if(S.phase!=='running'||S.raceStart) return; S.raceStart=n; S.fired={}; toast(t('t_heat_started')); }
+  audioInit(); beep('start'); vibrate([120]); save(); render();
 }
 function doStop(){
   if(S.phase!=='running') return;
   const m=M();
   S.phase='finished'; S.stopAt=Date.now(); S.undo=null; S.locked=false;
   S.lastRun=S.tankStart?Math.round((S.stopAt-S.tankStart)/1000):0;
-  const rec={id:S.stopAt,when:S.stopAt,mode:m.key,name:m.name,dur:m.dur,tankSec:S.tankSec,
+  const rec={id:S.stopAt,when:S.stopAt,mode:m.key,dur:m.dur,tankSec:S.tankSec,
     pits:S.pits.map(p=>({at:Math.round(p.at),run:Math.round(p.run)})),
     elapsed:S.raceStart?Math.round((S.stopAt-S.raceStart)/1000):null,lastRun:S.lastRun,calib:null};
   H.unshift(rec); if(H.length>HIST_MAX) H.length=HIST_MAX; saveH(); S.lastHist=rec.id;
-  releaseAwake(); beep('end'); vibrate([300]); save(); render();
+  beep('end'); vibrate([300]); save(); render();
   openCalc(S.lastRun);
 }
 function doReset(){
   const keep={}; SETTINGS_KEYS.forEach(k=>keep[k]=S[k]);
-  S=Object.assign(JSON.parse(JSON.stringify(DEF)),keep); lastDigits={}; releaseAwake(); toast('Pronto para nova corrida'); save(); render();
+  S=Object.assign(JSON.parse(JSON.stringify(DEF)),keep); lastDigits={}; toast(t('t_reset')); save(); render();
 }
 function setMode(k){ if(!canChangeMode()||!MODE_META[k]) return; S.mode=k; S.fired={}; save(); render(); }
 function adjTank(d){ S.tankSec=Math.min(TANK_MAX,Math.max(TANK_MIN,S.tankSec+d)); save(); render(); }
 
 /* hold-to-confirm; onDone receives the timestamp of the press start */
-function holdButton(btn,onDone,fill){
+function holdButton(btn,onDone){
   let t0=null,raf=null,pressedAt=0;
   const stop=(ok)=>{ if(t0===null) return; cancelAnimationFrame(raf); t0=null; btn.style.setProperty('--p',0); if(ok) onDone(pressedAt); };
   const tick=()=>{ const p=Math.min(1,(performance.now()-t0)/S.holdMs); btn.style.setProperty('--p',p); if(p>=1){ vibrate([80]); stop(true);} else raf=requestAnimationFrame(tick); };
@@ -656,7 +745,7 @@ function holdButton(btn,onDone,fill){
   btn.addEventListener('lostpointercapture',()=>stop(false));
   btn.addEventListener('contextmenu',e=>e.preventDefault());
 }
-/* ABASTECI: single tap in qualifying, hold in sub-final/final; the pit is timed from the start of the press */
+/* ABASTECI: single tap in qualifying, hold in semi/final; the pit is timed from the start of the press */
 function pitButton(btn){
   let t0=null,raf=null,pressedAt=0;
   const stop=(ok)=>{ if(t0===null) return; cancelAnimationFrame(raf); t0=null; btn.style.setProperty('--p',0); if(ok) doPit(pressedAt); };
@@ -683,70 +772,72 @@ function runtimeFor(run,left){ // seconds a full tank lasts, from a partial run
 function openCalc(run){ if(S.locked) return; C.run=Math.max(0,Math.round(run||0)); C.left=0; el.calcLeft.value='0'; el.calcLeft.max=String(S.capCc); el.calc.hidden=false; renderCalc(); }
 function closeCalc(){ el.calc.hidden=true; }
 function renderCalc(){
-  setText(el.calcTitle,'Calculadora de runtime · depósito de '+S.capCc+' cc');
+  setText(el.calcTitle,t('calc_title',S.capCc));
   setText(el.calcRun,clock(C.run));
   const r=runtimeFor(C.run,C.left);
   setText(el.marginVal,S.margin+' s');
-  if(!r){ setText(el.calcRate,'—'); setText(el.calcUsed,''); setText(el.calcRuntime,'—'); el.calcApply.disabled=true; setText(el.calcApply,'Usar como depósito'); }
+  if(!r){ setText(el.calcRate,'—'); setText(el.calcUsed,''); setText(el.calcRuntime,'—'); el.calcApply.disabled=true; setText(el.calcApply,t('use_as_tank')); }
   else {
-    setText(el.calcRate,r.rate.toFixed(1).replace('.',',')+' cc/min');
-    setText(el.calcUsed,'gastou '+Math.round(r.used*10)/10+' cc em '+clock(C.run));
+    setText(el.calcRate,num(r.rate,1)+t('cc_per_min'));
+    setText(el.calcUsed,t('used_in',Math.round(r.used*10)/10,clock(C.run)));
     setText(el.calcRuntime,clock(r.runtime));
     const dep=Math.max(TANK_MIN,Math.floor((r.runtime-S.margin)/5)*5);
-    el.calcApply.disabled=false; setText(el.calcApply,'Usar '+clock(dep)+' como depósito');
+    el.calcApply.disabled=false; setText(el.calcApply,t('use_t_as_tank',clock(dep)));
   }
   if(S.calib.length){
     const avg=S.calib.reduce((a,c)=>a+c.runtime,0)/S.calib.length;
-    setText(el.calcAvg,'média de '+S.calib.length+': '+clock(avg));
-    el.calibList.innerHTML='Calibrações: '+S.calib.map(c=>'<b>'+clock(c.runtime)+'</b> ('+clock(c.run)+' · '+c.left+' cc)').join(' · ');
-  } else { setText(el.calcAvg,''); el.calibList.textContent='Ainda sem calibrações guardadas.'; }
+    setText(el.calcAvg,t('avg_of',S.calib.length,clock(avg)));
+    el.calibList.innerHTML=esc(t('calibs'))+S.calib.map(c=>'<b>'+clock(c.runtime)+'</b> ('+clock(c.run)+' · '+c.left+' cc)').join(' · ');
+  } else { setText(el.calcAvg,''); el.calibList.textContent=t('no_calibs'); }
 }
 function applyCalc(){
   const r=runtimeFor(C.run,C.left); if(!r) return;
   const dep=Math.max(TANK_MIN,Math.min(TANK_MAX,Math.floor((r.runtime-S.margin)/5)*5));
   S.calib.push({run:C.run,left:C.left,runtime:Math.round(r.runtime),when:Date.now()}); if(S.calib.length>6) S.calib.shift();
   if(S.lastHist){ const rec=H.find(x=>x.id===S.lastHist); if(rec){ rec.calib={run:C.run,left:C.left,runtime:Math.round(r.runtime)}; saveH(); } }
-  S.tankSec=dep; save(); closeCalc(); toast('Depósito definido em '+clock(dep)+' (runtime '+clock(r.runtime)+' − '+S.margin+' s)'); render();
+  S.tankSec=dep; save(); closeCalc(); toast(t('t_tank_set',clock(dep),clock(r.runtime),S.margin)); render();
 }
 
 /* ---------- history ---------- */
 let histOpen=null, histConfirm=null;
 function openHistory(){ if(S.locked) return; histOpen=null; histConfirm=null; el.history.hidden=false; renderHistory(); }
 function closeHistory(){ el.history.hidden=true; }
+function recName(rec){ return t('mode_'+(MODE_META[rec.mode]?rec.mode:'f')+'_name'); }
+function recShort(rec){ return t('mode_'+(MODE_META[rec.mode]?rec.mode:'f')+'_short'); }
 function recSummary(rec){
-  const L=[]; L.push('NOSPONSOR NOFUEL · '+rec.name+' '+clock(rec.dur)+' · '+fmtDate(rec.when));
-  L.push('Depósito de planeamento '+clock(rec.tankSec)+(rec.mode==='q'?'':' · '+rec.pits.length+' pit'+(rec.pits.length===1?'':'s')));
-  if(rec.pits.length) L.push(rec.pits.map((p,i)=>'Pit '+(i+1)+' '+clock(p.at)+' (dep. '+clock(p.run)+')').join(' · '));
-  L.push('Último depósito '+clock(rec.lastRun)+(rec.elapsed!=null?' · parado aos '+clock(rec.elapsed):' · manga sem arranque marcado'));
-  if(rec.calib) L.push('Runtime medido '+clock(rec.calib.runtime)+' ('+rec.calib.left+' cc sobraram em '+clock(rec.calib.run)+')');
-  return L.join('\n');
+  const Ls=[]; Ls.push('NOSPONSOR NOFUEL · '+recName(rec)+' '+clock(rec.dur)+' · '+fmtDate(rec.when));
+  Ls.push(t('sum_tank',clock(rec.tankSec))+(rec.mode==='q'?'':' · '+t('pits_n',rec.pits.length)));
+  if(rec.pits.length) Ls.push(rec.pits.map((p,i)=>t('sum_pit',i+1,clock(p.at),clock(p.run))).join(' · '));
+  Ls.push(t('sum_last',clock(rec.lastRun),rec.elapsed!=null?clock(rec.elapsed):null));
+  if(rec.calib) Ls.push(t('sum_calib',clock(rec.calib.runtime),rec.calib.left,clock(rec.calib.run)));
+  return Ls.join('\n');
 }
 function renderHistory(){
-  if(!H.length){ el.histList.innerHTML='<li class="hist-empty">Ainda sem corridas guardadas.</li>'; el.histClearAll.hidden=true; return; }
+  if(!H.length){ el.histList.innerHTML='<li class="hist-empty">'+esc(t('no_races'))+'</li>'; el.histClearAll.hidden=true; return; }
   el.histClearAll.hidden=false;
   el.histList.innerHTML=H.map(rec=>{
     const open=histOpen===rec.id;
-    const stat=rec.mode==='q'?('dep. '+clock(rec.lastRun)):(rec.pits.length+' pit'+(rec.pits.length===1?'':'s')+' · '+(rec.elapsed!=null?clock(rec.elapsed):'—'));
-    let h='<li><button class="row" data-open="'+rec.id+'"><span class="m">'+esc(rec.short||MODE_META[rec.mode].short)+' '+durLabel(rec.dur)+'</span><span class="d">'+esc(fmtDate(rec.when))+(rec.calib?' · runtime '+clock(rec.calib.runtime):'')+'</span><span class="s">'+esc(stat)+'</span></button>';
+    const stat=rec.mode==='q'?t('tank_abbr',clock(rec.lastRun)):(t('pits_n',rec.pits.length)+' · '+(rec.elapsed!=null?clock(rec.elapsed):'—'));
+    let h='<li><button class="row" data-open="'+rec.id+'"><span class="m">'+esc(recShort(rec))+' '+durLabel(rec.dur)+'</span><span class="d">'+esc(fmtDate(rec.when))+(rec.calib?esc(t('runtime_short',clock(rec.calib.runtime))):'')+'</span><span class="s">'+esc(stat)+'</span></button>';
     if(open){
       h+='<div class="detail"><div class="pits">';
-      rec.pits.forEach((p,i)=>{ h+='<div class="pit done"><span class="n">Pit '+(i+1)+'</span><span class="t">'+clock(p.at)+'</span><span class="r">dep. '+clock(p.run)+'</span></div>'; });
-      h+='<div class="pit fim"><span class="n">Fim</span><span class="t">'+(rec.elapsed!=null?clock(rec.elapsed):'—')+'</span><span class="r">dep. '+clock(rec.lastRun)+'</span></div></div>';
-      h+='<div class="hint">Depósito de planeamento '+clock(rec.tankSec)+(rec.calib?' · runtime medido '+clock(rec.calib.runtime)+' com '+rec.calib.left+' cc a sobrar':' · sem medição de combustível')+'</div>';
-      h+='<div class="acts"><button class="tool" data-copy="'+rec.id+'">Copiar resumo</button>';
-      h+=histConfirm===rec.id?'<button class="tool danger" data-del="'+rec.id+'">Confirmar apagar</button>':'<button class="tool" data-ask="'+rec.id+'">Apagar</button>';
+      rec.pits.forEach((p,i)=>{ h+='<div class="pit done"><span class="n">'+esc(t('pit_n',i+1))+'</span><span class="t">'+clock(p.at)+'</span><span class="r">'+esc(t('tank_abbr',clock(p.run)))+'</span></div>'; });
+      h+='<div class="pit fim"><span class="n">'+esc(t('end'))+'</span><span class="t">'+(rec.elapsed!=null?clock(rec.elapsed):'—')+'</span><span class="r">'+esc(t('tank_abbr',clock(rec.lastRun)))+'</span></div></div>';
+      h+='<div class="hint">'+esc(t('planning_tank',clock(rec.tankSec))+(rec.calib?t('measured_runtime',clock(rec.calib.runtime),rec.calib.left):t('no_fuel_measure')))+'</div>';
+      h+='<div class="acts"><button class="tool" data-copy="'+rec.id+'">'+esc(t('copy_summary'))+'</button>';
+      h+=histConfirm===rec.id?'<button class="tool danger" data-del="'+rec.id+'">'+esc(t('confirm_del'))+'</button>':'<button class="tool" data-ask="'+rec.id+'">'+esc(t('del'))+'</button>';
       h+='</div></div>';
     }
     return h+'</li>';
   }).join('');
 }
 function copyText(txt){
-  const done=()=>toast('Resumo copiado');
+  const done=()=>toast(t('t_copied'));
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt)); return; } }catch(e){}
   fallbackCopy(txt);
 }
 function fallbackCopy(txt){
-  try{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Resumo copiado'); }catch(e){ toast('Não foi possível copiar'); }
+  try{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast(t('t_copied')); }catch(e){ toast(t('t_copy_fail')); }
 }
 
 /* ---------- settings ---------- */
@@ -758,43 +849,44 @@ function adjSetting(key,d){
   else S[key]=Math.min(lim[1],Math.max(lim[0],S[key]+d));
   save(); renderSettings(); render();
 }
+function setLang(l){ if(l!=='pt'&&l!=='en') return; S.lang=l; save(); applyLang(); renderSettings(); if(!el.calc.hidden) renderCalc(); if(!el.history.hidden) renderHistory(); render(); }
 function renderSettings(){
   setText(el.setQ,clock(S.dur.q)); setText(el.setSF,clock(S.dur.sf)); setText(el.setF,clock(S.dur.f));
-  setText(el.setCap,S.capCc+' cc'); setText(el.setHold,(S.holdMs/1000).toFixed(1).replace('.',',')+' s'); setText(el.setCool,S.cooldown+' s');
-  el.setAutoLock.setAttribute('aria-pressed',S.autoLock?'true':'false'); setText(el.setAutoLock,S.autoLock?'Sim':'Não');
+  setText(el.setCap,S.capCc+' cc'); setText(el.setHold,num(S.holdMs/1000,1)+' s'); setText(el.setCool,S.cooldown+' s');
+  el.setAutoLock.setAttribute('aria-pressed',S.autoLock?'true':'false'); setText(el.setAutoLock,S.autoLock?t('yes'):t('no'));
   const locked=!canChangeMode();
   el.settings.querySelectorAll('[data-set="q"],[data-set="sf"],[data-set="f"]').forEach(b=>b.disabled=locked);
-  setText(el.setLocked,locked?'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).':'');
+  setText(el.setLocked,locked?t('set_locked'):'');
 }
 
 /* ---------- render ---------- */
 function render(){
   const m=M(); const n=now(); const q=!m.race;
-  const t=S.raceStart?(n-S.raceStart)/1000:null;
+  const tt=S.raceStart?(n-S.raceStart)/1000:null;
   const te=S.tankStart?(n-S.tankStart)/1000:null;
-  const r=te!=null?planFor(m.race,S.tankSec,t,te):{};
-  if(q&&t!=null) r.remaining=m.dur-t;
-  const st=statusOf(m,r,t,te);
+  const r=te!=null?planFor(m.race,S.tankSec,tt,te):{};
+  if(q&&tt!=null) r.remaining=m.dur-tt;
+  const st=statusOf(m,r,tt,te);
   const idle=S.phase==='idle', running=S.phase==='running', fin=S.phase==='finished';
 
   // header
   const compact=running||S.locked;
-  el.app.className=(q?(t==null?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'');
-  setText($('hdrInfo'),m.short+' '+durLabel(m.dur)+' · depósito '+clock(S.tankSec)+(S.sound?'':' · som off'));
+  el.app.className=(q?(tt==null?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'');
+  setText(el.hdrInfo,t('hdr',m.short,durLabel(m.dur),clock(S.tankSec))+(S.sound?'':t('hdr_sound_off')));
   try{ el.modes.inert=S.locked; el.tools.inert=S.locked; }catch(e){}
-  document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,MODE_META[k].short+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
+  document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,t('mode_'+k+'_short')+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
   setText(el.tankVal,clock(S.tankSec));
-  el.btnSound.setAttribute('aria-pressed',S.sound?'true':'false'); setText(el.btnSound,S.sound?'Som':'Som off');
+  el.btnSound.setAttribute('aria-pressed',S.sound?'true':'false'); setText(el.btnSound,S.sound?t('sound'):t('sound_off'));
   el.btnCalc.disabled=running; el.btnHistory.disabled=running;
   const lockable=running||(idle&&!!S.tankStart);
   el.btnLock.hidden=!(lockable||S.locked);
-  setText(el.lockLbl,S.locked?'Bloqueado · manter para abrir':'Bloquear · manter');
+  setText(el.lockLbl,S.locked?t('locked_hold'):t('lock_hold'));
 
   // tank panel
   el.tankPanel.className='panel tank st-'+st;
-  let word=STATE_WORD[st]||''; if(fin) word='Parado';
+  let word=st==='idle'?'':t('st_'+st); if(fin) word=t('stopped');
   setText(el.tankState,word);
-  setText(el.tankLbl,te==null?'Depósito':(q?'Depósito · desde que encheste':'Depósito · desde o último pit'));
+  setText(el.tankLbl,te==null?t('tank'):(q?t('tank_since_fill'):t('tank_since_pit')));
   setDigits(el.tankDigits,te==null?'0:00':clock(te));
   const frac=te==null?0:Math.min(1,te/S.tankSec); el.tankFill.style.width=(frac*100)+'%';
   if(!q&&r.stint!=null&&!r.last){ el.tankPlannedTick.hidden=false; el.tankPlannedTick.style.left=(Math.min(1,r.stint/S.tankSec)*100)+'%'; }
@@ -803,34 +895,34 @@ function render(){
   el.chipNext.classList.remove('crit');
   if(!q){
     el.chipStops.hidden=false; el.qualHint.hidden=true;
-    setText(el.chipNextLbl,'Pit planeado');
+    setText(el.chipNextLbl,t('planned_pit'));
     if(te==null){ setText(el.chipNextV,'—'); setText(el.chipLimitV,'—'); setText(el.chipStopsV,'—'); }
-    else if(t==null){ setText(el.chipNextV,'—'); setText(el.chipLimitV,signed(r.tankLeft)); setText(el.chipStopsV,String(Math.max(0,Math.ceil(m.race/S.tankSec)-1))); }
-    else if(r.last){ setText(el.chipNextV,'Nenhum'); setText(el.chipLimitV,signed(r.tankLeft)); setText(el.chipStopsV,S.pits.length+' feitas'); }
-    else { setText(el.chipNextV,r.nextIn>=0?'em '+clock(r.nextIn):'há '+clock(-r.nextIn)); setText(el.chipLimitV,r.limitIn>=0?'em '+clock(r.limitIn):'há '+clock(-r.limitIn)); setText(el.chipStopsV,S.pits.length+' de '+(S.pits.length+r.stopsLeft)); }
+    else if(tt==null){ setText(el.chipNextV,'—'); setText(el.chipLimitV,signed(r.tankLeft)); setText(el.chipStopsV,String(Math.max(0,Math.ceil(m.race/S.tankSec)-1))); }
+    else if(r.last){ setText(el.chipNextV,t('none')); setText(el.chipLimitV,signed(r.tankLeft)); setText(el.chipStopsV,t('done_n',S.pits.length)); }
+    else { setText(el.chipNextV,r.nextIn>=0?t('in_t',clock(r.nextIn)):t('ago_t',clock(-r.nextIn))); setText(el.chipLimitV,r.limitIn>=0?t('in_t',clock(r.limitIn)):t('ago_t',clock(-r.limitIn))); setText(el.chipStopsV,t('n_of',S.pits.length,S.pits.length+r.stopsLeft)); }
   } else {
     el.chipStops.hidden=true; el.qualHint.hidden=false;
-    setText(el.chipLimitV,te==null?'—':(r.tankLeft>=0?'resta '+clock(r.tankLeft):'há '+clock(-r.tankLeft)));
-    if(te==null){ setText(el.chipNextLbl,'Margem para arrancar'); setText(el.chipNextV,'—'); setText(el.qualHint,'Abastece uma vez; o depósito ('+clock(S.tankSec)+') tem de cobrir a espera na grelha mais a manga de '+clock(m.dur)+'.'); }
-    else if(t==null){ const mg=r.tankLeft-m.dur; setText(el.chipNextLbl,'Margem para arrancar'); if(mg>=0) setText(el.chipNextV,clock(mg)); else { setText(el.chipNextV,'−'+clock(-mg)); el.chipNext.classList.add('crit'); }
-      setText(el.qualHint,mg>=0?'Se a manga arrancar dentro de '+clock(mg)+' o combustível chega ao fim.':'Se arrancar agora, falta combustível para '+clock(-mg)+' da manga.'); }
-    else { const d=r.tankLeft-Math.max(0,r.remaining); setText(el.chipNextLbl,'Combustível no fim da manga'); if(d>=0) setText(el.chipNextV,'sobra '+clock(d)); else { setText(el.chipNextV,'falta '+clock(-d)); el.chipNext.classList.add('crit'); }
-      setText(el.qualHint,'Manga de '+clock(m.dur)+' em curso. No fim mantém PARAR e introduz o combustível que sobrou.'); }
+    setText(el.chipLimitV,te==null?'—':(r.tankLeft>=0?t('left_t',clock(r.tankLeft)):t('ago_t',clock(-r.tankLeft))));
+    if(te==null){ setText(el.chipNextLbl,t('margin_start')); setText(el.chipNextV,'—'); setText(el.qualHint,t('qual_hint_idle',clock(S.tankSec),clock(m.dur))); }
+    else if(tt==null){ const mg=r.tankLeft-m.dur; setText(el.chipNextLbl,t('margin_start')); if(mg>=0) setText(el.chipNextV,clock(mg)); else { setText(el.chipNextV,'−'+clock(-mg)); el.chipNext.classList.add('crit'); }
+      setText(el.qualHint,mg>=0?t('qual_hint_ok',clock(mg)):t('qual_hint_short',clock(-mg))); }
+    else { const d=r.tankLeft-Math.max(0,r.remaining); setText(el.chipNextLbl,t('fuel_end_heat')); if(d>=0) setText(el.chipNextV,t('spare_t',clock(d))); else { setText(el.chipNextV,t('short_t',clock(-d))); el.chipNext.classList.add('crit'); }
+      setText(el.qualHint,t('qual_hint_run',clock(m.dur))); }
   }
 
   // race / heat panel
-  const showRace=!q||t!=null;
+  const showRace=!q||tt!=null;
   el.racePanel.hidden=!showRace; el.planPanel.hidden=q;
   if(showRace){
     const R=q?m.dur:m.race;
-    const over=t!=null&&r.remaining<0;
+    const over=tt!=null&&r.remaining<0;
     el.racePanel.classList.toggle('over',over);
-    setText(el.raceLbl,over?'Tempo esgotado':'Tempo restante');
-    setText(el.raceState,fin?'Terminada':(over?'Última volta':(t==null?(S.tankStart?'Na grelha':'Pronto'):m.name)));
-    setDigits(el.raceDigits,t==null?clock(R):signed(r.remaining));
-    setText(el.raceElapsed,t==null?'0:00':clock(Math.max(0,t)));
-    setText(el.raceTotal,(q?'Manga ':m.name+' ')+clock(R));
-    el.raceFill.style.width=(t==null?0:Math.min(1,t/R)*100)+'%';
+    setText(el.raceLbl,over?t('time_up'):t('time_left'));
+    setText(el.raceState,fin?t('finished'):(over?t('last_lap'):(tt==null?(S.tankStart?t('on_grid'):t('ready')):m.name)));
+    setDigits(el.raceDigits,tt==null?clock(R):signed(r.remaining));
+    setText(el.raceElapsed,tt==null?'0:00':clock(Math.max(0,tt)));
+    setText(el.raceTotal,(q?t('heat'):m.name)+' '+clock(R));
+    el.raceFill.style.width=(tt==null?0:Math.min(1,tt/R)*100)+'%';
     el.raceBar.querySelectorAll('.tick').forEach(x=>x.remove());
     if(!q){
       S.pits.forEach(p=>{ const d=document.createElement('div'); d.className='tick'; d.style.left=(Math.min(1,p.at/R)*100)+'%'; el.raceBar.appendChild(d); });
@@ -839,12 +931,12 @@ function render(){
   }
   if(!q){
     const R=m.race; let html='';
-    S.pits.forEach((p,i)=>{ html+='<li class="pit done"><span class="n">Pit '+(i+1)+'</span><span class="t">'+clock(p.at)+'</span><span class="r">dep. '+clock(p.run)+'</span></li>'; });
-    if(te==null){ const stops=Math.max(0,Math.ceil(R/S.tankSec)-1); const stint=R/(stops+1); for(let i=1;i<=stops;i++) html+='<li class="pit"><span class="n">Pit '+i+'</span><span class="t">≈'+clock(i*stint)+'</span><span class="r">plano</span></li>'; setText(el.planMeta,stops+' paragens · depósitos de '+clock(stint)); }
-    else if(t==null){ setText(el.planMeta,'calcula-se ao iniciar'); }
-    else { (r.schedule||[]).forEach((p,i)=>{ html+='<li class="pit'+(i===0?' next':'')+'"><span class="n">Pit '+(S.pits.length+i+1)+'</span><span class="t">≈'+clock(Math.max(0,p))+'</span><span class="r">'+(i===0?'próximo':'plano')+'</span></li>'; });
-      setText(el.planMeta,r.last?'Sem mais paragens':(r.stopsLeft+' por fazer · depósitos de '+clock(r.stint))); }
-    html+='<li class="pit fim"><span class="n">Fim</span><span class="t">'+clock(R)+'</span><span class="r">'+(fin?'parado':'bandeira')+'</span></li>';
+    S.pits.forEach((p,i)=>{ html+='<li class="pit done"><span class="n">'+esc(t('pit_n',i+1))+'</span><span class="t">'+clock(p.at)+'</span><span class="r">'+esc(t('tank_abbr',clock(p.run)))+'</span></li>'; });
+    if(te==null){ const stops=Math.max(0,Math.ceil(R/S.tankSec)-1); const stint=R/(stops+1); for(let i=1;i<=stops;i++) html+='<li class="pit"><span class="n">'+esc(t('pit_n',i))+'</span><span class="t">≈'+clock(i*stint)+'</span><span class="r">'+esc(t('plan'))+'</span></li>'; setText(el.planMeta,t('plan_meta_idle',stops,clock(stint))); }
+    else if(tt==null){ setText(el.planMeta,t('plan_meta_grid')); }
+    else { (r.schedule||[]).forEach((p,i)=>{ html+='<li class="pit'+(i===0?' next':'')+'"><span class="n">'+esc(t('pit_n',S.pits.length+i+1))+'</span><span class="t">≈'+clock(Math.max(0,p))+'</span><span class="r">'+esc(i===0?t('next'):t('plan'))+'</span></li>'; });
+      setText(el.planMeta,r.last?t('plan_meta_last'):t('plan_meta_run',r.stopsLeft,clock(r.stint))); }
+    html+='<li class="pit fim"><span class="n">'+esc(t('end'))+'</span><span class="t">'+clock(R)+'</span><span class="r">'+esc(fin?t('stopped').toLowerCase():t('flag'))+'</span></li>';
     if(el.planList.innerHTML!==html) el.planList.innerHTML=html;
   }
 
@@ -852,15 +944,15 @@ function render(){
   el.btnPit.hidden=fin||(q&&!!S.tankStart);
   const cool=!q&&te!=null&&te<S.cooldown&&!fin;
   el.btnPit.classList.toggle('cool',cool);
-  if(q) setText(el.pitSub,'Toca quando encheres');
-  else if(te==null) setText(el.pitSub,'Manter premido ao encher na grelha');
-  else if(cool) setText(el.pitSub,'Registado · bloqueado '+Math.ceil(S.cooldown-te)+' s');
-  else setText(el.pitSub,t==null?'Manter premido para reiniciar o depósito':'Manter premido ao sair do pit');
+  if(q) setText(el.pitSub,t('tap_fill'));
+  else if(te==null) setText(el.pitSub,t('hold_grid'));
+  else if(cool) setText(el.pitSub,t('logged_locked',Math.ceil(S.cooldown-te)));
+  else setText(el.pitSub,tt==null?t('hold_restart'):t('hold_pit'));
   const undoOk=S.undo&&Date.now()<S.undo.until&&running&&!q;
-  el.btnUndo.hidden=!undoOk; if(undoOk) setText(el.undoSub,'Manter · '+Math.ceil((S.undo.until-Date.now())/1000)+' s');
+  el.btnUndo.hidden=!undoOk; if(undoOk) setText(el.undoSub,t('hold_s',Math.ceil((S.undo.until-Date.now())/1000)));
   const heatStart=q&&running&&!S.raceStart;
   el.btnStart.hidden=!((idle&&!q)||heatStart);
-  el.btnStart.classList.toggle('heat',heatStart); setText(el.startLbl,q?'Arranque da manga':'Início');
+  el.btnStart.classList.toggle('heat',heatStart); setText(el.startLbl,q?t('heat_start'):t('start'));
   el.actions.classList.toggle('q-run',q&&!!S.tankStart&&!fin);
   el.btnStop.hidden=!running;
   el.btnReset.hidden=!(fin||(idle&&S.tankStart));
@@ -895,12 +987,12 @@ holdButton(el.btnUndo,doUndo);
 holdButton(el.btnStart,doStart);
 holdButton(el.btnStop,doStop);
 holdButton(el.btnReset,doReset);
-holdButton(el.btnLock,()=>{ lock(!S.locked); toast(S.locked?'Ecrã bloqueado · só Abasteci, Anular e Parar':'Ecrã desbloqueado'); });
+holdButton(el.btnLock,()=>{ lock(!S.locked); toast(S.locked?t('t_locked'):t('t_unlocked')); });
 document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 el.tankMinus.addEventListener('click',()=>adjTank(-STEP));
 el.tankPlus.addEventListener('click',()=>adjTank(STEP));
 el.btnSound.addEventListener('click',()=>{ S.sound=!S.sound; if(S.sound){ audioInit(); beep('pit'); } save(); render(); });
-$('btnFs').addEventListener('click',()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); else toast('Neste aparelho, adiciona a app ao ecrã inicial para ficar em ecrã inteiro'); }catch(e){} });
+$('btnFs').addEventListener('click',()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); else toast(t('t_fs')); }catch(e){} });
 
 el.btnCalc.addEventListener('click',()=>openCalc(S.lastRun));
 $('calcClose').addEventListener('click',closeCalc);
@@ -918,16 +1010,18 @@ el.histList.addEventListener('click',e=>{
   if(b.dataset.open){ const id=Number(b.dataset.open); histOpen=histOpen===id?null:id; histConfirm=null; renderHistory(); }
   else if(b.dataset.copy){ const rec=H.find(x=>x.id===Number(b.dataset.copy)); if(rec) copyText(recSummary(rec)); }
   else if(b.dataset.ask){ histConfirm=Number(b.dataset.ask); renderHistory(); }
-  else if(b.dataset.del){ const id=Number(b.dataset.del); H=H.filter(x=>x.id!==id); saveH(); histConfirm=null; histOpen=null; renderHistory(); toast('Corrida apagada'); }
+  else if(b.dataset.del){ const id=Number(b.dataset.del); H=H.filter(x=>x.id!==id); saveH(); histConfirm=null; histOpen=null; renderHistory(); toast(t('t_race_deleted')); }
 });
 let clearArmed=false;
-el.histClearAll.addEventListener('click',()=>{ if(!clearArmed){ clearArmed=true; setText(el.histClearAll,'Confirmar apagar tudo'); setTimeout(()=>{ clearArmed=false; setText(el.histClearAll,'Apagar tudo'); },4000); return; } H=[]; saveH(); clearArmed=false; setText(el.histClearAll,'Apagar tudo'); renderHistory(); toast('Histórico apagado'); });
+el.histClearAll.addEventListener('click',()=>{ if(!clearArmed){ clearArmed=true; setText(el.histClearAll,t('confirm_delete_all')); setTimeout(()=>{ clearArmed=false; setText(el.histClearAll,t('delete_all')); },4000); return; } H=[]; saveH(); clearArmed=false; setText(el.histClearAll,t('delete_all')); renderHistory(); toast(t('t_hist_deleted')); });
 
 el.btnSettings.addEventListener('click',openSettings);
 $('setClose').addEventListener('click',closeSettings);
 el.settings.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>adjSetting(b.dataset.set,Number(b.dataset.d))));
+el.langPt.addEventListener('click',()=>setLang('pt'));
+el.langEn.addEventListener('click',()=>setLang('en'));
 el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
-$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; save(); renderSettings(); render(); toast('Valores de origem repostos'); });
+$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; save(); renderSettings(); render(); toast(t('t_defaults')); });
 
 /* ---------- opening animation: only on a fresh open, never over a running race ---------- */
 (function splash(){
@@ -946,6 +1040,7 @@ $('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object
   setTimeout(end,5500);                               // hard cap whatever happens
 })();
 
+applyLang();
 keepAwake();
 render();
 setInterval(render,100);
