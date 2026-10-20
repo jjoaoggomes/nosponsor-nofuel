@@ -28,4 +28,4 @@ Notas
    - iOS não vibra (limitação do sistema); os sons funcionam depois do primeiro toque.
    - Para não perder o histórico no iPhone/iPad, usar sempre a app instalada no ecrã inicial, não o Safari.
 
-Build e7961c7d5b
+Build 365e13a298

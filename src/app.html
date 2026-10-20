@@ -375,7 +375,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       </div>
       <div class="digits" id="raceDigits"></div>
       <div class="bar" id="raceBar"><div class="fill" id="raceFill"></div></div>
-      <div class="sub"><span><span data-i18n="elapsed">Decorrido</span> <b id="raceElapsed">0:00</b></span><span id="raceTotal">Final 45:00</span></div>
+      <div class="sub"><span><span id="raceSubLbl">Decorrido</span> <b id="raceElapsed">0:00</b></span><span id="raceTotal">Final 45:00</span></div>
     </section>
 
     <section class="panel tank st-ok" id="tankPanel">
@@ -472,6 +472,8 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <div class="setting"><button data-set="holdMs" data-d="-200" aria-label="−0.2 s">−</button><output id="setHold">1,2 s</output><button data-set="holdMs" data-d="200" aria-label="+0.2 s">+</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_cool">Bloqueio após pit</span><span class="set-hint" data-i18n="set_cool_hint">tempo em que um novo Abasteci é ignorado</span></div>
         <div class="setting"><button data-set="cooldown" data-d="-5" aria-label="−5 s">−</button><output id="setCool">30 s</output><button data-set="cooldown" data-d="5" aria-label="+5 s">+</button></div></div>
+      <div class="set-row"><div><span class="set-name" data-i18n="set_clock">Relógio da corrida</span><span class="set-hint" data-i18n="set_clock_hint">tempo restante a contar para zero, ou tempo decorrido a contar a partir de zero</span></div>
+        <div class="seg"><button class="tool toggle" data-cmode="down" data-i18n="clock_down">Decrescente</button><button class="tool toggle" data-cmode="up" data-i18n="clock_up">Crescente</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_alerts">Avisos</span><span class="set-hint" data-i18n="set_alerts_hint">som e vibração, só vibração para pits barulhentos, ou só som (iOS não vibra)</span></div>
         <div class="seg"><button class="tool toggle" data-amode="both" data-i18n="alerts_both">Som + vibração</button><button class="tool toggle" data-amode="vib" data-i18n="alerts_vib">Só vibração</button><button class="tool toggle" data-amode="snd" data-i18n="alerts_snd">Só som</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="set_lead_pit">Antecedência do aviso de pit</span><span class="set-hint" data-i18n="set_lead_pit_hint">segundos antes do pit planeado (na qualificação, antes do limite do depósito)</span></div>
@@ -534,6 +536,7 @@ pt:{
   set_cool:'Bloqueio após pit',set_cool_hint:'tempo em que um novo Abasteci é ignorado',set_autolock:'Bloquear ecrã ao iniciar',set_autolock_hint:'durante a corrida só respondem Abasteci, Anular e Parar; desbloqueia com toque longo',
   set_ask:'Pedir o combustível que sobrou ao parar',set_ask_hint:'abre a calculadora de runtime no fim de cada manga; desligado, abres pelo botão Runtime quando quiseres',
   yes:'Sim',no:'Não',set_locked:'Os tempos das mangas só se alteram com o cronómetro parado (Nova corrida).',defaults:'Repor valores de origem',t_defaults:'Valores de origem repostos',
+  set_clock:'Relógio da corrida',set_clock_hint:'tempo restante a contar para zero, ou tempo decorrido a contar a partir de zero',clock_down:'Decrescente',clock_up:'Crescente',time_elapsed:'Tempo decorrido',remaining:'Restante',
   sun:'Sol',strat_more:(n,w,k,l)=>'Parar agora: '+n+' paragens · espera '+w+' e ficas com '+k+' (limite em '+l+')',strat_ok:(n,m)=>'Parar agora: '+n+' '+(n===1?'paragem':'paragens')+' · folga '+m+' por depósito',
   set_alerts:'Avisos',set_alerts_hint:'som e vibração, só vibração para pits barulhentos, ou só som (iOS não vibra)',alerts_both:'Som + vibração',alerts_vib:'Só vibração',alerts_snd:'Só som',
   set_lead_pit:'Antecedência do aviso de pit',set_lead_pit_hint:'segundos antes do pit planeado (na qualificação, antes do limite do depósito)',set_lead_end:'Aviso de fim',set_lead_end_hint:'segundos antes do fim da corrida ou da manga',
@@ -583,6 +586,7 @@ en:{
   set_cool:'Lock-out after pit',set_cool_hint:'time during which a new Fuelled is ignored',set_autolock:'Lock screen at start',set_autolock_hint:'during the race only Fuelled, Undo and Stop respond; unlock with a long press',
   set_ask:'Ask for fuel left when stopping',set_ask_hint:'opens the runtime calculator at the end of each heat; when off, open it with the Runtime button whenever you want',
   yes:'Yes',no:'No',set_locked:'Race lengths can only be changed with the clock stopped (New race).',defaults:'Restore defaults',t_defaults:'Defaults restored',
+  set_clock:'Race clock',set_clock_hint:'time left counting down to zero, or elapsed time counting up from zero',clock_down:'Count down',clock_up:'Count up',time_elapsed:'Elapsed time',remaining:'Left',
   sun:'Sun',strat_more:(n,w,k,l)=>'Pit now: '+n+' stops · wait '+w+' to keep it at '+k+' (limit in '+l+')',strat_ok:(n,m)=>'Pit now: '+n+' stop'+(n===1?'':'s')+' · '+m+' spare per tank',
   set_alerts:'Alerts',set_alerts_hint:'sound and vibration, vibration only for loud pits, or sound only (iOS does not vibrate)',alerts_both:'Sound + vibration',alerts_vib:'Vibration only',alerts_snd:'Sound only',
   set_lead_pit:'Pit warning lead time',set_lead_pit_hint:'seconds before the planned pit (in qualifying, before the tank limit)',set_lead_end:'End warning',set_lead_end_hint:'seconds before the end of the race or heat',
@@ -602,9 +606,9 @@ const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
 const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120],leadPit:[15,180],leadEnd:[15,180]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,countUp:false,
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
-const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','v','alertMode','leadPit','leadEnd','sun','lastRun','calib'];
+const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','v','alertMode','leadPit','leadEnd','sun','countUp','lastRun','calib'];
 
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
@@ -618,6 +622,7 @@ if(!Array.isArray(S.calib)) S.calib=[];
 ['margin','capCc','holdMs','cooldown','leadPit','leadEnd'].forEach(k=>{ if(typeof S[k]!=='number') S[k]=DEF[k]; });
 if(['both','vib','snd'].indexOf(S.alertMode)<0) S.alertMode='both';
 if(typeof S.sun!=='boolean') S.sun=false;
+if(typeof S.countUp!=='boolean') S.countUp=false;
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
 if(typeof S.askRuntime!=='boolean') S.askRuntime=false;
 if(!(S.v>=2)){ S.askRuntime=false; S.v=2; }
@@ -1012,6 +1017,7 @@ function renderSettings(){
   $('setAsk').setAttribute('aria-pressed',S.askRuntime?'true':'false'); setText($('setAsk'),S.askRuntime?t('yes'):t('no'));
   setText($('setLeadPit'),S.leadPit+' s'); setText($('setLeadEnd'),S.leadEnd+' s');
   el.settings.querySelectorAll('[data-amode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.amode===S.alertMode?'true':'false'));
+  el.settings.querySelectorAll('[data-cmode]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.cmode==='up')===S.countUp?'true':'false'));
   $('btnImport').disabled=S.phase==='running';
   const lr=lastRaceRec(); $('setChart').disabled=!lr;
   setText($('setChartHint'),t('set_chart_hint',lr?(t('mode_'+lr.mode+'_short')+' '+durLabel(lr.dur)+' · '+fmtDate(lr.when)):null));
@@ -1085,10 +1091,12 @@ function render(){
     const R=q?m.dur:m.race;
     const over=tt!=null&&r.remaining<0;
     el.racePanel.classList.toggle('over',over);
-    setText(el.raceLbl,over?t('time_up'):t('time_left'));
-    setText(el.raceState,fin?t('finished'):(over?t('last_lap'):(tt==null?(S.tankStart?t('on_grid'):t('ready')):m.name)));
-    setDigits(el.raceDigits,tt==null?clock(R):signed(r.remaining));
-    setText(el.raceElapsed,tt==null?'0:00':clock(Math.max(0,tt)));
+    const up=S.countUp;
+    setText(el.raceLbl,over?t('time_up'):(up?t('time_elapsed'):t('time_left')));
+    setText(el.raceState,fin?t('finished'):(over?t('last_lap'):(tt==null?t('ready'):m.name)));
+    setDigits(el.raceDigits,tt==null?(up?'0:00':clock(R)):(up?clock(Math.max(0,tt)):signed(r.remaining)));
+    setText($('raceSubLbl'),up?t('remaining'):t('elapsed'));
+    setText(el.raceElapsed,tt==null?(up?clock(R):'0:00'):(up?signed(r.remaining):clock(Math.max(0,tt))));
     setText(el.raceTotal,(q?t('heat'):m.name)+' '+clock(R));
     el.raceFill.style.width=(tt==null?0:Math.min(1,tt/R)*100)+'%';
     el.raceBar.querySelectorAll('.tick').forEach(x=>x.remove());
@@ -1196,11 +1204,12 @@ el.langEn.addEventListener('click',()=>setLang('en'));
 el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); renderSettings(); });
 $('setAsk').addEventListener('click',()=>{ S.askRuntime=!S.askRuntime; save(); renderSettings(); });
 el.settings.querySelectorAll('[data-amode]').forEach(b=>b.addEventListener('click',()=>{ S.alertMode=b.dataset.amode; save(); renderSettings(); if(S.alertMode!=='vib'){ audioInit(); beep('pit'); } if(S.alertMode!=='snd') vibrate([60]); }));
+el.settings.querySelectorAll('[data-cmode]').forEach(b=>b.addEventListener('click',()=>{ S.countUp=b.dataset.cmode==='up'; save(); renderSettings(); render(); }));
 $('btnExport').addEventListener('click',exportBackup);
 $('btnImport').addEventListener('click',()=>{ const f=$('importFile'); f.value=''; f.click(); });
 $('importFile').addEventListener('change',e=>importBackup(e.target.files&&e.target.files[0]));
 el.btnSun.addEventListener('click',()=>{ S.sun=!S.sun; save(); applySun(); });
-$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; S.askRuntime=DEF.askRuntime; S.alertMode=DEF.alertMode; S.leadPit=DEF.leadPit; S.leadEnd=DEF.leadEnd; save(); renderSettings(); render(); toast(t('t_defaults')); });
+$('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object.assign({},DEF.dur); S.capCc=DEF.capCc; S.holdMs=DEF.holdMs; S.cooldown=DEF.cooldown; S.autoLock=DEF.autoLock; S.askRuntime=DEF.askRuntime; S.alertMode=DEF.alertMode; S.leadPit=DEF.leadPit; S.leadEnd=DEF.leadEnd; S.countUp=DEF.countUp; save(); renderSettings(); render(); toast(t('t_defaults')); });
 
 applyLang();
 applySun();
