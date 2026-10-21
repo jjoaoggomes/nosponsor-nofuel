@@ -432,6 +432,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
           <div class="chip"><span class="lbl" data-i18n="ahead">À frente</span><span class="v" id="liveAhead">—</span><span class="hint" id="liveAheadSub"></span></div>
           <div class="chip"><span class="lbl" data-i18n="behind">Atrás</span><span class="v" id="liveBehind">—</span><span class="hint" id="liveBehindSub"></span></div>
         </div>
+        <div class="runs" id="livePace" hidden></div>
         <div class="hint" id="liveHint" hidden></div>
       </div>
     </section>
@@ -624,6 +625,10 @@ pt:{
   th_tank:'Depósito',th_start:'Início',th_dur:'Duração',th_used:'Consumo',th_rate:'Ritmo',total:'Total',grid_fill:t=>'cheio '+t+' antes da partida',ran_dry:'secou?',measured:'medido',
   src_measured:'ritmo medido no fim desta corrida (combustível que sobrou)',src_avg:n=>'ritmo da média das '+n+' calibrações guardadas',src_plan:'ritmo estimado a partir do depósito de planeamento; faz uma calibração para ter valores reais',
   chart_note:'Cada depósito parte cheio. A linha tracejada vermelha é o nível a que o plano previa parar; a cinzenta é o fim da corrida.',reserve_lbl:'limite plano',end_lbl:'fim',
+  t_heat_detected:(g,m)=>'Manga detetada: '+g+' · modo '+m,grid_of:n=>'grelha · '+n+' pilotos',pit_t:v=>'pit '+v+' s',t_pit_time:v=>'Pit: '+v+' s desde o loop',
+  pace_me:p=>'ritmo <b>'+p+'</b>',pace_wait:'ritmo: a medir (2 voltas)',pace_ahead_away:(p,d)=>p+' foge <b>'+d+'</b> s/v',pace_ahead_catch:(p,d,l)=>'apanhas '+p+' em <b>'+(l!=null?l+' v':'?')+'</b> ('+d+' s/v)',
+  pace_behind_catch:(p,d,l)=>p+' apanha-te em <b>'+(l!=null?l+' v':'?')+'</b> ('+d+' s/v)',pace_behind_away:(p,d)=>p+' perde <b>'+d+'</b> s/v',pace_same:p=>'mesmo ritmo que '+p,
+  catch_before_pit:(p,tm)=>p+' apanha-te em '+tm+', antes do pit planeado',
   rcm_hint:'cola o link ou o número do evento (myrcm.ch › Online Events › Live Timing)',connect:'Ligar',disconnect:'Desligar',rcm_status:'Estado',rcm_car:'O meu carro',rcm_car_hint:'escolhe pelo número ou nome; fica guardado para as próximas mangas',rcm_car_none:'(ainda sem pilotos nesta manga)',rcm_car_pick:'— escolher —',
   rcm_clock:'Arranque e fim',rcm_clock_hint:'com Tempo do MyRCM, Início e Parar são automáticos quando o teu carro está na manga em curso; Parar manual continua a funcionar',clock_manual:'Controlo manual',clock_rcm:'Tempo do MyRCM',
   rcm_off:'desligado',rcm_connecting:'a ligar…',rcm_waiting:'ligado · à espera de dados',rcm_noevent:'sem resposta · o evento não está ao vivo?',rcm_connected:'ligado',rcm_stale:s=>'sem atualizações há '+s+' s',rcm_reconnect:'a religar…',rcm_offline:'sem rede · a tentar',
@@ -682,6 +687,10 @@ en:{
   th_tank:'Tank',th_start:'Start',th_dur:'Length',th_used:'Used',th_rate:'Rate',total:'Total',grid_fill:t=>'filled '+t+' before the start',ran_dry:'ran dry?',measured:'measured',
   src_measured:'rate measured at the end of this race (fuel left)',src_avg:n=>'rate from the average of the '+n+' saved calibrations',src_plan:'rate estimated from the planning tank; run a calibration for real figures',
   chart_note:'Each tank starts full. The red dashed line is the level at which the plan expected to pit; the grey one is the end of the race.',reserve_lbl:'plan limit',end_lbl:'end',
+  t_heat_detected:(g,m)=>'Heat detected: '+g+' · mode '+m,grid_of:n=>'grid · '+n+' drivers',pit_t:v=>'pit '+v+' s',t_pit_time:v=>'Pit: '+v+' s from the loop',
+  pace_me:p=>'pace <b>'+p+'</b>',pace_wait:'pace: measuring (2 laps)',pace_ahead_away:(p,d)=>p+' pulls away <b>'+d+'</b> s/lap',pace_ahead_catch:(p,d,l)=>'you catch '+p+' in <b>'+(l!=null?l+' L':'?')+'</b> ('+d+' s/lap)',
+  pace_behind_catch:(p,d,l)=>p+' catches you in <b>'+(l!=null?l+' L':'?')+'</b> ('+d+' s/lap)',pace_behind_away:(p,d)=>p+' loses <b>'+d+'</b> s/lap',pace_same:p=>'same pace as '+p,
+  catch_before_pit:(p,tm)=>p+' catches you in '+tm+', before the planned pit',
   rcm_hint:'paste the event link or number (myrcm.ch › Online Events › Live Timing)',connect:'Connect',disconnect:'Disconnect',rcm_status:'Status',rcm_car:'My car',rcm_car_hint:'pick by number or name; remembered for the next heats',rcm_car_none:'(no drivers in this heat yet)',rcm_car_pick:'— choose —',
   rcm_clock:'Start and finish',rcm_clock_hint:'with MyRCM time, Start and Stop are automatic when your car is in the running heat; manual Stop still works',clock_manual:'Manual control',clock_rcm:'MyRCM time',
   rcm_off:'off',rcm_connecting:'connecting…',rcm_waiting:'connected · waiting for data',rcm_noevent:'no response · is the event live?',rcm_connected:'connected',rcm_stale:s=>'no update for '+s+' s',rcm_reconnect:'reconnecting…',rcm_offline:'no network · retrying',
@@ -860,9 +869,11 @@ function doPit(n){
   if(S.phase!=='running'||!S.raceStart||!S.tankStart) return;   // in semi/final the tank starts with INÍCIO
   if(inCooldown(n)){ rejectPit(n); return; }
   const te=(n-S.tankStart)/1000;
-  S.pits.push({at:(n-S.raceStart)/1000,run:te});
+  let pitT=null;
+  if(RCM.me&&RCM.state==='connected'&&RCM.elapsed!=null&&n-RCM.at<20000){ const off=RCM.elapsed+0.5+(n-RCM.at)/1000; const pass=hms(RCM.me.ABSOLUTTIME); if(pass!=null){ const d=off-pass; if(d>=0&&d<=120) pitT=Math.round(d*10)/10; } }
+  S.pits.push({at:(n-S.raceStart)/1000,run:te,pitT:pitT});
   S.undo={until:n+UNDO_WIN*1000,prev:S.tankStart};
-  S.tankStart=n; S.fired={}; beep('pit'); vibrate([60]); save(); render();
+  S.tankStart=n; S.fired={}; beep('pit'); vibrate([60]); if(pitT!=null) toast(t('t_pit_time',num(pitT,1))); save(); render();
 }
 function doUndo(){
   if(!S.undo||Date.now()>S.undo.until) return;
@@ -882,7 +893,7 @@ function doStop(at){
   S.phase='finished'; S.stopAt=(typeof at==='number'&&at>0)?Math.min(at,Date.now()):Date.now(); S.undo=null; S.locked=false;
   S.lastRun=S.tankStart?Math.round((S.stopAt-S.tankStart)/1000):0;
   const rec={id:S.stopAt,when:S.stopAt,mode:m.key,dur:m.dur,tankSec:S.tankSec,
-    pits:S.pits.map(p=>({at:Math.round(p.at),run:Math.round(p.run)})),
+    pits:S.pits.map(p=>({at:Math.round(p.at),run:Math.round(p.run),pitT:p.pitT!=null?p.pitT:undefined})),
     elapsed:S.raceStart?Math.round((S.stopAt-S.raceStart)/1000):null,lastRun:S.lastRun,calib:null,
     rcm:RCM.me?{key:S.rcm.key,group:rcmGroupName(),pos:RCM.me.INDEX,n:RCM.rows.length,laps:RCM.me.LAPS,total:RCM.me.ABSOLUTTIME,best:RCM.me.BESTTIME,pilot:RCM.me.PILOT}:null};
   H.unshift(rec); if(H.length>HIST_MAX) H.length=HIST_MAX; saveH(); S.lastHist=rec.id;
@@ -977,7 +988,7 @@ function recShort(rec){ return t('mode_'+(MODE_META[rec.mode]?rec.mode:'f')+'_sh
 function recSummary(rec){
   const Ls=[]; Ls.push('NOSPONSOR NOFUEL · '+recName(rec)+' '+clock(rec.dur)+' · '+fmtDate(rec.when));
   Ls.push(t('sum_tank',clock(rec.tankSec))+(rec.mode==='q'?'':' · '+t('pits_n',rec.pits.length)));
-  if(rec.pits.length) Ls.push(rec.pits.map((p,i)=>t('sum_pit',i+1,clock(p.at),clock(p.run))).join(' · '));
+  if(rec.pits.length) Ls.push(rec.pits.map((p,i)=>t('sum_pit',i+1,clock(p.at),clock(p.run))+(p.pitT!=null?' · '+t('pit_t',num(p.pitT,1)):'')).join(' · '));
   Ls.push(t('sum_last',clock(rec.lastRun),rec.elapsed!=null?clock(rec.elapsed):null));
   if(rec.rcm) Ls.push(t('sum_rcm',rec.rcm.group,rec.rcm.pos,rec.rcm.n,rec.rcm.laps));
   if(rec.calib) Ls.push(t('sum_calib',clock(rec.calib.runtime),rec.calib.left,clock(rec.calib.run)));
@@ -992,7 +1003,7 @@ function renderHistory(){
     let h='<li><button class="row" data-open="'+rec.id+'"><span class="m">'+esc(recShort(rec))+' '+durLabel(rec.dur)+'</span><span class="d">'+esc(fmtDate(rec.when))+(rec.calib?esc(t('runtime_short',clock(rec.calib.runtime))):'')+'</span><span class="s">'+esc(stat)+'</span></button>';
     if(open){
       h+='<div class="detail"><div class="pits">';
-      rec.pits.forEach((p,i)=>{ h+='<div class="pit done"><span class="n">'+esc(t('pit_n',i+1))+'</span><span class="t">'+clock(p.at)+'</span><span class="r">'+esc(t('tank_abbr',clock(p.run)))+'</span></div>'; });
+      rec.pits.forEach((p,i)=>{ h+='<div class="pit done"><span class="n">'+esc(t('pit_n',i+1))+'</span><span class="t">'+clock(p.at)+'</span><span class="r">'+esc(t('tank_abbr',clock(p.run))+(p.pitT!=null?' · '+t('pit_t',num(p.pitT,1)):''))+'</span></div>'; });
       h+='<div class="pit fim"><span class="n">'+esc(t('end'))+'</span><span class="t">'+(rec.elapsed!=null?clock(rec.elapsed):'—')+'</span><span class="r">'+esc(t('tank_abbr',clock(rec.lastRun)))+'</span></div></div>';
       h+='<div class="hint">'+esc(t('planning_tank',clock(rec.tankSec))+(rec.calib?t('measured_runtime',clock(rec.calib.runtime),rec.calib.left):t('no_fuel_measure')))+'</div>';
       h+='<div class="acts"><button class="tool" data-copy="'+rec.id+'">'+esc(t('copy_summary'))+'</button>';
@@ -1074,7 +1085,7 @@ function openChart(rec){
 function closeChart(){ $('chartSheet').hidden=true; }
 
 /* ---------- MyRCM live timing (wss://www.myrcm.ch/websocket, undocumented) ---------- */
-const RCM={ws:null,state:'off',at:0,openAt:0,retry:0,timer:null,last:null,meta:null,rows:[],me:null,ahead:null,behind:null,dur:null,elapsed:null,remaining:null,started:false,over:false,countdown:null};
+const RCM={ws:null,state:'off',at:0,openAt:0,retry:0,timer:null,last:null,meta:null,rows:[],me:null,ahead:null,behind:null,dur:null,elapsed:null,remaining:null,started:false,over:false,countdown:null,groupKey:null,lapHist:{},pace:null};
 function rcmKeyFrom(str){ const v=String(str||'').trim(); const m=/live\/(\d+)/.exec(v)||/(\d{3,})/.exec(v); return m?m[1]:''; }
 function hms(str){ if(str==null||str==='') return null; const p=String(str).trim().split(':'); if(p.some(x=>x===''||isNaN(Number(x)))) return null; let v=0; for(const x of p) v=v*60+Number(x); return v; }
 function rcmGroupName(){ const g=String((RCM.meta&&RCM.meta.GROUP)||''); const m=/\[\s*(.*?)\s*\]/.exec(g); return (m?m[1]:g).replace(/\s+/g,' ').trim(); }
@@ -1091,7 +1102,7 @@ function rcmConnect(){
   ws.onclose=()=>{ if(RCM.ws===ws){ RCM.ws=null; if(RCM.state!=='off'){ RCM.state=navigator.onLine===false?'offline':'closed'; rcmSchedule(); } } };
 }
 function rcmSchedule(){ clearTimeout(RCM.timer); if(!S.rcm.key) return; const d=Math.min(30000,3000*Math.pow(2,Math.min(RCM.retry++,4))); RCM.timer=setTimeout(rcmConnect,d); }
-function rcmReset(){ clearTimeout(RCM.timer); RCM.retry=0; if(RCM.ws){ const w=RCM.ws; RCM.ws=null; try{ w.close(); }catch(e){} } RCM.state='off'; RCM.last=null; RCM.meta=null; RCM.rows=[]; RCM.me=RCM.ahead=RCM.behind=null; RCM.dur=RCM.elapsed=RCM.remaining=null; RCM.started=RCM.over=false; RCM.countdown=null; }
+function rcmReset(){ clearTimeout(RCM.timer); RCM.retry=0; if(RCM.ws){ const w=RCM.ws; RCM.ws=null; try{ w.close(); }catch(e){} } RCM.state='off'; RCM.last=null; RCM.meta=null; RCM.rows=[]; RCM.me=RCM.ahead=RCM.behind=null; RCM.dur=RCM.elapsed=RCM.remaining=null; RCM.started=RCM.over=false; RCM.countdown=null; RCM.groupKey=null; RCM.lapHist={}; RCM.pace=null; }
 function rcmSet(str){ const k=rcmKeyFrom(str); if(!k){ toast(t('t_rcm_bad')); return; } rcmReset(); S.rcm.key=k; save(); toast(t('t_rcm_set',k)); rcmConnect(); renderSettings(); render(); }
 function rcmForget(){ rcmReset(); S.rcm.key=''; save(); toast(t('t_rcm_forget')); renderSettings(); render(); }
 function rcmFindMe(){
@@ -1103,23 +1114,58 @@ function rcmApply(E){
   if(Array.isArray(E.DATA)) RCM.rows=E.DATA;
   const md=RCM.meta; RCM.dur=hms(md.RACETIME); RCM.elapsed=hms(md.CURRENTTIME); RCM.remaining=hms(md.REMAININGTIME); RCM.countdown=hms(md.COUNTDOWN_SHORT||md.COUNTDOWN);
   const rs=String(md.RACESTATE||''); RCM.started=/Started|Running/i.test(rs); RCM.over=/Over|Finish|Stop|End/i.test(rs);
+  const newGroup=RCM.groupKey!==md.GROUPKEY; if(newGroup){ RCM.groupKey=md.GROUPKEY; RCM.lapHist={}; }
+  rcmLapHistory();
   RCM.me=rcmFindMe();
+  if(newGroup) rcmNewHeat();
   RCM.ahead=RCM.me?RCM.rows.find(r=>r.INDEX===RCM.me.INDEX-1)||null:null;
   RCM.behind=RCM.me?RCM.rows.find(r=>r.INDEX===RCM.me.INDEX+1)||null:null;
+  RCM.pace=rcmPace();
   rcmClock();
   if(!el.settings.hidden) renderSettings();
+}
+// Lap-time history per car (last 6 laps), fed by LAPS increments
+function rcmLapHistory(){
+  RCM.rows.forEach(r=>{ const k=String(r.TRANSPONDER||r.PILOT||r.INDEX); const h=RCM.lapHist[k]||(RCM.lapHist[k]={laps:-1,times:[]}); const L=Number(r.LAPS)||0;
+    if(h.laps>=0&&L>h.laps){ const lt=hms(r.LAPTIME); if(lt!=null&&lt>0){ h.times.push(lt); if(h.times.length>6) h.times.shift(); } } h.laps=L; });
+}
+// Recent pace of a car: mean of its last 3 clean laps (laps > 1.35× its best recent lap are pit/crash laps and are ignored)
+function paceOf(r){ if(!r) return null; const h=RCM.lapHist[String(r.TRANSPONDER||r.PILOT||r.INDEX)]; if(!h||h.times.length<2) return null; const mn=Math.min.apply(null,h.times); const ok=h.times.filter(x=>x<=mn*1.35).slice(-3); if(ok.length<2) return null; return ok.reduce((a,b)=>a+b,0)/ok.length; }
+function gapSec(v){ const sv=String(v==null?'':v).trim(); if(sv.indexOf('.')<0) return null; const x=Math.abs(parseFloat(sv)); return isNaN(x)?null:x; }
+function rcmPace(){
+  const me=RCM.me; if(!me) return null; const mp=paceOf(me); if(!mp) return {me:null};
+  const out={me:mp,ahead:null,behind:null};
+  if(RCM.ahead){ const ap=paceOf(RCM.ahead); if(ap){ const d=mp-ap; const gap=gapSec(me.DELAYTIMEPREVIOUS); out.ahead={p:'P'+RCM.ahead.INDEX,delta:d,gap:gap,laps:(d<-0.005&&gap!=null)?Math.ceil(gap/(-d)):null}; } }
+  if(RCM.behind){ const bp=paceOf(RCM.behind); if(bp){ const d=mp-bp; const gap=gapSec(RCM.behind.DELAYTIMEPREVIOUS); out.behind={p:'P'+RCM.behind.INDEX,delta:d,gap:gap,laps:(d>0.005&&gap!=null)?Math.ceil(gap/d):null,sec:(d>0.005&&gap!=null)?Math.ceil(gap/d)*mp:null}; } }
+  return out;
+}
+// A new heat with my car in it: pick the mode from its name (or length) and get ready, unless a race is running here
+function rcmModeFor(name,dur){
+  const v=String(name||'').toLowerCase();
+  if(/semi|sub[- ]?final|halbfinal|demi|1\/2|1\/4|quarter|viertel|1\/8[- ]?fin|1\/16/.test(v)) return 'sf';
+  if(/final|main/.test(v)) return 'f';
+  if(/quali|heat|manga|practice|training|controlled|warm|free/.test(v)) return 'q';   // "Lauf"/"Run" mean any session: decide by length
+  if(dur>0&&dur<4*3600){ if(dur<=600) return 'q'; return Math.abs(dur-S.dur.sf)<=Math.abs(dur-S.dur.f)?'sf':'f'; }
+  return null;
+}
+function rcmNewHeat(){
+  if(!RCM.me||RCM.over||S.phase==='running') return;
+  if(S.phase==='finished'){ if(!el.calc.hidden) return; doReset(); }
+  const k=rcmModeFor(rcmGroupName()+' '+String(RCM.meta.SECTION||''),RCM.dur);
+  if(k&&k!==S.mode&&canChangeMode()){ S.mode=k; S.fired={}; save(); }
+  toast(t('t_heat_detected',rcmGroupName(),t('mode_'+S.mode+'_short'))); beep('pit'); vibrate([60,40,60]); render();
 }
 // Drive the app clock from the official one: only when the user chose it and their car is in the running heat.
 function rcmClock(){
   if(S.rcm.clock!=='rcm'||!RCM.me||RCM.elapsed==null) return;
-  const m=M(); const n=Date.now(); const startAt=n-RCM.elapsed*1000;
+  const m=M(); const n=Date.now(); const startAt=n-(RCM.elapsed+0.5)*1000;
   if(RCM.started&&!RCM.over){
     if(S.phase==='idle'){
       S.raceStart=startAt; S.tankStart=startAt; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true;
       audioInit(); beep('start'); vibrate([120]); toast(t('t_rcm_start')); save(); render(); return;
     }
     if(S.phase==='running'&&!S.raceStart){ S.raceStart=startAt; S.fired={}; beep('start'); toast(t('t_rcm_start')); save(); render(); return; }
-    if(S.phase==='running'&&S.raceStart&&Math.abs(S.raceStart-startAt)>1500){ const d=startAt-S.raceStart; S.raceStart=startAt; if(S.tankStart&&S.pits.length===0) S.tankStart+=d; save(); }
+    if(S.phase==='running'&&S.raceStart&&Math.abs(S.raceStart-startAt)>1200){ const d=startAt-S.raceStart; S.raceStart=startAt; if(S.tankStart&&S.pits.length===0) S.tankStart+=d; save(); }
   }
   if(RCM.over&&S.phase==='running'&&S.raceStart){
     const at=Math.min(n,S.raceStart+(RCM.dur||m.dur)*1000);
@@ -1150,7 +1196,17 @@ function renderLive(q,tt){
   else if(RCM.rows.length&&!me){ hint.hidden=false; setText(hint,t('rcm_not_in_heat')); }
   else hint.hidden=true;
   if(me){
-    setText($('livePos'),'P'+me.INDEX); setText($('livePosSub'),t('of_n',RCM.rows.length,Number(me.POSITIONIMPROVEMENT)||0));
+    if(ok&&!RCM.started&&!RCM.over&&Number(me.VEHICLE)>0){ setText($('livePos'),'P'+me.VEHICLE); setText($('livePosSub'),t('grid_of',RCM.rows.length)); }
+    else { setText($('livePos'),'P'+me.INDEX); setText($('livePosSub'),t('of_n',RCM.rows.length,Number(me.POSITIONIMPROVEMENT)||0)); }
+    const pc=RCM.pace, pl=$('livePace');
+    if(RCM.started&&!RCM.over&&pc){
+      let parts=[];
+      if(!pc.me) parts.push(esc(t('pace_wait')));
+      else { parts.push(t('pace_me',num(pc.me,2)));
+        if(pc.ahead){ const a=pc.ahead; if(a.delta>0.005) parts.push(t('pace_ahead_away',a.p,num(a.delta,2))); else if(a.delta<-0.005) parts.push(t('pace_ahead_catch',a.p,num(-a.delta,2),a.laps)); else parts.push(esc(t('pace_same',a.p))); }
+        if(pc.behind){ const b=pc.behind; if(b.delta>0.005) parts.push(t('pace_behind_catch',b.p,num(b.delta,2),b.laps)); else if(b.delta<-0.005) parts.push(t('pace_behind_away',b.p,num(-b.delta,2))); else parts.push(esc(t('pace_same',b.p))); } }
+      pl.hidden=false; const ph=parts.join(' · '); if(pl.innerHTML!==ph) pl.innerHTML=ph;
+    } else pl.hidden=true;
     setText($('liveLaps'),String(me.LAPS)); setText($('liveLapsSub'),t('last_best',me.LAPTIME||'—',me.BESTTIME||'—'));
     if(RCM.ahead){ setText($('liveAhead'),gapFmt(me.DELAYTIMEPREVIOUS)); setText($('liveAheadSub'),'P'+RCM.ahead.INDEX+' '+(RCM.ahead.PILOT||'')); } else { setText($('liveAhead'),t('leader')); setText($('liveAheadSub'),''); }
     if(RCM.behind){ setText($('liveBehind'),gapFmt(RCM.behind.DELAYTIMEPREVIOUS)); setText($('liveBehindSub'),'P'+RCM.behind.INDEX+' '+(RCM.behind.PILOT||'')); } else { setText($('liveBehind'),t('nobody_behind')); setText($('liveBehindSub'),''); }
@@ -1290,7 +1346,8 @@ function render(){
     el.stratHint.innerHTML=r.win.saves
       ?esc(t('strat_more',r.win.stopsIfNow,'\u200b'+clock(r.win.waitNeeded),r.stopsLeft,clock(Math.max(0,r.limitIn)))).replace('\u200b'+clock(r.win.waitNeeded),'<b>'+clock(r.win.waitNeeded)+'</b>')
       :esc(t('strat_ok',r.win.stopsIfNow,'\u200b'+clock(r.win.marginNow))).replace('\u200b'+clock(r.win.marginNow),'<b>'+clock(r.win.marginNow)+'</b>');
-    if(RCM.me&&RCM.behind&&RCM.state==='connected') el.stratHint.innerHTML+=' · '+esc(t('behind_at',RCM.behind.PILOT||('P'+RCM.behind.INDEX),gapFmt(RCM.behind.DELAYTIMEPREVIOUS)));
+    if(RCM.me&&RCM.behind&&RCM.state==='connected'){ el.stratHint.innerHTML+=' · '+esc(t('behind_at',RCM.behind.PILOT||('P'+RCM.behind.INDEX),gapFmt(RCM.behind.DELAYTIMEPREVIOUS)));
+      const pb=RCM.pace&&RCM.pace.behind; if(pb&&pb.sec!=null&&r.nextIn>0&&pb.sec<r.nextIn) el.stratHint.innerHTML+=' · <b>'+esc(t('catch_before_pit',pb.p,clock(pb.sec)))+'</b>'; }
   } else el.stratHint.hidden=true;
 
   el.chipNext.classList.remove('crit');
@@ -1335,7 +1392,7 @@ function render(){
   }
   if(!q){
     const R=m.race; let html='';
-    S.pits.forEach((p,i)=>{ html+='<li class="pit done"><span class="n">'+esc(t('pit_n',i+1))+'</span><span class="t">'+clock(p.at)+'</span><span class="r">'+esc(t('tank_abbr',clock(p.run)))+'</span></li>'; });
+    S.pits.forEach((p,i)=>{ html+='<li class="pit done"><span class="n">'+esc(t('pit_n',i+1))+'</span><span class="t">'+clock(p.at)+'</span><span class="r">'+esc(t('tank_abbr',clock(p.run))+(p.pitT!=null?' · '+t('pit_t',num(p.pitT,1)):''))+'</span></li>'; });
     if(te==null){ const stops=Math.max(0,Math.ceil(R/S.tankSec)-1); const stint=R/(stops+1); for(let i=1;i<=stops;i++) html+='<li class="pit"><span class="n">'+esc(t('pit_n',i))+'</span><span class="t">≈'+clock(i*stint)+'</span><span class="r">'+esc(t('plan'))+'</span></li>'; setText(el.planMeta,t('plan_meta_idle',stops,clock(stint))); }
     else if(tt==null){ setText(el.planMeta,t('plan_meta_grid')); }
     else { (r.schedule||[]).forEach((p,i)=>{ html+='<li class="pit'+(i===0?' next':'')+'"><span class="n">'+esc(t('pit_n',S.pits.length+i+1))+'</span><span class="t">≈'+clock(Math.max(0,p))+'</span><span class="r">'+esc(i===0?t('next'):t('plan'))+'</span></li>'; });
