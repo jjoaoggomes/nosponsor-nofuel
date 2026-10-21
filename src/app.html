@@ -1091,7 +1091,7 @@ function hms(str){ if(str==null||str==='') return null; const p=String(str).trim
 function rcmGroupName(){ const g=String((RCM.meta&&RCM.meta.GROUP)||''); const m=/\[\s*(.*?)\s*\]/.exec(g); return (m?m[1]:g).replace(/\s+/g,' ').trim(); }
 function gapFmt(v){ if(v==null||v==='') return '—'; const sv=String(v).trim(); if(sv.indexOf('.')>=0){ const x=Math.abs(parseFloat(sv)); return isNaN(x)?sv:t('gap_s',num(x,1)); } const l=Math.abs(parseInt(sv,10)); return isNaN(l)?sv:t('gap_laps',l); }
 function rcmConnect(){
-  if(!S.rcm.key||document.visibilityState!=='visible') return;
+  if(!S.rcm.key) return;   // not gated on visibility: some shells report "hidden" at launch and would never connect
   if(RCM.ws&&(RCM.ws.readyState===0||RCM.ws.readyState===1)) return;
   clearTimeout(RCM.timer);
   let ws; try{ ws=new WebSocket('wss://www.myrcm.ch/websocket'); }catch(e){ RCM.state='error'; rcmSchedule(); return; }
