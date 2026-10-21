@@ -94,11 +94,46 @@ button:disabled{cursor:default}
 .tool.icon[aria-pressed="true"] .ico-sun{display:none}
 .tool.icon[aria-pressed="true"] .ico-moon{display:block}
 #chartSheet{z-index:35}
+
+/* ---------- live standings screen (MyRCM only) ---------- */
+.board{position:fixed; inset:0; z-index:32; background:var(--bg); color:var(--fg); display:flex; flex-direction:column; gap:8px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(8px + env(safe-area-inset-top,0px)); padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+.board-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.board-top .grp{font-family:var(--font-display); font-weight:700; font-size:clamp(18px,3vw,28px); letter-spacing:.04em; text-transform:uppercase; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.board-top .clk{font-family:var(--font-display); font-weight:600; font-size:clamp(22px,4vw,40px); font-variant-numeric:tabular-nums; margin-left:auto; white-space:nowrap}
+.board-top .clk small{font-family:var(--font-body); font-weight:500; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-right:8px}
+.board-wrap{flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line); border-radius:14px; background:var(--panel)}
+.board table{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.board th,.board td{padding:9px 10px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; font-size:clamp(14px,1.9vw,20px)}
+.board th{position:sticky; top:0; background:var(--panel); font-family:var(--font-display); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:12px; color:var(--muted); z-index:1}
+.board th.l,.board td.l{text-align:left}
+.board td.p{font-family:var(--font-display); font-weight:700; font-size:clamp(20px,2.6vw,30px); width:1%}
+.board td.name{font-weight:600; max-width:34vw; overflow:hidden; text-overflow:ellipsis}
+.board td.name small{display:block; font-weight:400; font-size:12px; color:var(--muted)}
+.board tr.me td{background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.board tr.me td.p{color:var(--accent)}
+.board td.best{color:var(--ok)}
+.board td.trend{width:1%; font-family:var(--font-display); font-weight:700}
+.board td.trend.up{color:var(--ok)} .board td.trend.down{color:var(--crit)}
+.board .empty{padding:30px; text-align:center; color:var(--muted)}
+.board-foot{display:flex; gap:12px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:13px}
+.board-foot .dot{margin-right:2px}
+#btnBoard{display:none}
+#app.rcm-on #btnBoard{display:inline-flex; align-items:center; gap:6px}
+#app.rcm-on #btnBoard .dot{width:8px; height:8px}
+@media (max-width:600px){
+  .board{padding-top:calc(6px + env(safe-area-inset-top,0px))}
+  .board th,.board td{padding:7px 6px; font-size:13px}
+  .board td.p{font-size:18px}
+  .board td.name{max-width:38vw}
+  .board .hide-sm{display:none}
+}
 #btnLock{position:relative; overflow:hidden; touch-action:none; min-width:150px}
 #btnLock::after{content:""; position:absolute; inset:0; background:var(--accent); opacity:.45; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
 #btnLock>*{position:relative}
 #app.locked #btnLock{background:var(--warn); color:var(--warn-fg); border-color:var(--warn)}
-#app.locked .modes,#app.locked .tools{opacity:.3; pointer-events:none}
+#app.locked .modes,#app.locked .tools>*:not(#btnBoard){opacity:.3; pointer-events:none}
 
 .lbl{font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
 
@@ -303,6 +338,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   .tool.icon{width:42px; height:42px; order:1}
   #app.compact .modes,#app.compact .tools{display:none}
   #app.compact .hdr-info{display:block; width:100%; order:5}
+  #app.compact.rcm-on .tools{display:flex} #app.compact.rcm-on .tools>*:not(#btnBoard){display:none}
   .panel{padding:10px 14px; gap:6px; border-radius:12px}
   .panel-head .state{font-size:clamp(15px,4.5cqw,22px)}
   .lbl{font-size:11px; letter-spacing:.1em}
@@ -331,6 +367,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   #app{gap:6px; padding-block:4px}
   #app.compact .modes,#app.compact .tools{display:none}
   #app.compact .hdr-info{display:block}
+  #app.compact.rcm-on .tools{display:flex} #app.compact.rcm-on .tools>*:not(#btnBoard){display:none}
   .panel{padding:6px 14px; gap:3px}
   .tank .digits{font-size:clamp(40px,16cqw,96px); margin-block:0}
   .race .digits{font-size:clamp(32px,12cqw,72px); margin-block:0}
@@ -368,6 +405,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <button class="tool" id="btnHistory" data-i18n="history">Histórico</button>
       <button class="tool" id="btnSound" aria-pressed="true">Som</button>
       <button class="tool" id="btnSettings" aria-label="Settings">⚙</button>
+      <button class="tool" id="btnBoard"><span class="dot" id="boardDot"></span><span data-i18n="board">Live</span></button>
     </div>
     <button class="tool icon" id="btnSun" aria-pressed="false" aria-label="Light / dark">
       <svg class="ico-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
@@ -462,6 +500,17 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
     <ul class="hist" id="histList"></ul>
     <div class="set-foot"><span class="hint" data-i18n="history_hint">Cada corrida fica guardada neste aparelho ao manteres PARAR. Toca numa linha para ver os pits.</span><button class="tool" id="histClearAll" data-i18n="delete_all">Apagar tudo</button></div>
   </div>
+</div>
+
+<div class="board" id="board" hidden>
+  <div class="board-top">
+    <button class="tool" id="boardClose" data-i18n="close">Fechar</button>
+    <span class="dot" id="boardDot2"></span>
+    <span class="grp" id="boardGroup"></span>
+    <span class="clk" id="boardClock"></span>
+  </div>
+  <div class="board-wrap"><table id="boardTable"></table></div>
+  <div class="board-foot"><span id="boardState"></span><span id="boardMeta"></span></div>
 </div>
 
 <div class="sheet" id="chartSheet" hidden>
@@ -579,6 +628,7 @@ pt:{
   rcm_clock:'Arranque e fim',rcm_clock_hint:'com Tempo do MyRCM, Início e Parar são automáticos quando o teu carro está na manga em curso; Parar manual continua a funcionar',clock_manual:'Controlo manual',clock_rcm:'Tempo do MyRCM',
   rcm_off:'desligado',rcm_connecting:'a ligar…',rcm_waiting:'ligado · à espera de dados',rcm_noevent:'sem resposta · o evento não está ao vivo?',rcm_connected:'ligado',rcm_stale:s=>'sem atualizações há '+s+' s',rcm_reconnect:'a religar…',rcm_offline:'sem rede · a tentar',
   rcm_countdown:x=>'arranque em '+x,rcm_over:'corrida terminada',rcm_pick_car:'escolhe o teu carro em ⚙ para veres a posição e o arranque automático',rcm_not_in_heat:'o teu carro não está nesta manga',rcm_waiting_start:'à espera do arranque oficial',
+  board:'Live',board_empty:'À espera de dados do MyRCM…',board_drivers:n=>n+' pilotos',board_update:s=>'atualizado há '+s+' s',th_pos:'P',th_no:'Nº',th_driver:'Piloto',th_laps:'V',th_last:'Última',th_best:'Melhor',th_total:'Total',th_gap1:'Dif. 1º',th_gapp:'Dif. ant.',th_avg:'Média',th_pits:'Pits',
   position:'Posição',laps:'Voltas',ahead:'À frente',behind:'Atrás',leader:'líder',nobody_behind:'ninguém',of_n:(n,i)=>'de '+n+(i?' · '+(i>0?'+':'')+i:''),last_best:(l,b)=>'última '+l+' · melhor '+b,gap_laps:v=>v+' v',gap_s:v=>v+' s',behind_at:(nm,g)=>nm+' a '+g,
   t_rcm_start:'Arranque pelo MyRCM',t_rcm_stop:'Fim de corrida pelo MyRCM',t_rcm_bad:'Não encontrei o número do evento nesse texto',t_rcm_set:k=>'Evento '+k+' · a ligar ao MyRCM',t_rcm_forget:'MyRCM desligado',
   hist_rcm:(p,l)=>'P'+p+' · '+l+' v',sum_rcm:(g,p,nn,l)=>'MyRCM '+g+' · P'+p+' de '+nn+' · '+l+' voltas',
@@ -636,6 +686,7 @@ en:{
   rcm_clock:'Start and finish',rcm_clock_hint:'with MyRCM time, Start and Stop are automatic when your car is in the running heat; manual Stop still works',clock_manual:'Manual control',clock_rcm:'MyRCM time',
   rcm_off:'off',rcm_connecting:'connecting…',rcm_waiting:'connected · waiting for data',rcm_noevent:'no response · is the event live?',rcm_connected:'connected',rcm_stale:s=>'no update for '+s+' s',rcm_reconnect:'reconnecting…',rcm_offline:'no network · retrying',
   rcm_countdown:x=>'start in '+x,rcm_over:'race over',rcm_pick_car:'pick your car in ⚙ to see your position and get the automatic start',rcm_not_in_heat:'your car is not in this heat',rcm_waiting_start:'waiting for the official start',
+  board:'Live',board_empty:'Waiting for MyRCM data…',board_drivers:n=>n+' drivers',board_update:s=>'updated '+s+' s ago',th_pos:'P',th_no:'No.',th_driver:'Driver',th_laps:'L',th_last:'Last',th_best:'Best',th_total:'Total',th_gap1:'Gap 1st',th_gapp:'Gap prev.',th_avg:'Avg',th_pits:'Pits',
   position:'Position',laps:'Laps',ahead:'Ahead',behind:'Behind',leader:'leader',nobody_behind:'nobody',of_n:(n,i)=>'of '+n+(i?' · '+(i>0?'+':'')+i:''),last_best:(l,b)=>'last '+l+' · best '+b,gap_laps:v=>v+' L',gap_s:v=>v+' s',behind_at:(nm,g)=>nm+' at '+g,
   t_rcm_start:'Started by MyRCM',t_rcm_stop:'Race ended by MyRCM',t_rcm_bad:'No event number found in that text',t_rcm_set:k=>'Event '+k+' · connecting to MyRCM',t_rcm_forget:'MyRCM disconnected',
   hist_rcm:(p,l)=>'P'+p+' · '+l+' L',sum_rcm:(g,p,nn,l)=>'MyRCM '+g+' · P'+p+' of '+nn+' · '+l+' laps',
@@ -1107,6 +1158,32 @@ function renderLive(q,tt){
     ['livePos','liveLaps','liveAhead','liveBehind'].forEach(id=>setText($(id),'—')); ['livePosSub','liveLapsSub','liveAheadSub','liveBehindSub'].forEach(id=>setText($(id),''));
   }
 }
+let boardOpen=false, boardSig='';
+function openBoard(){ if(!S.rcm.key) return; boardOpen=true; boardSig=''; $('board').hidden=false; renderBoard(true); }
+function closeBoard(){ boardOpen=false; $('board').hidden=true; }
+function renderBoard(force){
+  if(!boardOpen) return;
+  const n=Date.now(); const ok=RCM.state==='connected'&&n-RCM.at<=20000;
+  $('boardDot2').className='dot '+(ok?'on':(RCM.state==='connected'||RCM.state==='waiting')?'warn':'err');
+  setText($('boardGroup'),RCM.meta?rcmGroupName():'#'+S.rcm.key);
+  const md=RCM.meta||{};
+  let clk='';
+  if(RCM.meta){ if(RCM.over) clk='<small>'+esc(t('rcm_over'))+'</small>'+esc(md.RACETIME_SHORT||''); else if(!RCM.started&&RCM.countdown>0) clk='<small>'+esc(t('rcm_countdown',''))+'</small>'+clock(RCM.countdown); else if(RCM.remaining!=null) clk='<small>'+esc(t('remaining'))+'</small>'+clock(RCM.remaining); }
+  if($('boardClock').innerHTML!==clk) $('boardClock').innerHTML=clk;
+  let stt=rcmStateText(); if(ok&&!RCM.over&&!RCM.started) stt=t('rcm_waiting_start');
+  setText($('boardState'),stt);
+  setText($('boardMeta'),RCM.rows.length?(t('board_drivers',RCM.rows.length)+(ok?' · '+t('board_update',Math.round((n-RCM.at)/1000)):'')):'');
+  const sig=RCM.at+':'+RCM.rows.length+':'+(RCM.me?RCM.me.INDEX:'-'); if(!force&&sig===boardSig) return; boardSig=sig;
+  if(!RCM.rows.length){ $('boardTable').innerHTML='<tr><td class="empty">'+esc(t('board_empty'))+'</td></tr>'; return; }
+  const pitCols=RCM.rows.some(r=>Number(r.PITSTOPS)>0);
+  let h='<tr><th>'+esc(t('th_pos'))+'</th><th class="hide-sm">'+esc(t('th_no'))+'</th><th class="l">'+esc(t('th_driver'))+'</th><th></th><th>'+esc(t('th_laps'))+'</th><th>'+esc(t('th_last'))+'</th><th>'+esc(t('th_best'))+'</th><th class="hide-sm">'+esc(t('th_total'))+'</th><th>'+esc(t('th_gap1'))+'</th><th>'+esc(t('th_gapp'))+'</th><th class="hide-sm">'+esc(t('th_avg'))+'</th>'+(pitCols?'<th>'+esc(t('th_pits'))+'</th>':'')+'</tr>';
+  RCM.rows.forEach(r=>{
+    const me=RCM.me&&r===RCM.me; const tr=Number(r.TREND)||0; const imp=Number(r.POSITIONIMPROVEMENT)||0;
+    const trend=tr>0?'▲':tr<0?'▼':''; const trc=tr>0?'up':tr<0?'down':'';
+    h+='<tr'+(me?' class="me"':'')+'><td class="p">'+r.INDEX+'</td><td class="hide-sm">'+esc(r.PILOTNUMBER||'')+'</td><td class="l name">'+esc(r.PILOT||'')+(r.CLUB?'<small>'+esc(r.CLUB)+'</small>':'')+'</td><td class="trend '+trc+'">'+trend+(imp?'<small> '+(imp>0?'+':'')+imp+'</small>':'')+'</td><td>'+esc(r.LAPS)+'</td><td>'+esc(r.LAPTIME||'')+'</td><td class="best">'+esc(r.BESTTIME||'')+'</td><td class="hide-sm">'+esc(r.ABSOLUTTIME||'')+'</td><td>'+(r.INDEX===1?'—':esc(gapFmt(r.DELAYTIMEFIRST)))+'</td><td>'+(r.INDEX===1?'—':esc(gapFmt(r.DELAYTIMEPREVIOUS)))+'</td><td class="hide-sm">'+esc(r.MEDIUMTIME||'')+'</td>'+(pitCols?'<td>'+esc(r.PITSTOPS)+'</td>':'')+'</tr>';
+  });
+  if($('boardTable').innerHTML!==h) $('boardTable').innerHTML=h;
+}
 function renderRcmSettings(){
   const inp=$('rcmKey'); if(document.activeElement!==inp) inp.value=S.rcm.key?S.rcm.key:'';
   const on=!!S.rcm.key; $('rcmStatusRow').hidden=!on; $('rcmCarRow').hidden=!on; $('rcmClockRow').hidden=!on;
@@ -1184,9 +1261,12 @@ function render(){
   // header
   const compact=running||S.locked;
   const rcmOn=!!S.rcm.key;
-  el.app.className=(q?((tt==null&&!rcmOn)?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'');
+  el.app.className=(q?((tt==null&&!rcmOn)?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'')+(rcmOn?' rcm-on':'');
+  if(rcmOn){ const okc=RCM.state==='connected'&&Date.now()-RCM.at<=20000; $('boardDot').className='dot '+(okc?'on':(RCM.state==='connected'||RCM.state==='waiting')?'warn':'err'); }
+  if(boardOpen&&!rcmOn) closeBoard();
+  renderBoard(false);
   setText(el.hdrInfo,t('hdr',m.short,durLabel(m.dur),clock(S.tankSec))+(S.sound?'':t('hdr_sound_off'))+(RCM.me?' · P'+RCM.me.INDEX:''));
-  try{ el.modes.inert=S.locked; el.tools.inert=S.locked; }catch(e){}
+  try{ el.modes.inert=S.locked; el.tools.inert=S.locked&&!rcmOn; el.tools.querySelectorAll(':scope>*:not(#btnBoard)').forEach(x=>{ x.inert=S.locked; }); }catch(e){}
   document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,t('mode_'+k+'_short')+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
   setText(el.tankVal,clock(S.tankSec));
   el.btnSound.setAttribute('aria-pressed',S.sound?'true':'false'); setText(el.btnSound,S.sound?t('sound'):t('sound_off'));
@@ -1344,6 +1424,8 @@ let clearArmed=false;
 el.histClearAll.addEventListener('click',()=>{ if(!clearArmed){ clearArmed=true; setText(el.histClearAll,t('confirm_delete_all')); setTimeout(()=>{ clearArmed=false; setText(el.histClearAll,t('delete_all')); },4000); return; } H=[]; saveH(); clearArmed=false; setText(el.histClearAll,t('delete_all')); renderHistory(); toast(t('t_hist_deleted')); });
 
 el.btnSettings.addEventListener('click',openSettings);
+$('btnBoard').addEventListener('click',openBoard);
+$('boardClose').addEventListener('click',closeBoard);
 $('setClose').addEventListener('click',closeSettings);
 el.settings.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>adjSetting(b.dataset.set,Number(b.dataset.d))));
 $('setChart').addEventListener('click',()=>openChart(lastRaceRec()));
