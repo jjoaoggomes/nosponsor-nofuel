@@ -95,7 +95,17 @@ button:disabled{cursor:default}
 .tool[aria-pressed="true"]{color:var(--fg); border-color:var(--accent)}
 .tool:disabled{opacity:.35}
 .toggle[aria-pressed="true"]{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
-.seg{display:flex; gap:4px}
+.seg{display:flex; gap:4px; flex-wrap:wrap}
+.live{display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--line); padding-top:8px; margin-top:2px}
+.live-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.live-head .grp{font-family:var(--font-display); font-weight:600; font-size:16px; letter-spacing:.04em; text-transform:uppercase; color:var(--fg); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.live-head .st{margin-left:auto}
+.dot{width:9px; height:9px; border-radius:50%; background:var(--muted); flex:none}
+.dot.on{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.err{background:var(--crit)}
+.live .chip .hint{font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.live .chip.me{border-color:var(--accent)}
+.key{height:46px; min-width:0; flex:1 1 220px; padding:0 12px; border-radius:12px; background:var(--panel2); color:var(--fg); border:1px solid var(--line); font:inherit; font-size:15px; -webkit-user-select:text; user-select:text}
+.sel{height:46px; padding:0 10px; border-radius:12px; background:var(--panel2); color:var(--fg); border:1px solid var(--line); font:inherit; font-size:15px; max-width:100%}
 .tool.icon{padding:0; width:46px; display:inline-flex; align-items:center; justify-content:center; color:var(--muted)}
 .tool.icon svg{display:block}
 .tool.icon .ico-moon{display:none}
@@ -397,6 +407,16 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <div class="digits" id="raceDigits"></div>
       <div class="bar" id="raceBar"><div class="fill" id="raceFill"></div></div>
       <div class="sub"><span><span id="raceSubLbl">Decorrido</span> <b id="raceElapsed">0:00</b></span><span id="raceTotal">Final 45:00</span></div>
+      <div class="live" id="live" hidden>
+        <div class="live-head"><span class="dot" id="liveDot"></span><span class="lbl">MyRCM</span><span class="grp" id="liveGroup"></span><span class="lbl st" id="liveState"></span></div>
+        <div class="chips">
+          <div class="chip me"><span class="lbl" data-i18n="position">Posição</span><span class="v" id="livePos">—</span><span class="hint" id="livePosSub"></span></div>
+          <div class="chip"><span class="lbl" data-i18n="laps">Voltas</span><span class="v" id="liveLaps">—</span><span class="hint" id="liveLapsSub"></span></div>
+          <div class="chip"><span class="lbl" data-i18n="ahead">À frente</span><span class="v" id="liveAhead">—</span><span class="hint" id="liveAheadSub"></span></div>
+          <div class="chip"><span class="lbl" data-i18n="behind">Atrás</span><span class="v" id="liveBehind">—</span><span class="hint" id="liveBehindSub"></span></div>
+        </div>
+        <div class="hint" id="liveHint" hidden></div>
+      </div>
     </section>
 
     <section class="panel tank st-ok" id="tankPanel">
@@ -479,6 +499,14 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   <div class="card" role="dialog" aria-labelledby="setTitle">
     <div class="panel-head"><span class="lbl" id="setTitle" data-i18n="settings">Configurações</span><button class="tool" id="setClose" data-i18n="close">Fechar</button></div>
     <div class="set-list">
+      <div class="set-row"><div><span class="set-name">MyRCM</span><span class="set-hint" data-i18n="rcm_hint">cola o link ou o número do evento (myrcm.ch › Online Events › Live Timing)</span></div>
+        <div class="seg"><input class="key" id="rcmKey" type="text" inputmode="numeric" placeholder="myrcm.ch/en/live/101706/livetiming" autocomplete="off"><button class="tool" id="rcmConnect" data-i18n="connect">Ligar</button></div></div>
+      <div class="set-row" id="rcmStatusRow" hidden><div><span class="set-name" data-i18n="rcm_status">Estado</span><span class="set-hint" id="rcmStatus"></span></div>
+        <button class="tool" id="rcmForget" data-i18n="disconnect">Desligar</button></div>
+      <div class="set-row" id="rcmCarRow" hidden><div><span class="set-name" data-i18n="rcm_car">O meu carro</span><span class="set-hint" data-i18n="rcm_car_hint">escolhe pelo número ou nome; fica guardado para as próximas mangas</span></div>
+        <select class="sel" id="rcmCar"></select></div>
+      <div class="set-row" id="rcmClockRow" hidden><div><span class="set-name" data-i18n="rcm_clock">Arranque e fim</span><span class="set-hint" data-i18n="rcm_clock_hint">com Tempo do MyRCM, Início e Parar são automáticos quando o teu carro está na manga em curso; Parar manual continua a funcionar</span></div>
+        <div class="seg"><button class="tool toggle" data-rclock="manual" data-i18n="clock_manual">Controlo manual</button><button class="tool toggle" data-rclock="rcm" data-i18n="clock_rcm">Tempo do MyRCM</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="language">Idioma</span><span class="set-hint" data-i18n="language_hint">aplica-se a toda a app</span></div>
         <div class="seg"><button class="tool toggle" id="langPt" data-lang="pt">Português</button><button class="tool toggle" id="langEn" data-lang="en">English</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="mode_q_name">Qualificação</span><span class="set-hint" data-i18n="set_q_hint">duração da manga · passos de 30 s</span></div>
@@ -511,7 +539,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <button class="tool toggle" id="setAutoLock" aria-pressed="true">Sim</button></div>
     </div>
     <div class="set-foot"><span class="hint" id="setLocked"></span><button class="tool" id="setDefaults" data-i18n="defaults">Repor valores de origem</button></div>
-    <div class="hint">NOSPONSOR NOFUEL · build 365e13a298</div>
+    <div class="hint">NOSPONSOR NOFUEL · build 49c3dd600b</div>
   </div>
 </div>
 
@@ -568,6 +596,13 @@ pt:{
   th_tank:'Depósito',th_start:'Início',th_dur:'Duração',th_used:'Consumo',th_rate:'Ritmo',total:'Total',grid_fill:t=>'cheio '+t+' antes da partida',ran_dry:'secou?',measured:'medido',
   src_measured:'ritmo medido no fim desta corrida (combustível que sobrou)',src_avg:n=>'ritmo da média das '+n+' calibrações guardadas',src_plan:'ritmo estimado a partir do depósito de planeamento; faz uma calibração para ter valores reais',
   chart_note:'Cada depósito parte cheio. A linha tracejada vermelha é o nível a que o plano previa parar; a cinzenta é o fim da corrida.',reserve_lbl:'limite plano',end_lbl:'fim',
+  rcm_hint:'cola o link ou o número do evento (myrcm.ch › Online Events › Live Timing)',connect:'Ligar',disconnect:'Desligar',rcm_status:'Estado',rcm_car:'O meu carro',rcm_car_hint:'escolhe pelo número ou nome; fica guardado para as próximas mangas',rcm_car_none:'(ainda sem pilotos nesta manga)',rcm_car_pick:'— escolher —',
+  rcm_clock:'Arranque e fim',rcm_clock_hint:'com Tempo do MyRCM, Início e Parar são automáticos quando o teu carro está na manga em curso; Parar manual continua a funcionar',clock_manual:'Controlo manual',clock_rcm:'Tempo do MyRCM',
+  rcm_off:'desligado',rcm_connecting:'a ligar…',rcm_waiting:'ligado · à espera de dados',rcm_noevent:'sem resposta · o evento não está ao vivo?',rcm_connected:'ligado',rcm_stale:s=>'sem atualizações há '+s+' s',rcm_reconnect:'a religar…',rcm_offline:'sem rede · a tentar',
+  rcm_countdown:x=>'arranque em '+x,rcm_over:'corrida terminada',rcm_pick_car:'escolhe o teu carro em ⚙ para veres a posição e o arranque automático',rcm_not_in_heat:'o teu carro não está nesta manga',rcm_waiting_start:'à espera do arranque oficial',
+  position:'Posição',laps:'Voltas',ahead:'À frente',behind:'Atrás',leader:'líder',nobody_behind:'ninguém',of_n:(n,i)=>'de '+n+(i?' · '+(i>0?'+':'')+i:''),last_best:(l,b)=>'última '+l+' · melhor '+b,gap_laps:v=>v+' v',gap_s:v=>v+' s',behind_at:(nm,g)=>nm+' a '+g,
+  t_rcm_start:'Arranque pelo MyRCM',t_rcm_stop:'Fim de corrida pelo MyRCM',t_rcm_bad:'Não encontrei o número do evento nesse texto',t_rcm_set:k=>'Evento '+k+' · a ligar ao MyRCM',t_rcm_forget:'MyRCM desligado',
+  hist_rcm:(p,l)=>'P'+p+' · '+l+' v',sum_rcm:(g,p,nn,l)=>'MyRCM '+g+' · P'+p+' de '+nn+' · '+l+' voltas',
   date_locale:'pt-PT',dec:','
 },
 en:{
@@ -618,6 +653,13 @@ en:{
   th_tank:'Tank',th_start:'Start',th_dur:'Length',th_used:'Used',th_rate:'Rate',total:'Total',grid_fill:t=>'filled '+t+' before the start',ran_dry:'ran dry?',measured:'measured',
   src_measured:'rate measured at the end of this race (fuel left)',src_avg:n=>'rate from the average of the '+n+' saved calibrations',src_plan:'rate estimated from the planning tank; run a calibration for real figures',
   chart_note:'Each tank starts full. The red dashed line is the level at which the plan expected to pit; the grey one is the end of the race.',reserve_lbl:'plan limit',end_lbl:'end',
+  rcm_hint:'paste the event link or number (myrcm.ch › Online Events › Live Timing)',connect:'Connect',disconnect:'Disconnect',rcm_status:'Status',rcm_car:'My car',rcm_car_hint:'pick by number or name; remembered for the next heats',rcm_car_none:'(no drivers in this heat yet)',rcm_car_pick:'— choose —',
+  rcm_clock:'Start and finish',rcm_clock_hint:'with MyRCM time, Start and Stop are automatic when your car is in the running heat; manual Stop still works',clock_manual:'Manual control',clock_rcm:'MyRCM time',
+  rcm_off:'off',rcm_connecting:'connecting…',rcm_waiting:'connected · waiting for data',rcm_noevent:'no response · is the event live?',rcm_connected:'connected',rcm_stale:s=>'no update for '+s+' s',rcm_reconnect:'reconnecting…',rcm_offline:'no network · retrying',
+  rcm_countdown:x=>'start in '+x,rcm_over:'race over',rcm_pick_car:'pick your car in ⚙ to see your position and get the automatic start',rcm_not_in_heat:'your car is not in this heat',rcm_waiting_start:'waiting for the official start',
+  position:'Position',laps:'Laps',ahead:'Ahead',behind:'Behind',leader:'leader',nobody_behind:'nobody',of_n:(n,i)=>'of '+n+(i?' · '+(i>0?'+':'')+i:''),last_best:(l,b)=>'last '+l+' · best '+b,gap_laps:v=>v+' L',gap_s:v=>v+' s',behind_at:(nm,g)=>nm+' at '+g,
+  t_rcm_start:'Started by MyRCM',t_rcm_stop:'Race ended by MyRCM',t_rcm_bad:'No event number found in that text',t_rcm_set:k=>'Event '+k+' · connecting to MyRCM',t_rcm_forget:'MyRCM disconnected',
+  hist_rcm:(p,l)=>'P'+p+' · '+l+' L',sum_rcm:(g,p,nn,l)=>'MyRCM '+g+' · P'+p+' of '+nn+' · '+l+' laps',
   date_locale:'en-GB',dec:'.'
 }};
 L.pt.planned_pit='Pit planeado';
@@ -627,9 +669,9 @@ const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
 const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120],leadPit:[15,180],leadEnd:[15,180]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,countUp:false,
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,countUp:false,rcm:{key:'',car:null,clock:'manual'},
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
-const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','v','alertMode','leadPit','leadEnd','sun','countUp','lastRun','calib'];
+const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','v','alertMode','leadPit','leadEnd','sun','countUp','rcm','lastRun','calib'];
 
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&MODE_META[s.mode]&&typeof s.tankSec==='number'){ const o=Object.assign({},DEF,s); o.dur=Object.assign({},DEF.dur,s.dur||{}); return o; } }catch(e){} return null; }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
@@ -644,6 +686,8 @@ if(!Array.isArray(S.calib)) S.calib=[];
 if(['both','vib','snd'].indexOf(S.alertMode)<0) S.alertMode='both';
 if(typeof S.sun!=='boolean') S.sun=false;
 if(typeof S.countUp!=='boolean') S.countUp=false;
+if(!S.rcm||typeof S.rcm!=='object') S.rcm={key:'',car:null,clock:'manual'};
+if(S.rcm.clock!=='rcm') S.rcm.clock='manual';
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
 if(typeof S.askRuntime!=='boolean') S.askRuntime=false;
 if(!(S.v>=2)){ S.askRuntime=false; S.v=2; }
@@ -663,7 +707,8 @@ const el={app:$('app'),actions:$('actions'),modes:$('modes'),tools:$('tools'),bt
   settings:$('settings'),setQ:$('setQ'),setSF:$('setSF'),setF:$('setF'),setCap:$('setCap'),setHold:$('setHold'),setCool:$('setCool'),setAutoLock:$('setAutoLock'),setLocked:$('setLocked'),langPt:$('langPt'),langEn:$('langEn')};
 
 /* ---------- helpers ---------- */
-function M(){ const k=S.mode; return {key:k,name:t('mode_'+k+'_name'),short:t('mode_'+k+'_short'),race:MODE_META[k].isRace?S.dur[k]:null,dur:S.dur[k]}; }
+function rcmDur(){ return (S.rcm.clock==='rcm'&&RCM.me&&RCM.dur>0&&RCM.dur<4*3600)?RCM.dur:null; }
+function M(){ const k=S.mode; const d=rcmDur()||S.dur[k]; return {key:k,name:t('mode_'+k+'_name'),short:t('mode_'+k+'_short'),race:MODE_META[k].isRace?d:null,dur:d}; }
 function now(){ return S.phase==='finished'&&S.stopAt?S.stopAt:Date.now(); }
 function clock(sec){ sec=Math.max(0,Math.floor(sec+1e-6)); const m=Math.floor(sec/60), s=sec%60; return m+':'+(s<10?'0':'')+s; }
 function signed(sec){ return sec>=0?clock(sec):'+'+clock(-sec); }
@@ -728,7 +773,7 @@ function awakeByVideo(){ // must start from a user gesture
     v.style.cssText='position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none'; document.body.appendChild(v);
     v.play().then(()=>{ awakeVid=v; }).catch(()=>{ v.remove(); }); }catch(e){}
 }
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ keepAwake(); if(awakeVid) awakeVid.play().catch(()=>{}); } });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ keepAwake(); if(awakeVid) awakeVid.play().catch(()=>{}); if(S.rcm&&S.rcm.key) rcmConnect(); } });
 document.addEventListener('pointerdown',()=>{ keepAwake().then(awakeByVideo); },{passive:true});
 
 /* ---------- strategy (pure) ---------- */
@@ -801,14 +846,15 @@ function doStart(n){
   else { if(S.phase!=='running'||S.raceStart) return; S.raceStart=n; S.fired={}; toast(t('t_heat_started')); }
   audioInit(); beep('start'); vibrate([120]); save(); render();
 }
-function doStop(){
+function doStop(at){
   if(S.phase!=='running') return;
   const m=M();
-  S.phase='finished'; S.stopAt=Date.now(); S.undo=null; S.locked=false;
+  S.phase='finished'; S.stopAt=(typeof at==='number'&&at>0)?Math.min(at,Date.now()):Date.now(); S.undo=null; S.locked=false;
   S.lastRun=S.tankStart?Math.round((S.stopAt-S.tankStart)/1000):0;
   const rec={id:S.stopAt,when:S.stopAt,mode:m.key,dur:m.dur,tankSec:S.tankSec,
     pits:S.pits.map(p=>({at:Math.round(p.at),run:Math.round(p.run)})),
-    elapsed:S.raceStart?Math.round((S.stopAt-S.raceStart)/1000):null,lastRun:S.lastRun,calib:null};
+    elapsed:S.raceStart?Math.round((S.stopAt-S.raceStart)/1000):null,lastRun:S.lastRun,calib:null,
+    rcm:RCM.me?{key:S.rcm.key,group:rcmGroupName(),pos:RCM.me.INDEX,n:RCM.rows.length,laps:RCM.me.LAPS,total:RCM.me.ABSOLUTTIME,best:RCM.me.BESTTIME,pilot:RCM.me.PILOT}:null};
   H.unshift(rec); if(H.length>HIST_MAX) H.length=HIST_MAX; saveH(); S.lastHist=rec.id;
   beep('end'); vibrate([300]); save(); render();
   if(S.askRuntime) openCalc(S.lastRun);
@@ -903,6 +949,7 @@ function recSummary(rec){
   Ls.push(t('sum_tank',clock(rec.tankSec))+(rec.mode==='q'?'':' · '+t('pits_n',rec.pits.length)));
   if(rec.pits.length) Ls.push(rec.pits.map((p,i)=>t('sum_pit',i+1,clock(p.at),clock(p.run))).join(' · '));
   Ls.push(t('sum_last',clock(rec.lastRun),rec.elapsed!=null?clock(rec.elapsed):null));
+  if(rec.rcm) Ls.push(t('sum_rcm',rec.rcm.group,rec.rcm.pos,rec.rcm.n,rec.rcm.laps));
   if(rec.calib) Ls.push(t('sum_calib',clock(rec.calib.runtime),rec.calib.left,clock(rec.calib.run)));
   return Ls.join('\n');
 }
@@ -911,7 +958,7 @@ function renderHistory(){
   el.histClearAll.hidden=false;
   el.histList.innerHTML=H.map(rec=>{
     const open=histOpen===rec.id;
-    const stat=rec.mode==='q'?t('tank_abbr',clock(rec.lastRun)):(t('pits_n',rec.pits.length)+' · '+(rec.elapsed!=null?clock(rec.elapsed):'—'));
+    const stat=(rec.rcm?t('hist_rcm',rec.rcm.pos,rec.rcm.laps)+' · ':'')+(rec.mode==='q'?t('tank_abbr',clock(rec.lastRun)):(t('pits_n',rec.pits.length)+' · '+(rec.elapsed!=null?clock(rec.elapsed):'—')));
     let h='<li><button class="row" data-open="'+rec.id+'"><span class="m">'+esc(recShort(rec))+' '+durLabel(rec.dur)+'</span><span class="d">'+esc(fmtDate(rec.when))+(rec.calib?esc(t('runtime_short',clock(rec.calib.runtime))):'')+'</span><span class="s">'+esc(stat)+'</span></button>';
     if(open){
       h+='<div class="detail"><div class="pits">';
@@ -996,6 +1043,103 @@ function openChart(rec){
 }
 function closeChart(){ $('chartSheet').hidden=true; }
 
+/* ---------- MyRCM live timing (wss://www.myrcm.ch/websocket, undocumented) ---------- */
+const RCM={ws:null,state:'off',at:0,openAt:0,retry:0,timer:null,last:null,meta:null,rows:[],me:null,ahead:null,behind:null,dur:null,elapsed:null,remaining:null,started:false,over:false,countdown:null};
+function rcmKeyFrom(str){ const v=String(str||'').trim(); const m=/live\/(\d+)/.exec(v)||/(\d{3,})/.exec(v); return m?m[1]:''; }
+function hms(str){ if(str==null||str==='') return null; const p=String(str).trim().split(':'); if(p.some(x=>x===''||isNaN(Number(x)))) return null; let v=0; for(const x of p) v=v*60+Number(x); return v; }
+function rcmGroupName(){ const g=String((RCM.meta&&RCM.meta.GROUP)||''); const m=/\[\s*(.*?)\s*\]/.exec(g); return (m?m[1]:g).replace(/\s+/g,' ').trim(); }
+function gapFmt(v){ if(v==null||v==='') return '—'; const sv=String(v).trim(); if(sv.indexOf('.')>=0){ const x=Math.abs(parseFloat(sv)); return isNaN(x)?sv:t('gap_s',num(x,1)); } const l=Math.abs(parseInt(sv,10)); return isNaN(l)?sv:t('gap_laps',l); }
+function rcmConnect(){
+  if(!S.rcm.key||document.visibilityState!=='visible') return;
+  if(RCM.ws&&(RCM.ws.readyState===0||RCM.ws.readyState===1)) return;
+  clearTimeout(RCM.timer);
+  let ws; try{ ws=new WebSocket('wss://www.myrcm.ch/websocket'); }catch(e){ RCM.state='error'; rcmSchedule(); return; }
+  RCM.ws=ws; RCM.state='connecting';
+  ws.onopen=()=>{ RCM.state='waiting'; RCM.openAt=Date.now(); RCM.retry=0; try{ ws.send(JSON.stringify({EventKey:String(S.rcm.key),Language:S.lang||'en',Format:'JSON'})); }catch(e){} };
+  ws.onmessage=e=>{ let d; try{ d=JSON.parse(e.data); }catch(x){ return; } if(d&&d.EVENT&&d.EVENT.METADATA) rcmApply(d.EVENT); };
+  ws.onerror=()=>{ RCM.state=navigator.onLine===false?'offline':'error'; };
+  ws.onclose=()=>{ if(RCM.ws===ws){ RCM.ws=null; if(RCM.state!=='off'){ RCM.state=navigator.onLine===false?'offline':'closed'; rcmSchedule(); } } };
+}
+function rcmSchedule(){ clearTimeout(RCM.timer); if(!S.rcm.key) return; const d=Math.min(30000,3000*Math.pow(2,Math.min(RCM.retry++,4))); RCM.timer=setTimeout(rcmConnect,d); }
+function rcmReset(){ clearTimeout(RCM.timer); RCM.retry=0; if(RCM.ws){ const w=RCM.ws; RCM.ws=null; try{ w.close(); }catch(e){} } RCM.state='off'; RCM.last=null; RCM.meta=null; RCM.rows=[]; RCM.me=RCM.ahead=RCM.behind=null; RCM.dur=RCM.elapsed=RCM.remaining=null; RCM.started=RCM.over=false; RCM.countdown=null; }
+function rcmSet(str){ const k=rcmKeyFrom(str); if(!k){ toast(t('t_rcm_bad')); return; } rcmReset(); S.rcm.key=k; save(); toast(t('t_rcm_set',k)); rcmConnect(); renderSettings(); render(); }
+function rcmForget(){ rcmReset(); S.rcm.key=''; save(); toast(t('t_rcm_forget')); renderSettings(); render(); }
+function rcmFindMe(){
+  const c=S.rcm.car; if(!c) return null;
+  return RCM.rows.find(r=>c.tx&&String(r.TRANSPONDER)===String(c.tx))||RCM.rows.find(r=>c.num>0&&Number(r.PILOTNUMBER)===Number(c.num))||RCM.rows.find(r=>c.name&&r.PILOT===c.name)||null;
+}
+function rcmApply(E){
+  RCM.last=E; RCM.at=Date.now(); RCM.state='connected'; RCM.meta=E.METADATA||{};
+  if(Array.isArray(E.DATA)) RCM.rows=E.DATA;
+  const md=RCM.meta; RCM.dur=hms(md.RACETIME); RCM.elapsed=hms(md.CURRENTTIME); RCM.remaining=hms(md.REMAININGTIME); RCM.countdown=hms(md.COUNTDOWN_SHORT||md.COUNTDOWN);
+  const rs=String(md.RACESTATE||''); RCM.started=/Started|Running/i.test(rs); RCM.over=/Over|Finish|Stop|End/i.test(rs);
+  RCM.me=rcmFindMe();
+  RCM.ahead=RCM.me?RCM.rows.find(r=>r.INDEX===RCM.me.INDEX-1)||null:null;
+  RCM.behind=RCM.me?RCM.rows.find(r=>r.INDEX===RCM.me.INDEX+1)||null:null;
+  rcmClock();
+  if(!el.settings.hidden) renderSettings();
+}
+// Drive the app clock from the official one: only when the user chose it and their car is in the running heat.
+function rcmClock(){
+  if(S.rcm.clock!=='rcm'||!RCM.me||RCM.elapsed==null) return;
+  const m=M(); const n=Date.now(); const startAt=n-RCM.elapsed*1000;
+  if(RCM.started&&!RCM.over){
+    if(S.phase==='idle'){
+      S.raceStart=startAt; S.tankStart=startAt; S.phase='running'; S.fired={}; S.undo=null; if(S.autoLock) S.locked=true;
+      audioInit(); beep('start'); vibrate([120]); toast(t('t_rcm_start')); save(); render(); return;
+    }
+    if(S.phase==='running'&&!S.raceStart){ S.raceStart=startAt; S.fired={}; beep('start'); toast(t('t_rcm_start')); save(); render(); return; }
+    if(S.phase==='running'&&S.raceStart&&Math.abs(S.raceStart-startAt)>1500){ const d=startAt-S.raceStart; S.raceStart=startAt; if(S.tankStart&&S.pits.length===0) S.tankStart+=d; save(); }
+  }
+  if(RCM.over&&S.phase==='running'&&S.raceStart){
+    const at=Math.min(n,S.raceStart+(RCM.dur||m.dur)*1000);
+    doStop(at); toast(t('t_rcm_stop'));
+  }
+}
+function rcmStateText(){
+  const n=Date.now();
+  switch(RCM.state){
+    case 'off': return t('rcm_off');
+    case 'connecting': return t('rcm_connecting');
+    case 'waiting': return (n-RCM.openAt>8000)?t('rcm_noevent'):t('rcm_waiting');
+    case 'connected': return (n-RCM.at>20000)?t('rcm_stale',Math.round((n-RCM.at)/1000)):t('rcm_connected');
+    case 'offline': return t('rcm_offline');
+    default: return t('rcm_reconnect');
+  }
+}
+function renderLive(q,tt){
+  const on=!!S.rcm.key; $('live').hidden=!on; if(!on) return;
+  const n=Date.now(); const ok=RCM.state==='connected'&&n-RCM.at<=20000;
+  const dot=$('liveDot'); dot.className='dot '+(ok?'on':(RCM.state==='connected'||RCM.state==='waiting')?'warn':(RCM.state==='off'?'':'err'));
+  setText($('liveGroup'),RCM.meta?rcmGroupName():'#'+S.rcm.key);
+  let stt=rcmStateText();
+  if(ok){ if(RCM.over) stt=t('rcm_over'); else if(!RCM.started&&RCM.countdown>0) stt=t('rcm_countdown',clock(RCM.countdown)); else if(!RCM.started) stt=t('rcm_waiting_start'); }
+  setText($('liveState'),stt);
+  const me=RCM.me, hint=$('liveHint');
+  if(!S.rcm.car){ hint.hidden=false; setText(hint,t('rcm_pick_car')); }
+  else if(RCM.rows.length&&!me){ hint.hidden=false; setText(hint,t('rcm_not_in_heat')); }
+  else hint.hidden=true;
+  if(me){
+    setText($('livePos'),'P'+me.INDEX); setText($('livePosSub'),t('of_n',RCM.rows.length,Number(me.POSITIONIMPROVEMENT)||0));
+    setText($('liveLaps'),String(me.LAPS)); setText($('liveLapsSub'),t('last_best',me.LAPTIME||'—',me.BESTTIME||'—'));
+    if(RCM.ahead){ setText($('liveAhead'),gapFmt(me.DELAYTIMEPREVIOUS)); setText($('liveAheadSub'),'P'+RCM.ahead.INDEX+' '+(RCM.ahead.PILOT||'')); } else { setText($('liveAhead'),t('leader')); setText($('liveAheadSub'),''); }
+    if(RCM.behind){ setText($('liveBehind'),gapFmt(RCM.behind.DELAYTIMEPREVIOUS)); setText($('liveBehindSub'),'P'+RCM.behind.INDEX+' '+(RCM.behind.PILOT||'')); } else { setText($('liveBehind'),t('nobody_behind')); setText($('liveBehindSub'),''); }
+  } else {
+    ['livePos','liveLaps','liveAhead','liveBehind'].forEach(id=>setText($(id),'—')); ['livePosSub','liveLapsSub','liveAheadSub','liveBehindSub'].forEach(id=>setText($(id),''));
+  }
+}
+function renderRcmSettings(){
+  const inp=$('rcmKey'); if(document.activeElement!==inp) inp.value=S.rcm.key?S.rcm.key:'';
+  const on=!!S.rcm.key; $('rcmStatusRow').hidden=!on; $('rcmCarRow').hidden=!on; $('rcmClockRow').hidden=!on;
+  if(!on) return;
+  setText($('rcmStatus'),rcmStateText()+(RCM.meta?' · '+rcmGroupName()+(RCM.remaining!=null?' · '+clock(RCM.remaining):''):''));
+  const sel=$('rcmCar'); const cur=S.rcm.car; let html='<option value="">'+esc(cur?('#'+(cur.num||'')+' '+(cur.name||'')).trim():t('rcm_car_pick'))+'</option>';
+  if(!RCM.rows.length) html+='<option value="" disabled>'+esc(t('rcm_car_none'))+'</option>';
+  RCM.rows.forEach((r,i)=>{ const isMe=RCM.me&&r===RCM.me; html+='<option value="'+i+'"'+(isMe?' selected':'')+'>'+esc('#'+(r.PILOTNUMBER||'-')+' '+(r.PILOT||'')+(r.CLUB?' ('+r.CLUB+')':''))+'</option>'; });
+  if(sel.innerHTML!==html) sel.innerHTML=html;
+  el.settings.querySelectorAll('[data-rclock]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.rclock===S.rcm.clock?'true':'false'));
+}
+
 /* ---------- backup / restore ---------- */
 function stamp(){ const d=new Date(), z=x=>(x<10?'0':'')+x; return d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes()); }
 function exportBackup(){
@@ -1040,6 +1184,7 @@ function renderSettings(){
   el.settings.querySelectorAll('[data-amode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.amode===S.alertMode?'true':'false'));
   el.settings.querySelectorAll('[data-cmode]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.cmode==='up')===S.countUp?'true':'false'));
   $('btnImport').disabled=S.phase==='running';
+  renderRcmSettings();
   const lr=lastRaceRec(); $('setChart').disabled=!lr;
   setText($('setChartHint'),t('set_chart_hint',lr?(t('mode_'+lr.mode+'_short')+' '+durLabel(lr.dur)+' · '+fmtDate(lr.when)):null));
   const locked=!canChangeMode();
@@ -1059,8 +1204,9 @@ function render(){
 
   // header
   const compact=running||S.locked;
-  el.app.className=(q?(tt==null?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'');
-  setText(el.hdrInfo,t('hdr',m.short,durLabel(m.dur),clock(S.tankSec))+(S.sound?'':t('hdr_sound_off')));
+  const rcmOn=!!S.rcm.key;
+  el.app.className=(q?((tt==null&&!rcmOn)?'q-solo':'q-heat'):'race-mode')+(S.locked?' locked':'')+(compact?' compact':'');
+  setText(el.hdrInfo,t('hdr',m.short,durLabel(m.dur),clock(S.tankSec))+(S.sound?'':t('hdr_sound_off'))+(RCM.me?' · P'+RCM.me.INDEX:''));
   try{ el.modes.inert=S.locked; el.tools.inert=S.locked; }catch(e){}
   document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,t('mode_'+k+'_short')+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
   setText(el.tankVal,clock(S.tankSec));
@@ -1085,6 +1231,7 @@ function render(){
     el.stratHint.innerHTML=r.win.saves
       ?esc(t('strat_more',r.win.stopsIfNow,'\u200b'+clock(r.win.waitNeeded),r.stopsLeft,clock(Math.max(0,r.limitIn)))).replace('\u200b'+clock(r.win.waitNeeded),'<b>'+clock(r.win.waitNeeded)+'</b>')
       :esc(t('strat_ok',r.win.stopsIfNow,'\u200b'+clock(r.win.marginNow))).replace('\u200b'+clock(r.win.marginNow),'<b>'+clock(r.win.marginNow)+'</b>');
+    if(RCM.me&&RCM.behind&&RCM.state==='connected') el.stratHint.innerHTML+=' · '+esc(t('behind_at',RCM.behind.PILOT||('P'+RCM.behind.INDEX),gapFmt(RCM.behind.DELAYTIMEPREVIOUS)));
   } else el.stratHint.hidden=true;
 
   el.chipNext.classList.remove('crit');
@@ -1106,8 +1253,9 @@ function render(){
   }
 
   // race / heat panel
-  const showRace=!q||tt!=null;
+  const showRace=!q||tt!=null||rcmOn;
   el.racePanel.hidden=!showRace; el.planPanel.hidden=q;
+  renderLive(q,tt);
   if(showRace){
     const R=q?m.dur:m.race;
     const over=tt!=null&&r.remaining<0;
@@ -1147,7 +1295,8 @@ function render(){
   const undoOk=S.undo&&Date.now()<S.undo.until&&running&&!q;
   el.btnUndo.hidden=!undoOk; if(undoOk) setText(el.undoSub,t('hold_s',Math.ceil((S.undo.until-Date.now())/1000)));
   const heatStart=q&&running&&!S.raceStart;
-  el.btnStart.hidden=!((idle&&!q)||heatStart);
+  const autoStart=S.rcm.clock==='rcm'&&!!RCM.me&&RCM.state==='connected';
+  el.btnStart.hidden=!((idle&&!q)||heatStart)||autoStart;
   el.btnStart.classList.toggle('heat',heatStart); setText(el.startLbl,q?t('heat_start'):t('start'));
   el.actions.classList.toggle('q-run',q&&!!S.tankStart&&!fin);
   el.btnStop.hidden=!running;
@@ -1226,6 +1375,12 @@ el.setAutoLock.addEventListener('click',()=>{ S.autoLock=!S.autoLock; save(); re
 $('setAsk').addEventListener('click',()=>{ S.askRuntime=!S.askRuntime; save(); renderSettings(); });
 el.settings.querySelectorAll('[data-amode]').forEach(b=>b.addEventListener('click',()=>{ S.alertMode=b.dataset.amode; save(); renderSettings(); if(S.alertMode!=='vib'){ audioInit(); beep('pit'); } if(S.alertMode!=='snd') vibrate([60]); }));
 el.settings.querySelectorAll('[data-cmode]').forEach(b=>b.addEventListener('click',()=>{ S.countUp=b.dataset.cmode==='up'; save(); renderSettings(); render(); }));
+$('rcmConnect').addEventListener('click',()=>rcmSet($('rcmKey').value));
+$('rcmKey').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); rcmSet($('rcmKey').value); } });
+$('rcmForget').addEventListener('click',rcmForget);
+$('rcmCar').addEventListener('change',()=>{ const i=$('rcmCar').value; if(i===''){ return; } const r=RCM.rows[Number(i)]; if(!r) return; S.rcm.car={tx:r.TRANSPONDER||'',num:Number(r.PILOTNUMBER)||0,name:r.PILOT||''}; save(); if(RCM.last) rcmApply(RCM.last); renderSettings(); render(); });
+el.settings.querySelectorAll('[data-rclock]').forEach(b=>b.addEventListener('click',()=>{ S.rcm.clock=b.dataset.rclock; save(); renderSettings(); if(RCM.last) rcmApply(RCM.last); render(); }));
+window.addEventListener('online',()=>{ RCM.retry=0; rcmConnect(); });
 $('btnExport').addEventListener('click',exportBackup);
 $('btnImport').addEventListener('click',()=>{ const f=$('importFile'); f.value=''; f.click(); });
 $('importFile').addEventListener('change',e=>importBackup(e.target.files&&e.target.files[0]));
@@ -1235,8 +1390,10 @@ $('setDefaults').addEventListener('click',()=>{ if(canChangeMode()) S.dur=Object
 applyLang();
 applySun();
 keepAwake();
+rcmConnect();
 render();
 setInterval(render,100);
+setInterval(()=>{ if(S.rcm.key&&RCM.state==='connected'&&Date.now()-RCM.at>60000&&RCM.ws){ try{ RCM.ws.close(); }catch(e){} } },5000);
 })();
 </script>
 
