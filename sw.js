@@ -1,5 +1,5 @@
-// NOSPONSOR NOFUEL · service worker · build aa7cfc3868
-const CACHE='nsnf-aa7cfc3868';
+// NOSPONSOR NOFUEL · service worker · build fe114030da
+const CACHE='nsnf-fe114030da';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./keepawake.mp4'];
 // cache:'reload' bypasses the browser HTTP cache (GitHub Pages sends max-age=600), so a new build is never seeded with stale files
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });

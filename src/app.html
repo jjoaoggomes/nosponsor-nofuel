@@ -1102,7 +1102,7 @@ function rcmConnect(){
   ws.onclose=()=>{ if(RCM.ws===ws){ RCM.ws=null; if(RCM.state!=='off'){ RCM.state=navigator.onLine===false?'offline':'closed'; rcmSchedule(); } } };
 }
 function rcmSchedule(){ clearTimeout(RCM.timer); if(!S.rcm.key) return; const d=Math.min(30000,3000*Math.pow(2,Math.min(RCM.retry++,4))); RCM.timer=setTimeout(rcmConnect,d); }
-function rcmReset(){ clearTimeout(RCM.timer); RCM.retry=0; if(RCM.ws){ const w=RCM.ws; RCM.ws=null; try{ w.close(); }catch(e){} } RCM.state='off'; RCM.last=null; RCM.meta=null; RCM.rows=[]; RCM.me=RCM.ahead=RCM.behind=null; RCM.dur=RCM.elapsed=RCM.remaining=null; RCM.started=RCM.over=false; RCM.countdown=null; RCM.groupKey=null; RCM.lapHist={}; RCM.pace=null; }
+function rcmReset(){ clearTimeout(RCM.timer); RCM.retry=0; if(RCM.ws){ const w=RCM.ws; RCM.ws=null; try{ w.close(); }catch(e){} } RCM.state='off'; RCM.last=null; RCM.meta=null; RCM.rows=[]; RCM.me=RCM.ahead=RCM.behind=null; RCM.dur=RCM.elapsed=RCM.remaining=null; RCM.started=RCM.over=false; RCM.countdown=null; RCM.groupKey=null; RCM.lapHist={}; RCM.pace=null; RCM.prepared=null; }
 function rcmSet(str){ const k=rcmKeyFrom(str); if(!k){ toast(t('t_rcm_bad')); return; } rcmReset(); S.rcm.key=k; save(); toast(t('t_rcm_set',k)); rcmConnect(); renderSettings(); render(); }
 function rcmForget(){ rcmReset(); S.rcm.key=''; save(); toast(t('t_rcm_forget')); renderSettings(); render(); }
 function rcmFindMe(){
@@ -1150,6 +1150,7 @@ function rcmModeFor(name,dur){
 }
 function rcmNewHeat(){
   if(!RCM.me||RCM.over||S.phase==='running') return;
+  if(RCM.prepared===RCM.groupKey) return; RCM.prepared=RCM.groupKey;
   if(S.phase==='finished'){ if(!el.calc.hidden) return; doReset(); }
   const k=rcmModeFor(rcmGroupName()+' '+String(RCM.meta.SECTION||''),RCM.dur);
   if(k&&k!==S.mode&&canChangeMode()){ S.mode=k; S.fired={}; save(); }
@@ -1496,7 +1497,7 @@ el.settings.querySelectorAll('[data-cmode]').forEach(b=>b.addEventListener('clic
 $('rcmConnect').addEventListener('click',()=>rcmSet($('rcmKey').value));
 $('rcmKey').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); rcmSet($('rcmKey').value); } });
 $('rcmForget').addEventListener('click',rcmForget);
-$('rcmCar').addEventListener('change',()=>{ const i=$('rcmCar').value; if(i===''){ return; } const r=RCM.rows[Number(i)]; if(!r) return; S.rcm.car={tx:r.TRANSPONDER||'',num:Number(r.PILOTNUMBER)||0,name:r.PILOT||''}; save(); if(RCM.last) rcmApply(RCM.last); renderSettings(); render(); });
+$('rcmCar').addEventListener('change',()=>{ const i=$('rcmCar').value; if(i===''){ return; } const r=RCM.rows[Number(i)]; if(!r) return; S.rcm.car={tx:r.TRANSPONDER||'',num:Number(r.PILOTNUMBER)||0,name:r.PILOT||''}; save(); if(RCM.last){ rcmApply(RCM.last); rcmNewHeat(); } renderSettings(); render(); });
 el.settings.querySelectorAll('[data-rclock]').forEach(b=>b.addEventListener('click',()=>{ S.rcm.clock=b.dataset.rclock; save(); renderSettings(); if(RCM.last) rcmApply(RCM.last); render(); }));
 window.addEventListener('online',()=>{ RCM.retry=0; rcmConnect(); });
 $('btnExport').addEventListener('click',exportBackup);
