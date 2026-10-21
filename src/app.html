@@ -536,6 +536,8 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
         <select class="sel" id="rcmCar"></select></div>
       <div class="set-row" id="rcmClockRow" hidden><div><span class="set-name" data-i18n="rcm_clock">Arranque e fim</span><span class="set-hint" data-i18n="rcm_clock_hint">com Tempo do MyRCM, Início e Parar são automáticos quando o teu carro está na manga em curso; Parar manual continua a funcionar</span></div>
         <div class="seg"><button class="tool toggle" data-rclock="manual" data-i18n="clock_manual">Controlo manual</button><button class="tool toggle" data-rclock="rcm" data-i18n="clock_rcm">Tempo do MyRCM</button></div></div>
+      <div class="set-row" id="rcmAutoRow" hidden><div><span class="set-name" data-i18n="rcm_auto">Detetar manga/final automaticamente</span><span class="set-hint" data-i18n="rcm_auto_hint">quando o teu carro aparece numa manga nova, escolhe o modo pelo nome ou duração e prepara uma nova corrida</span></div>
+        <button class="tool toggle" id="rcmAuto" aria-pressed="true">Sim</button></div>
       <div class="set-row"><div><span class="set-name" data-i18n="language">Idioma</span><span class="set-hint" data-i18n="language_hint">aplica-se a toda a app</span></div>
         <div class="seg"><button class="tool toggle" id="langPt" data-lang="pt">Português</button><button class="tool toggle" id="langEn" data-lang="en">English</button></div></div>
       <div class="set-row"><div><span class="set-name" data-i18n="mode_q_name">Qualificação</span><span class="set-hint" data-i18n="set_q_hint">duração da manga · passos de 30 s</span></div>
@@ -630,6 +632,7 @@ pt:{
   pace_behind_catch:(p,d,l)=>p+' apanha-te em <b>'+(l!=null?l+' v':'?')+'</b> ('+d+' s/v)',pace_behind_away:(p,d)=>p+' perde <b>'+d+'</b> s/v',pace_same:p=>'mesmo ritmo que '+p,
   catch_before_pit:(p,tm)=>p+' apanha-te em '+tm+', antes do pit planeado',
   rcm_hint:'cola o link ou o número do evento (myrcm.ch › Online Events › Live Timing)',connect:'Ligar',disconnect:'Desligar',rcm_status:'Estado',rcm_car:'O meu carro',rcm_car_hint:'escolhe pelo número ou nome; fica guardado para as próximas mangas',rcm_car_none:'(ainda sem pilotos nesta manga)',rcm_car_pick:'— escolher —',
+  rcm_auto:'Detetar manga/final automaticamente',rcm_auto_hint:'quando o teu carro aparece numa manga nova, escolhe o modo pelo nome ou duração e prepara uma nova corrida',
   rcm_clock:'Arranque e fim',rcm_clock_hint:'com Tempo do MyRCM, Início e Parar são automáticos quando o teu carro está na manga em curso; Parar manual continua a funcionar',clock_manual:'Controlo manual',clock_rcm:'Tempo do MyRCM',
   rcm_off:'desligado',rcm_connecting:'a ligar…',rcm_waiting:'ligado · à espera de dados',rcm_noevent:'sem resposta · o evento não está ao vivo?',rcm_connected:'ligado',rcm_stale:s=>'sem atualizações há '+s+' s',rcm_reconnect:'a religar…',rcm_offline:'sem rede · a tentar',
   rcm_countdown:x=>'arranque em '+x,rcm_over:'corrida terminada',rcm_pick_car:'escolhe o teu carro em ⚙ para veres a posição e o arranque automático',rcm_not_in_heat:'o teu carro não está nesta manga',rcm_waiting_start:'à espera do arranque oficial',
@@ -692,6 +695,7 @@ en:{
   pace_behind_catch:(p,d,l)=>p+' catches you in <b>'+(l!=null?l+' L':'?')+'</b> ('+d+' s/lap)',pace_behind_away:(p,d)=>p+' loses <b>'+d+'</b> s/lap',pace_same:p=>'same pace as '+p,
   catch_before_pit:(p,tm)=>p+' catches you in '+tm+', before the planned pit',
   rcm_hint:'paste the event link or number (myrcm.ch › Online Events › Live Timing)',connect:'Connect',disconnect:'Disconnect',rcm_status:'Status',rcm_car:'My car',rcm_car_hint:'pick by number or name; remembered for the next heats',rcm_car_none:'(no drivers in this heat yet)',rcm_car_pick:'— choose —',
+  rcm_auto:'Detect heat/final automatically',rcm_auto_hint:'when your car shows up in a new heat, picks the mode from its name or length and gets a new race ready',
   rcm_clock:'Start and finish',rcm_clock_hint:'with MyRCM time, Start and Stop are automatic when your car is in the running heat; manual Stop still works',clock_manual:'Manual control',clock_rcm:'MyRCM time',
   rcm_off:'off',rcm_connecting:'connecting…',rcm_waiting:'connected · waiting for data',rcm_noevent:'no response · is the event live?',rcm_connected:'connected',rcm_stale:s=>'no update for '+s+' s',rcm_reconnect:'reconnecting…',rcm_offline:'no network · retrying',
   rcm_countdown:x=>'start in '+x,rcm_over:'race over',rcm_pick_car:'pick your car in ⚙ to see your position and get the automatic start',rcm_not_in_heat:'your car is not in this heat',rcm_waiting_start:'waiting for the official start',
@@ -708,7 +712,7 @@ const MODE_META={q:{isRace:false},sf:{isRace:true},f:{isRace:true}};
 const UNDO_WIN=15, STEP=15, TANK_MIN=120, TANK_MAX=900, HIST_MAX=60;
 const LIMITS={q:[60,900],sf:[300,3600],f:[600,5400],capCc:[50,300],holdMs:[400,2000],cooldown:[0,120],leadPit:[15,180],leadEnd:[15,180]};
 const KEY='nsnf-state-v1', HKEY='nsnf-history-v1';
-const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,countUp:false,rcm:{key:'',car:null,clock:'manual'},
+const DEF={mode:'f',lang:null,dur:{q:300,sf:1200,f:2700},tankSec:450,margin:15,capCc:125,holdMs:1200,cooldown:30,sound:true,autoLock:true,askRuntime:false,v:2,alertMode:'both',leadPit:60,leadEnd:60,sun:false,countUp:false,rcm:{key:'',car:null,clock:'manual',auto:true},
   phase:'idle',locked:false,raceStart:null,tankStart:null,stopAt:null,pits:[],undo:null,fired:{},lastRun:0,calib:[],lastHist:null};
 const SETTINGS_KEYS=['mode','lang','dur','tankSec','margin','capCc','holdMs','cooldown','sound','autoLock','askRuntime','v','alertMode','leadPit','leadEnd','sun','countUp','rcm','lastRun','calib'];
 
@@ -727,6 +731,7 @@ if(typeof S.sun!=='boolean') S.sun=false;
 if(typeof S.countUp!=='boolean') S.countUp=false;
 if(!S.rcm||typeof S.rcm!=='object') S.rcm={key:'',car:null,clock:'manual'};
 if(S.rcm.clock!=='rcm') S.rcm.clock='manual';
+if(typeof S.rcm.auto!=='boolean') S.rcm.auto=true;
 if(typeof S.autoLock!=='boolean') S.autoLock=true;
 if(typeof S.askRuntime!=='boolean') S.askRuntime=false;
 if(!(S.v>=2)){ S.askRuntime=false; S.v=2; }
@@ -1149,7 +1154,7 @@ function rcmModeFor(name,dur){
   return null;
 }
 function rcmNewHeat(){
-  if(!RCM.me||RCM.over||S.phase==='running') return;
+  if(!S.rcm.auto||!RCM.me||RCM.over||S.phase==='running') return;
   if(RCM.prepared===RCM.groupKey) return; RCM.prepared=RCM.groupKey;
   if(S.phase==='finished'){ if(!el.calc.hidden) return; doReset(); }
   const k=rcmModeFor(rcmGroupName()+' '+String(RCM.meta.SECTION||''),RCM.dur);
@@ -1243,7 +1248,8 @@ function renderBoard(force){
 }
 function renderRcmSettings(){
   const inp=$('rcmKey'); if(document.activeElement!==inp) inp.value=S.rcm.key?S.rcm.key:'';
-  const on=!!S.rcm.key; $('rcmStatusRow').hidden=!on; $('rcmCarRow').hidden=!on; $('rcmClockRow').hidden=!on;
+  const on=!!S.rcm.key; $('rcmStatusRow').hidden=!on; $('rcmCarRow').hidden=!on; $('rcmClockRow').hidden=!on; $('rcmAutoRow').hidden=!on;
+  $('rcmAuto').setAttribute('aria-pressed',S.rcm.auto?'true':'false'); setText($('rcmAuto'),S.rcm.auto?t('yes'):t('no'));
   if(!on) return;
   setText($('rcmStatus'),rcmStateText()+(RCM.meta?' · '+rcmGroupName()+(RCM.remaining!=null?' · '+clock(RCM.remaining):''):''));
   const sel=$('rcmCar'); const cur=S.rcm.car; let html='<option value="">'+esc(cur?('#'+(cur.num||'')+' '+(cur.name||'')).trim():t('rcm_car_pick'))+'</option>';
@@ -1498,6 +1504,7 @@ $('rcmConnect').addEventListener('click',()=>rcmSet($('rcmKey').value));
 $('rcmKey').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); rcmSet($('rcmKey').value); } });
 $('rcmForget').addEventListener('click',rcmForget);
 $('rcmCar').addEventListener('change',()=>{ const i=$('rcmCar').value; if(i===''){ return; } const r=RCM.rows[Number(i)]; if(!r) return; S.rcm.car={tx:r.TRANSPONDER||'',num:Number(r.PILOTNUMBER)||0,name:r.PILOT||''}; save(); if(RCM.last){ rcmApply(RCM.last); rcmNewHeat(); } renderSettings(); render(); });
+$('rcmAuto').addEventListener('click',()=>{ S.rcm.auto=!S.rcm.auto; save(); renderSettings(); if(S.rcm.auto&&RCM.last){ RCM.prepared=null; rcmNewHeat(); } });
 el.settings.querySelectorAll('[data-rclock]').forEach(b=>b.addEventListener('click',()=>{ S.rcm.clock=b.dataset.rclock; save(); renderSettings(); if(RCM.last) rcmApply(RCM.last); render(); }));
 window.addEventListener('online',()=>{ RCM.retry=0; rcmConnect(); });
 $('btnExport').addEventListener('click',exportBackup);
