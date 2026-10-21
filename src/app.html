@@ -133,7 +133,7 @@ button:disabled{cursor:default}
 #btnLock::after{content:""; position:absolute; inset:0; background:var(--accent); opacity:.45; transform:scaleX(var(--p,0)); transform-origin:left; pointer-events:none}
 #btnLock>*{position:relative}
 #app.locked #btnLock{background:var(--warn); color:var(--warn-fg); border-color:var(--warn)}
-#app.locked .modes,#app.locked .tools>*:not(#btnBoard){opacity:.3; pointer-events:none}
+#app.locked .modes,#app.locked .tools>*:not(#btnBoard),#app.locked #btnSettings{opacity:.3; pointer-events:none}
 
 .lbl{font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
 
@@ -336,6 +336,7 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
   .tool{height:42px; min-width:42px; padding:0 10px; font-size:13px}
   #btnLock{order:2; height:42px; padding:0 10px}
   .tool.icon{width:42px; height:42px; order:1}
+  #btnSettings{order:1; height:42px; padding:0 10px; font-size:12px; letter-spacing:.04em}
   #app.compact .modes,#app.compact .tools{display:none}
   #app.compact .hdr-info{display:block; width:100%; order:5}
   #app.compact.rcm-on .tools{display:flex} #app.compact.rcm-on .tools>*:not(#btnBoard){display:none}
@@ -404,13 +405,13 @@ main{flex:1; min-height:0; display:grid; grid-template-columns:1fr 1.15fr; grid-
       <button class="tool" id="btnCalc" data-i18n="runtime">Runtime</button>
       <button class="tool" id="btnHistory" data-i18n="history">Histórico</button>
       <button class="tool" id="btnSound" aria-pressed="true">Som</button>
-      <button class="tool" id="btnSettings" aria-label="Settings">⚙</button>
       <button class="tool" id="btnBoard"><span class="dot" id="boardDot"></span><span data-i18n="board">Live</span></button>
     </div>
     <button class="tool icon" id="btnSun" aria-pressed="false" aria-label="Light / dark">
       <svg class="ico-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
       <svg class="ico-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
     </button>
+    <button class="tool" id="btnSettings" data-i18n="settings">Configurações</button>
     <button class="tool" id="btnLock"><span id="lockLbl">Bloquear</span></button>
     <span class="hdr-info" id="hdrInfo"></span>
   </header>
@@ -1329,7 +1330,7 @@ function render(){
   if(boardOpen&&!rcmOn) closeBoard();
   renderBoard(false);
   setText(el.hdrInfo,t('hdr',m.short,durLabel(m.dur),clock(S.tankSec))+(S.sound?'':t('hdr_sound_off'))+(RCM.me?' · P'+RCM.me.INDEX:''));
-  try{ el.modes.inert=S.locked; el.tools.inert=S.locked&&!rcmOn; el.tools.querySelectorAll(':scope>*:not(#btnBoard)').forEach(x=>{ x.inert=S.locked; }); }catch(e){}
+  try{ el.modes.inert=S.locked; el.btnSettings.inert=S.locked; el.tools.inert=S.locked&&!rcmOn; el.tools.querySelectorAll(':scope>*:not(#btnBoard)').forEach(x=>{ x.inert=S.locked; }); }catch(e){}
   document.querySelectorAll('.mode').forEach(b=>{ const k=b.dataset.mode; setText(b,t('mode_'+k+'_short')+' '+durLabel(S.dur[k])); b.setAttribute('aria-selected',k===S.mode?'true':'false'); b.disabled=!canChangeMode(); });
   setText(el.tankVal,clock(S.tankSec));
   el.btnSound.setAttribute('aria-pressed',S.sound?'true':'false'); setText(el.btnSound,S.sound?t('sound'):t('sound_off'));
