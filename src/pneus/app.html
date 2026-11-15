@@ -1,4 +1,4 @@
-<title>Pneus RC 1/8 TT</title>
+<title>NOSPONSOR NOTYRES</title>
 <!--FONTS-->
 <style>
 :root{
@@ -35,7 +35,7 @@ button{cursor:pointer;-webkit-user-select:none;user-select:none}
 #app{max-width:720px;margin:0 auto;padding:12px 12px 110px}
 
 .top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.top h1{flex:1;margin:0;font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
+.top h1{flex:1;margin:0;font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
 .top h1 span{color:var(--accent)}
 .ghost{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:44px;padding:0 12px;
   font-family:var(--font-display);font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase}
@@ -118,7 +118,7 @@ dialog p{margin:0 0 12px;color:var(--muted)}
 </style>
 <div id="app">
   <div class="top">
-    <h1>Pneus <span>1/8 TT</span></h1>
+    <h1>NOSPONSOR <span>NOTYRES</span></h1>
     <button class="ghost" id="bBackup">Cópia</button>
     <button class="ghost icon" id="bTheme" aria-label="Mudar entre modo claro e escuro"></button>
   </div>
@@ -140,7 +140,7 @@ dialog p{margin:0 0 12px;color:var(--muted)}
   </div>
 
   <div id="list"></div>
-  <div class="foot">Pneus RC 1/8 TT · contagem em jogos de 4 · dados guardados neste aparelho · build dev</div>
+  <div class="foot">NOSPONSOR NOTYRES · pneus RC 1/8 TT · contagem em jogos de 4 · dados guardados neste aparelho · build dev</div>
 </div>
 
 <div class="fab"><button id="bAdd">+ Adicionar pneus</button></div>
@@ -396,7 +396,7 @@ $('bExport').onclick=function(){
   var data=JSON.stringify({app:'pneus-rc',v:1,exportado:d.toISOString(),items:S.items},null,2);
   var file=null; try{ file=new File([data],name,{type:'application/json'}); }catch(e){}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
-    navigator.share({files:[file],title:'Stock de pneus RC'}).catch(function(){});
+    navigator.share({files:[file],title:'NOSPONSOR NOTYRES'}).catch(function(){});
     return;
   }
   var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'})); a.download=name;

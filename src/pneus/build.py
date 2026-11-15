@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the tyre stock PWA (Pneus RC 1/8 TT) into /pneus of the published site.
+"""Build the tyre stock PWA (NOSPONSOR NOTYRES) into /pneus of the published site.
 
 usage (from the repository root): python3 src/pneus/build.py
 Reuses the Barlow fonts already embedded in the root index.html, so it needs no network.
@@ -29,7 +29,7 @@ head = """<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pneus RC">
+<meta name="apple-mobile-web-app-title" content="NOTYRES">
 <meta name="description" content="Stock de pneus RC 1/8 TT por marca, modelo e dureza. Funciona offline.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -74,8 +74,8 @@ icon(192, 170).save(os.path.join(out, "icon-192.png"), optimize=True)
 icon(180, 190).save(os.path.join(out, "apple-touch-icon.png"), optimize=True)
 
 manifest = {
-    "name": "Pneus RC 1/8 TT",
-    "short_name": "Pneus RC",
+    "name": "NOSPONSOR NOTYRES",
+    "short_name": "NOTYRES",
     "description": "Stock de pneus RC 1/8 TT por marca, modelo e dureza, 100% offline.",
     "lang": "pt",
     "start_url": "./",
@@ -93,7 +93,7 @@ json.dump(manifest, open(os.path.join(out, "manifest.webmanifest"), "w", encodin
 
 # ---- service worker: page network-first (short timeout), the rest cache-first; only touches its own caches,
 # because this app shares the origin with NOSPONSOR NOFUEL ----
-sw = """// Pneus RC 1/8 TT · service worker · build %s
+sw = """// NOSPONSOR NOTYRES · service worker · build %s
 const CACHE='pneus-%s';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });

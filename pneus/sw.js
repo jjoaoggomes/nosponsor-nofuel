@@ -1,5 +1,5 @@
-// Pneus RC 1/8 TT · service worker · build 8cbf0f33a6
-const CACHE='pneus-8cbf0f33a6';
+// NOSPONSOR NOTYRES · service worker · build 02253dc09d
+const CACHE='pneus-02253dc09d';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('pneus-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
