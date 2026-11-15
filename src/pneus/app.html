@@ -1,0 +1,424 @@
+<title>Pneus RC 1/8 TT</title>
+<!--FONTS-->
+<style>
+:root{
+--bg:#0b0e13;--panel:#141923;--panel2:#1d2430;--line:#2b3442;
+--fg:#edf1f7;--muted:#8d99ab;
+--accent:#ff4fb0;--accent-fg:#1f0512;
+--ok:#35d07f;--warn:#ffb02e;--crit:#ff4a4a;--crit-fg:#1a0303;
+--font-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+--font-body:"Barlow","Roboto","Segoe UI",system-ui,sans-serif;
+color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+:root:not([data-theme="dark"]){
+--bg:#e8ecf2;--panel:#ffffff;--panel2:#eef2f7;--line:#cdd5e0;
+--fg:#10161f;--muted:#5b6778;
+--accent:#d8127a;--accent-fg:#ffffff;
+--ok:#128a47;--warn:#c27400;--crit:#d61f1f;--crit-fg:#ffffff;
+color-scheme:light;
+}
+}
+:root[data-theme="light"]{
+--bg:#e8ecf2;--panel:#ffffff;--panel2:#eef2f7;--line:#cdd5e0;
+--fg:#10161f;--muted:#5b6778;
+--accent:#d8127a;--accent-fg:#ffffff;
+--ok:#128a47;--warn:#c27400;--crit:#d61f1f;--crit-fg:#ffffff;
+color-scheme:light;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.35;
+  -webkit-text-size-adjust:100%;touch-action:manipulation}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-user-select:none;user-select:none}
+#app{max-width:720px;margin:0 auto;padding:12px 12px 110px}
+
+.top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.top h1{flex:1;margin:0;font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
+.top h1 span{color:var(--accent)}
+.ghost{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:44px;padding:0 12px;
+  font-family:var(--font-display);font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase}
+.ghost:active{background:var(--panel2)}
+.icon{width:44px;padding:0;display:grid;place-items:center}
+.icon svg{width:20px;height:20px}
+
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sum div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.sum b{display:block;font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.sum small{font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.sum .tot b{color:var(--accent)}
+
+.filters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.filters label,.field label{display:block;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+select,input[type=text]{width:100%;min-height:44px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0 10px;font-size:16px}
+select.on{border-color:var(--accent)}
+.opts{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;min-height:44px}
+.chk{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:15px;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.link{background:none;border:0;color:var(--accent);font-size:15px;min-height:44px;padding:0 4px}
+
+.brand{margin-bottom:18px}
+.brand>h2{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--accent);
+  font-family:var(--font-display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase}
+.brand>h2 small{margin-left:auto;font-weight:600;font-size:14px;letter-spacing:.06em;color:var(--muted)}
+.model{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.model>h3{margin:0;padding:8px 12px;background:var(--panel2);font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:.03em;
+  display:flex;align-items:baseline;gap:8px}
+.model>h3 small{margin-left:auto;font-size:13px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.row{padding:8px 12px 10px;border-top:1px solid var(--line)}
+.row.zero .hard{color:var(--muted)}
+.rowtop{display:flex;align-items:center;gap:8px}
+.hard{flex:1;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
+.edit{background:none;border:0;color:var(--muted);min-width:44px;min-height:40px;font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.counts{display:flex;align-items:flex-end;gap:6px}
+.cnt{flex:1;min-width:0}
+.cnt small{display:block;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
+.step{display:flex;align-items:stretch;background:var(--bg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.step button{width:44px;min-height:44px;border:0;background:var(--panel2);font-size:24px;line-height:1;font-weight:600}
+.step button:active{background:var(--accent);color:var(--accent-fg)}
+.step button:disabled{opacity:.3}
+.step output{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
+.cnt.new output{color:var(--ok)}
+.cnt.used output{color:var(--warn)}
+.row.zero .cnt output{color:var(--muted)}
+.move{width:40px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:18px;padding:0}
+.move:disabled{opacity:.3}
+.move:active{background:var(--accent);color:var(--accent-fg)}
+
+.empty{text-align:center;color:var(--muted);padding:40px 16px}
+.empty b{display:block;color:var(--fg);font-family:var(--font-display);font-size:24px;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+
+.fab{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to top,var(--bg) 70%,transparent);pointer-events:none}
+.fab button{pointer-events:auto;display:block;width:100%;max-width:696px;margin:0 auto;min-height:56px;border:0;border-radius:14px;
+  background:var(--accent);color:var(--accent-fg);font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase}
+.fab button:active{filter:brightness(.9)}
+
+dialog{width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:var(--panel);color:var(--fg);
+  border:1px solid var(--line);border-radius:16px;padding:16px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h2{margin:0 0 12px;font-family:var(--font-display);font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.03em}
+dialog p{margin:0 0 12px;color:var(--muted)}
+.field{margin-bottom:12px}
+.field input[type=text]{background:var(--bg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--crit);font-size:15px;min-height:20px;margin:0 0 8px}
+.btns{display:flex;gap:8px;margin-top:6px}
+.btns button{flex:1;min-height:50px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);
+  font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase}
+.btns .pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btns .del{background:var(--crit);color:var(--crit-fg);border-color:var(--crit)}
+.stack{display:grid;gap:8px}
+.stack button{min-height:50px}
+.foot{margin-top:24px;text-align:center;color:var(--muted);font-size:12px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);
+  padding:10px 16px;border-radius:999px;font-size:15px;font-weight:500;max-width:calc(100vw - 32px);text-align:center;z-index:10}
+.toast[hidden]{display:none}
+</style>
+<div id="app">
+  <div class="top">
+    <h1>Pneus <span>1/8 TT</span></h1>
+    <button class="ghost" id="bBackup">Cópia</button>
+    <button class="ghost icon" id="bTheme" aria-label="Mudar entre modo claro e escuro"></button>
+  </div>
+
+  <div class="sum" aria-live="polite">
+    <div><b id="sNew">0</b><small>Jogos novos</small></div>
+    <div><b id="sUsed">0</b><small>Jogos usados</small></div>
+    <div class="tot"><b id="sTot">0</b><small>Total</small></div>
+  </div>
+
+  <div class="filters">
+    <div><label for="fMarca">Marca</label><select id="fMarca"></select></div>
+    <div><label for="fModelo">Modelo</label><select id="fModelo"></select></div>
+    <div><label for="fDureza">Dureza</label><select id="fDureza"></select></div>
+  </div>
+  <div class="opts">
+    <label class="chk"><input type="checkbox" id="fStock"> Só com stock</label>
+    <button class="link" id="bClear" hidden>Limpar filtros</button>
+  </div>
+
+  <div id="list"></div>
+  <div class="foot">Pneus RC 1/8 TT · contagem em jogos de 4 · dados guardados neste aparelho · build dev</div>
+</div>
+
+<div class="fab"><button id="bAdd">+ Adicionar pneus</button></div>
+<div class="toast" id="toast" hidden></div>
+
+<dialog id="dForm">
+  <form method="dialog" id="form" autocomplete="off">
+    <h2 id="formTitle">Adicionar pneus</h2>
+    <div class="field"><label for="iMarca">Marca</label><input type="text" id="iMarca" list="lMarca" maxlength="40" autocapitalize="words"></div>
+    <div class="field"><label for="iModelo">Modelo do pneu</label><input type="text" id="iModelo" list="lModelo" maxlength="40" autocapitalize="words"></div>
+    <div class="field"><label for="iDureza">Dureza</label><input type="text" id="iDureza" list="lDureza" maxlength="30" autocapitalize="words"></div>
+    <div class="two">
+      <div class="cnt new"><small>Jogos novos</small><div class="step"><button type="button" data-f="novos" data-d="-1" aria-label="Menos um jogo novo">−</button><output id="oNovos">0</output><button type="button" data-f="novos" data-d="1" aria-label="Mais um jogo novo">+</button></div></div>
+      <div class="cnt used"><small>Jogos usados</small><div class="step"><button type="button" data-f="usados" data-d="-1" aria-label="Menos um jogo usado">−</button><output id="oUsados">0</output><button type="button" data-f="usados" data-d="1" aria-label="Mais um jogo usado">+</button></div></div>
+    </div>
+    <p class="err" id="formErr" role="alert"></p>
+    <div class="btns"><button type="button" id="bCancel">Cancelar</button><button type="submit" class="pri" id="bSave">Guardar</button></div>
+    <div class="btns" id="delWrap" hidden><button type="button" class="del" id="bDel">Apagar esta linha</button></div>
+  </form>
+  <datalist id="lMarca"></datalist><datalist id="lModelo"></datalist><datalist id="lDureza"></datalist>
+</dialog>
+
+<dialog id="dConfirm">
+  <h2 id="cTitle"></h2>
+  <p id="cText"></p>
+  <div class="btns"><button type="button" id="cNo">Cancelar</button><button type="button" class="del" id="cYes">Apagar</button></div>
+</dialog>
+
+<dialog id="dBackup">
+  <h2>Cópia de segurança</h2>
+  <p>O stock fica guardado só neste aparelho. Guarda uma cópia de vez em quando, ou usa-a para passar o stock para outro aparelho.</p>
+  <div class="stack">
+    <button class="ghost" id="bExport">Guardar cópia</button>
+    <button class="ghost" id="bImport">Restaurar de uma cópia</button>
+    <button class="ghost" id="bCloseBackup">Fechar</button>
+  </div>
+  <input type="file" id="file" accept="application/json,.json" hidden>
+</dialog>
+
+<script>
+(function(){
+'use strict';
+var KEY='pneus-rc-v1';
+var SUG_MARCAS=['AKA','Beta','Hot Race','JConcepts','Louise','Matrix','Pro-Line','ProCircuit','Sweep','TPRO','6MIK'];
+var $=function(id){return document.getElementById(id);};
+var S=load();
+var F={marca:'',modelo:'',dureza:''};
+var editing=null, draft={novos:0,usados:0};
+
+function load(){
+  try{ var s=JSON.parse(localStorage.getItem(KEY)); if(s&&Array.isArray(s.items)) return clean(s); }catch(e){}
+  return {v:1,items:[],theme:'',soStock:false};
+}
+function clean(s){
+  var out={v:1,items:[],theme:(s.theme==='light'||s.theme==='dark')?s.theme:'',soStock:!!s.soStock};
+  s.items.forEach(function(it){
+    if(!it) return;
+    var m=txt(it.marca),o=txt(it.modelo),d=txt(it.dureza);
+    if(!m||!o||!d) return;
+    put(out.items,{id:String(it.id||uid()),marca:m,modelo:o,dureza:d,novos:num(it.novos),usados:num(it.usados)});
+  });
+  return out;
+}
+function txt(v){return String(v==null?'':v).replace(/\s+/g,' ').trim().slice(0,40);}
+function num(v){v=Math.floor(Number(v));return (isFinite(v)&&v>0)?Math.min(v,999):0;}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function norm(v){return v.toLocaleLowerCase('pt');}
+function same(a,b){return norm(a.marca)===norm(b.marca)&&norm(a.modelo)===norm(b.modelo)&&norm(a.dureza)===norm(b.dureza);}
+function put(items,it){ // one line per marca+modelo+dureza: same combination adds up
+  for(var i=0;i<items.length;i++){ if(same(items[i],it)){ items[i].novos=Math.min(999,items[i].novos+it.novos); items[i].usados=Math.min(999,items[i].usados+it.usados); return items[i]; } }
+  items.push(it); return it;
+}
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }
+  catch(e){ toast('Não foi possível guardar neste aparelho.'); }
+}
+function cmp(a,b){return a.localeCompare(b,'pt',{numeric:true,sensitivity:'base'});}
+function uniq(list){var seen={},out=[];list.forEach(function(v){var k=norm(v);if(!seen[k]){seen[k]=1;out.push(v);}});return out.sort(cmp);}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function jogos(n){return n+(n===1?' jogo':' jogos');}
+
+/* ---------- theme ---------- */
+var SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+var MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>';
+function isLight(){ return S.theme?S.theme==='light':window.matchMedia('(prefers-color-scheme: light)').matches; }
+function applyTheme(){
+  if(S.theme) document.documentElement.setAttribute('data-theme',S.theme); else document.documentElement.removeAttribute('data-theme');
+  $('bTheme').innerHTML=isLight()?MOON:SUN;
+}
+$('bTheme').onclick=function(){ S.theme=isLight()?'dark':'light'; save(); applyTheme(); };
+
+/* ---------- filters ---------- */
+function fill(sel,all,values,cur){
+  sel.textContent='';
+  var o=el('option',null,all); o.value=''; sel.appendChild(o);
+  values.forEach(function(v){ var p=el('option',null,v); p.value=v; sel.appendChild(p); });
+  var hit=values.filter(function(v){return norm(v)===norm(cur);})[0]||'';
+  sel.value=hit; sel.classList.toggle('on',!!hit);
+  return hit;
+}
+function renderFilters(){
+  F.marca=fill($('fMarca'),'Todas',uniq(S.items.map(function(i){return i.marca;})),F.marca);
+  var inBrand=S.items.filter(function(i){return !F.marca||norm(i.marca)===norm(F.marca);});
+  F.modelo=fill($('fModelo'),'Todos',uniq(inBrand.map(function(i){return i.modelo;})),F.modelo);
+  F.dureza=fill($('fDureza'),'Todas',uniq(inBrand.map(function(i){return i.dureza;})),F.dureza);
+  $('fStock').checked=S.soStock;
+  $('bClear').hidden=!(F.marca||F.modelo||F.dureza||S.soStock);
+}
+$('fMarca').onchange=function(){F.marca=this.value;F.modelo='';render();};
+$('fModelo').onchange=function(){F.modelo=this.value;render();};
+$('fDureza').onchange=function(){F.dureza=this.value;render();};
+$('fStock').onchange=function(){S.soStock=this.checked;save();render();};
+$('bClear').onclick=function(){F={marca:'',modelo:'',dureza:''};S.soStock=false;save();render();};
+
+/* ---------- list ---------- */
+function visible(){
+  return S.items.filter(function(i){
+    if(F.marca&&norm(i.marca)!==norm(F.marca)) return false;
+    if(F.modelo&&norm(i.modelo)!==norm(F.modelo)) return false;
+    if(F.dureza&&norm(i.dureza)!==norm(F.dureza)) return false;
+    if(S.soStock&&i.novos+i.usados===0) return false;
+    return true;
+  });
+}
+function stepper(it,field,label){
+  var box=el('div','cnt '+(field==='novos'?'new':'used'));
+  box.appendChild(el('small',null,label));
+  var st=el('div','step');
+  var minus=el('button',null,'−'); minus.type='button'; minus.disabled=it[field]<=0;
+  minus.setAttribute('aria-label','Menos um jogo '+(field==='novos'?'novo':'usado'));
+  minus.onclick=function(){ if(it[field]>0){ it[field]--; save(); render(); } };
+  var out=el('output',null,String(it[field]));
+  var plus=el('button',null,'+'); plus.type='button'; plus.disabled=it[field]>=999;
+  plus.setAttribute('aria-label','Mais um jogo '+(field==='novos'?'novo':'usado'));
+  plus.onclick=function(){ if(it[field]<999){ it[field]++; save(); render(); } };
+  st.appendChild(minus); st.appendChild(out); st.appendChild(plus); box.appendChild(st);
+  return box;
+}
+function row(it){
+  var r=el('div','row'+(it.novos+it.usados===0?' zero':''));
+  var top=el('div','rowtop');
+  top.appendChild(el('div','hard',it.dureza));
+  var ed=el('button','edit','Editar'); ed.type='button'; ed.onclick=function(){openForm(it);};
+  top.appendChild(ed); r.appendChild(top);
+  var c=el('div','counts');
+  c.appendChild(stepper(it,'novos','Novos'));
+  var mv=el('button','move','→'); mv.type='button'; mv.disabled=it.novos<=0||it.usados>=999;
+  mv.setAttribute('aria-label','Passar um jogo novo a usado'); mv.title='Passar um jogo novo a usado';
+  mv.onclick=function(){ if(it.novos>0&&it.usados<999){ it.novos--; it.usados++; save(); render(); toast('1 jogo passou de novo a usado'); } };
+  c.appendChild(mv);
+  c.appendChild(stepper(it,'usados','Usados'));
+  r.appendChild(c);
+  return r;
+}
+function render(){
+  renderFilters();
+  var items=visible(), list=$('list'), keep=window.scrollY;
+  var n=0,u=0; items.forEach(function(i){n+=i.novos;u+=i.usados;});
+  $('sNew').textContent=n; $('sUsed').textContent=u; $('sTot').textContent=n+u;
+  list.textContent='';
+  if(!items.length){
+    var e=el('div','empty');
+    if(!S.items.length){ e.appendChild(el('b',null,'Sem pneus registados')); e.appendChild(document.createTextNode('Toca em «Adicionar pneus» para registar o primeiro jogo.')); }
+    else { e.appendChild(el('b',null,'Nada com estes filtros')); e.appendChild(document.createTextNode('Muda a marca, o modelo ou a dureza, ou limpa os filtros.')); }
+    list.appendChild(e); return;
+  }
+  uniq(items.map(function(i){return i.marca;})).forEach(function(marca){
+    var ofBrand=items.filter(function(i){return norm(i.marca)===norm(marca);});
+    var sec=el('section','brand'), h=el('h2',null,marca), t=0;
+    ofBrand.forEach(function(i){t+=i.novos+i.usados;});
+    h.appendChild(el('small',null,jogos(t))); sec.appendChild(h);
+    uniq(ofBrand.map(function(i){return i.modelo;})).forEach(function(modelo){
+      var ofModel=ofBrand.filter(function(i){return norm(i.modelo)===norm(modelo);}).sort(function(a,b){return cmp(a.dureza,b.dureza);});
+      var card=el('div','model'), h3=el('h3',null,modelo), mt=0;
+      ofModel.forEach(function(i){mt+=i.novos+i.usados;});
+      h3.appendChild(el('small',null,jogos(mt))); card.appendChild(h3);
+      ofModel.forEach(function(i){card.appendChild(row(i));});
+      sec.appendChild(card);
+    });
+    list.appendChild(sec);
+  });
+  window.scrollTo(0,keep);
+}
+
+/* ---------- add / edit ---------- */
+function options(id,values){ var d=$(id); d.textContent=''; values.forEach(function(v){var o=el('option');o.value=v;d.appendChild(o);}); }
+function refreshLists(){
+  var m=txt($('iMarca').value);
+  options('lMarca',uniq(S.items.map(function(i){return i.marca;}).concat(SUG_MARCAS)));
+  var ofBrand=S.items.filter(function(i){return m&&norm(i.marca)===norm(m);});
+  options('lModelo',uniq(ofBrand.map(function(i){return i.modelo;})));
+  options('lDureza',uniq((ofBrand.length?ofBrand:S.items).map(function(i){return i.dureza;})));
+}
+function openForm(it){
+  editing=it||null;
+  $('formTitle').textContent=it?'Editar pneus':'Adicionar pneus';
+  $('iMarca').value=it?it.marca:(F.marca||'');
+  $('iModelo').value=it?it.modelo:(F.modelo||'');
+  $('iDureza').value=it?it.dureza:'';
+  draft={novos:it?it.novos:1,usados:it?it.usados:0};
+  $('oNovos').textContent=draft.novos; $('oUsados').textContent=draft.usados;
+  $('formErr').textContent=''; $('delWrap').hidden=!it;
+  refreshLists();
+  $('dForm').showModal();
+}
+$('iMarca').oninput=refreshLists;
+$('form').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-f]'); if(!b) return;
+  var f=b.getAttribute('data-f'); draft[f]=Math.max(0,Math.min(999,draft[f]+Number(b.getAttribute('data-d'))));
+  $(f==='novos'?'oNovos':'oUsados').textContent=draft[f];
+});
+$('bCancel').onclick=function(){$('dForm').close();};
+$('form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var it={marca:txt($('iMarca').value),modelo:txt($('iModelo').value),dureza:txt($('iDureza').value),novos:draft.novos,usados:draft.usados};
+  if(!it.marca||!it.modelo||!it.dureza){ $('formErr').textContent='Preenche a marca, o modelo e a dureza.'; return; }
+  // reuse the spelling already in stock, so "aka" and "AKA" stay the same brand
+  ['marca','modelo','dureza'].forEach(function(k){ var hit=S.items.filter(function(i){return i!==editing&&norm(i[k])===norm(it[k]);})[0]; if(hit) it[k]=hit[k]; });
+  var msg;
+  if(editing){
+    var clash=S.items.filter(function(i){return i!==editing&&same(i,it);})[0];
+    if(clash){ S.items=S.items.filter(function(i){return i!==editing;}); clash.novos=Math.min(999,clash.novos+it.novos); clash.usados=Math.min(999,clash.usados+it.usados); msg='Já existia essa linha: as quantidades foram somadas.'; }
+    else { editing.marca=it.marca; editing.modelo=it.modelo; editing.dureza=it.dureza; editing.novos=it.novos; editing.usados=it.usados; msg='Alterações guardadas'; }
+  } else {
+    var existed=S.items.some(function(i){return same(i,it);});
+    it.id=uid(); put(S.items,it);
+    msg=existed?'Já existia: quantidades somadas à linha.':'Pneus adicionados';
+  }
+  save(); $('dForm').close(); render(); toast(msg);
+});
+$('bDel').onclick=function(){
+  var it=editing; if(!it) return;
+  confirmBox('Apagar linha?',it.marca+' · '+it.modelo+' · '+it.dureza+' ('+jogos(it.novos+it.usados)+'). Isto não se pode desfazer.','Apagar',function(){
+    S.items=S.items.filter(function(i){return i!==it;}); save(); $('dForm').close(); render(); toast('Linha apagada');
+  });
+};
+$('bAdd').onclick=function(){openForm(null);};
+
+/* ---------- confirm + toast ---------- */
+var onYes=null;
+function confirmBox(title,text,yes,fn){ $('cTitle').textContent=title; $('cText').textContent=text; $('cYes').textContent=yes; onYes=fn; $('dConfirm').showModal(); }
+$('cNo').onclick=function(){$('dConfirm').close();};
+$('cYes').onclick=function(){ var fn=onYes; onYes=null; $('dConfirm').close(); if(fn) fn(); };
+var toastT=0;
+function toast(m){ var t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(function(){t.hidden=true;},2600); }
+
+/* ---------- backup ---------- */
+$('bBackup').onclick=function(){$('dBackup').showModal();};
+$('bCloseBackup').onclick=function(){$('dBackup').close();};
+$('bExport').onclick=function(){
+  var d=new Date(), p=function(x){return (x<10?'0':'')+x;};
+  var name='pneus-rc-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json';
+  var data=JSON.stringify({app:'pneus-rc',v:1,exportado:d.toISOString(),items:S.items},null,2);
+  var file=null; try{ file=new File([data],name,{type:'application/json'}); }catch(e){}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'Stock de pneus RC'}).catch(function(){});
+    return;
+  }
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'})); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  toast('Cópia guardada: '+name);
+};
+$('bImport').onclick=function(){ $('file').value=''; $('file').click(); };
+$('file').onchange=function(){
+  var f=this.files&&this.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    var data=null; try{ data=JSON.parse(r.result); }catch(e){}
+    if(!data||data.app!=='pneus-rc'||!Array.isArray(data.items)){ toast('Este ficheiro não é uma cópia do stock de pneus.'); return; }
+    var next=clean({items:data.items,theme:S.theme,soStock:S.soStock});
+    confirmBox('Restaurar cópia?','O stock atual ('+S.items.length+' linhas) é substituído pelo da cópia ('+next.items.length+' linhas).','Substituir',function(){
+      S=next; F={marca:'',modelo:'',dureza:''}; save(); $('dBackup').close(); render(); toast('Stock restaurado');
+    });
+  };
+  r.readAsText(f);
+};
+
+if(navigator.storage&&navigator.storage.persist){ navigator.storage.persist().catch(function(){}); }
+applyTheme(); render();
+})();
+</script>

@@ -1,0 +1,26 @@
+{
+  "name": "Pneus RC 1/8 TT",
+  "short_name": "Pneus RC",
+  "description": "Stock de pneus RC 1/8 TT por marca, modelo e dureza, 100% offline.",
+  "lang": "pt",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e13",
+  "theme_color": "#0b0e13",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
