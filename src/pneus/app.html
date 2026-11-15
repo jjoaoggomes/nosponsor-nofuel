@@ -33,6 +33,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
 #app{max-width:720px;margin:0 auto;padding:12px 12px 110px}
+.disp{font-family:var(--font-display);text-transform:uppercase}
 
 .top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .top h1{flex:1;margin:0;font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
@@ -43,68 +44,62 @@ button{cursor:pointer;-webkit-user-select:none;user-select:none}
 .icon{width:44px;padding:0;display:grid;place-items:center}
 .icon svg{width:20px;height:20px}
 
-.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .sum div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
 .sum b{display:block;font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
 .sum small{font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
 .sum .tot b{color:var(--accent)}
+.sum em{display:block;font-style:normal;font-size:12px;color:var(--muted);min-height:16px}
 
-.filters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.sect{font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+
+/* home: one card per brand */
+.bcard{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:12px;padding:12px 10px 12px 14px;margin-bottom:8px;min-height:72px}
+.bcard:active{background:var(--panel2)}
+.bcard .nm{flex:1;min-width:0}
+.bcard .nm b{display:block;font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.05;letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
+.bcard .nm small{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.bcard .qt{text-align:right;font-family:var(--font-display);line-height:1}
+.bcard .qt b{display:block;font-weight:700;font-size:34px;font-variant-numeric:tabular-nums}
+.bcard .qt small{font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.chev{color:var(--muted);font-size:26px;line-height:1;padding-left:2px}
+
+/* brand page */
+.bhead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.back{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:44px;padding:0 12px 0 8px;
+  font-family:var(--font-display);font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.bhead h2{flex:1;min-width:0;margin:0;font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1;letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
 .filters label,.field label{display:block;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
 select,input[type=text]{width:100%;min-height:44px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0 10px;font-size:16px}
 select.on{border-color:var(--accent)}
-.opts{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;min-height:44px}
+.opts{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;min-height:44px}
 .chk{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:15px;min-height:44px}
 .chk input{width:22px;height:22px;accent-color:var(--accent)}
 .link{background:none;border:0;color:var(--accent);font-size:15px;min-height:44px;padding:0 4px}
 
-.brand{margin-bottom:18px}
-.brand>h2{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--accent);
-  font-family:var(--font-display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase}
-.brand>h2 span{flex:0 1 auto}
-.brand>h2 small{margin-left:auto;font-weight:600;font-size:14px;letter-spacing:.06em;color:var(--muted)}
-.model{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
-.model>h3{margin:0;padding:8px 12px;background:var(--panel2);font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:.03em;
-  display:flex;align-items:baseline;gap:8px}
-.model>h3 small{margin-left:auto;font-size:13px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
-.row{padding:8px 12px 10px;border-top:1px solid var(--line)}
+.model{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.model>h3{margin:0;padding:8px 12px;background:var(--panel2);font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.03em;
+  display:flex;align-items:baseline;gap:8px;text-transform:uppercase}
+.model>h3 small{margin-left:auto;font-weight:600;font-size:13px;letter-spacing:.06em;color:var(--muted)}
+.row{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:10px 12px}
+.row:active{background:var(--panel2)}
+.rowtop{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.hard{flex:1;font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
+.rowtop small{font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
 .row.zero .hard{color:var(--muted)}
-.rowtop{display:flex;align-items:center;gap:8px}
-.hard{flex:1;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
-.edit{background:none;border:0;color:var(--muted);min-width:44px;min-height:40px;font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
-.counts{display:flex;align-items:flex-end;gap:6px}
-.cnt{flex:1;min-width:0}
-.cnt small{display:block;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
-.step{display:flex;align-items:stretch;background:var(--bg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.step button{width:44px;min-height:44px;border:0;background:var(--panel2);font-size:24px;line-height:1;font-weight:600}
-.step button:active{background:var(--accent);color:var(--accent-fg)}
-.step button:disabled{opacity:.3}
-.step output{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
-.cnt.k-porColar output{color:var(--fg)}
-.cnt.k-colados output{color:var(--accent)}
-.cnt.k-bom output{color:var(--ok)}
-.cnt.k-meio output{color:var(--warn)}
-.cnt.k-fim output{color:var(--crit)}
-.grp{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:8px 0 2px}
-.counts.three{gap:6px}
-.counts.three .step button{width:36px}
-.use{display:block;width:100%;min-height:40px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);
-  font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase}
-.use:disabled{opacity:.3}
-.use:active{background:var(--accent);color:var(--accent-fg)}
-.order{margin-left:10px;background:none;border:1px solid var(--line);border-radius:8px;min-height:32px;padding:0 10px;color:var(--muted);
-  font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
-.ord{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
-.ord:first-child{border-top:0}
-.ord span{flex:1;font-family:var(--font-display);font-weight:700;font-size:20px;text-transform:uppercase;overflow-wrap:anywhere}
-.ord i{font-style:normal;color:var(--muted);font-size:13px;width:20px;text-align:right}
-.ord button{width:48px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:20px}
-.ord button:disabled{opacity:.3}
-.sum b em{font-style:normal;font-family:var(--font-body);font-weight:500;font-size:12px;color:var(--muted);margin-left:6px;letter-spacing:0}
-.row.zero .cnt output{color:var(--muted)}
-.move{width:40px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:18px;padding:0}
-.move:disabled{opacity:.3}
-.move:active{background:var(--accent);color:var(--accent-fg)}
+.cells{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.cell{background:var(--bg);border-radius:8px;padding:4px 2px;text-align:center}
+.cell b{display:block;font-family:var(--font-display);font-weight:700;font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.cell small{display:block;font-family:var(--font-display);font-weight:600;font-size:10.5px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.cell.z b{color:var(--muted);opacity:.45}
+.k-porColar b,.k-porColar output{color:var(--fg)}
+.k-colados b,.k-colados output{color:var(--accent)}
+.k-bom b,.k-bom output{color:var(--ok)}
+.k-meio b,.k-meio output{color:var(--warn)}
+.k-fim b,.k-fim output{color:var(--crit)}
+.cell.gap{margin-left:4px}
 
 .empty{text-align:center;color:var(--muted);padding:40px 16px}
 .empty b{display:block;color:var(--fg);font-family:var(--font-display);font-size:24px;font-weight:700;text-transform:uppercase;margin-bottom:6px}
@@ -118,23 +113,53 @@ select.on{border-color:var(--accent)}
 dialog{width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:var(--panel);color:var(--fg);
   border:1px solid var(--line);border-radius:16px;padding:16px}
 dialog::backdrop{background:rgba(0,0,0,.6)}
-dialog h2{margin:0 0 12px;font-family:var(--font-display);font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.03em}
+dialog h2{margin:0 0 4px;font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.05;text-transform:uppercase;letter-spacing:.03em;overflow-wrap:anywhere}
 dialog p{margin:0 0 12px;color:var(--muted)}
+.sub{font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:.04em;color:var(--accent);text-transform:uppercase;margin:0 0 10px}
 .field{margin-bottom:12px}
 .field input[type=text]{background:var(--bg)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.err{color:var(--crit);font-size:15px;min-height:20px;margin:0 0 8px}
+.grp{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:12px 0 2px}
+.counts{display:flex;align-items:flex-end;gap:6px}
+.counts.three .step button{width:36px}
+.cnt{flex:1;min-width:0}
+.cnt small{display:block;font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
+.step{display:flex;align-items:stretch;background:var(--bg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.step button{width:44px;min-height:44px;border:0;background:var(--panel2);font-size:24px;line-height:1;font-weight:600}
+.step button:active{background:var(--accent);color:var(--accent-fg)}
+.step button:disabled{opacity:.3}
+.step output{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
+.moves{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.moves.one{grid-template-columns:1fr}
+.mv{min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:0 6px;
+  font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.05em;text-transform:uppercase}
+.mv:disabled{opacity:.3}
+.mv:active{background:var(--accent);color:var(--accent-fg)}
+.diff{margin:14px 0 4px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px dashed var(--line);font-size:15px;color:var(--muted)}
+.diff.on{border-style:solid;border-color:var(--accent);color:var(--fg)}
+.diff b{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;display:block;color:var(--accent);margin-bottom:2px}
+.diff span{display:block}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:6px}
+summary{min-height:44px;display:flex;align-items:center;color:var(--muted);font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.err{color:var(--crit);font-size:15px;min-height:20px;margin:6px 0 4px}
 .btns{display:flex;gap:8px;margin-top:6px}
 .btns button{flex:1;min-height:50px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);
   font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase}
 .btns .pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btns .pri:disabled{opacity:.35}
 .btns .del{background:var(--crit);color:var(--crit-fg);border-color:var(--crit)}
 .stack{display:grid;gap:8px}
 .stack button{min-height:50px}
+.ord{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.ord:first-child{border-top:0}
+.ord span{flex:1;font-family:var(--font-display);font-weight:700;font-size:20px;text-transform:uppercase;overflow-wrap:anywhere}
+.ord i{font-style:normal;color:var(--muted);font-size:13px;width:20px;text-align:right}
+.ord button{width:48px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:20px}
+.ord button:disabled{opacity:.3}
 .foot{margin-top:24px;text-align:center;color:var(--muted);font-size:12px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);
   padding:10px 16px;border-radius:999px;font-size:15px;font-weight:500;max-width:calc(100vw - 32px);text-align:center;z-index:10}
 .toast[hidden]{display:none}
+[hidden]{display:none!important}
 </style>
 <div id="app">
   <div class="top">
@@ -143,20 +168,27 @@ dialog p{margin:0 0 12px;color:var(--muted)}
     <button class="ghost icon" id="bTheme" aria-label="Mudar entre modo claro e escuro"></button>
   </div>
 
-  <div class="sum" aria-live="polite">
-    <div><b id="sNew">0</b><small>Jogos novos</small></div>
-    <div><b id="sUsed">0</b><small>Jogos usados</small></div>
-    <div class="tot"><b id="sTot">0</b><small>Total</small></div>
+  <div class="bhead" id="bhead" hidden>
+    <button class="back" id="bBack">‹ Marcas</button>
+    <h2 id="bName"></h2>
+    <button class="ghost" id="bOrder">Ordem</button>
   </div>
 
-  <div class="filters">
-    <div><label for="fMarca">Marca</label><select id="fMarca"></select></div>
-    <div><label for="fModelo">Modelo</label><select id="fModelo"></select></div>
-    <div><label for="fDureza">Dureza</label><select id="fDureza"></select></div>
+  <div class="sum" aria-live="polite">
+    <div><b id="sNew">0</b><small>Jogos novos</small><em id="sNewSub"></em></div>
+    <div><b id="sUsed">0</b><small>Jogos usados</small><em id="sUsedSub"></em></div>
+    <div class="tot"><b id="sTot">0</b><small>Total</small><em></em></div>
   </div>
-  <div class="opts">
-    <label class="chk"><input type="checkbox" id="fStock"> Só com stock</label>
-    <button class="link" id="bClear" hidden>Limpar filtros</button>
+
+  <div id="brandTools" hidden>
+    <div class="filters">
+      <div><label for="fModelo">Modelo</label><select id="fModelo"></select></div>
+      <div><label for="fDureza">Dureza</label><select id="fDureza"></select></div>
+    </div>
+    <div class="opts">
+      <label class="chk"><input type="checkbox" id="fStock"> Só com stock</label>
+      <button class="link" id="bClear" hidden>Limpar filtros</button>
+    </div>
   </div>
 
   <div id="list"></div>
@@ -169,16 +201,26 @@ dialog p{margin:0 0 12px;color:var(--muted)}
 <dialog id="dForm">
   <form method="dialog" id="form" autocomplete="off">
     <h2 id="formTitle">Adicionar pneus</h2>
-    <div class="field"><label for="iMarca">Marca</label><input type="text" id="iMarca" list="lMarca" maxlength="40" autocapitalize="words"></div>
-    <div class="field"><label for="iModelo">Modelo do pneu</label><input type="text" id="iModelo" list="lModelo" maxlength="40" autocapitalize="words"></div>
-    <div class="field"><label for="iDureza">Dureza</label><input type="text" id="iDureza" list="lDureza" maxlength="30" autocapitalize="words"></div>
+    <div class="sub" id="formSub"></div>
+    <div id="names">
+      <div class="field"><label for="iMarca">Marca</label><input type="text" id="iMarca" list="lMarca" maxlength="40" autocapitalize="words"></div>
+      <div class="field"><label for="iModelo">Modelo do pneu</label><input type="text" id="iModelo" list="lModelo" maxlength="40" autocapitalize="words"></div>
+      <div class="field"><label for="iDureza">Dureza</label><input type="text" id="iDureza" list="lDureza" maxlength="30" autocapitalize="words"></div>
+    </div>
     <div class="grp">Novos</div>
-    <div class="two" id="formNovos"></div>
+    <div class="counts" id="formNovos"></div>
+    <div class="moves"><button type="button" class="mv" id="mColar">Colar 1 jogo →</button><button type="button" class="mv" id="mUsar">Usar 1 colado ↓</button></div>
     <div class="grp">Usados</div>
     <div class="counts three" id="formUsados"></div>
+    <div class="moves"><button type="button" class="mv" id="mMeio">Bom → Meio</button><button type="button" class="mv" id="mFim">Meio → Fim</button></div>
+    <div class="diff" id="diff"></div>
     <p class="err" id="formErr" role="alert"></p>
     <div class="btns"><button type="button" id="bCancel">Cancelar</button><button type="submit" class="pri" id="bSave">Guardar</button></div>
-    <div class="btns" id="delWrap" hidden><button type="button" class="del" id="bDel">Apagar esta linha</button></div>
+    <details id="more">
+      <summary>Mudar nome ou apagar</summary>
+      <div id="namesEdit"></div>
+      <div class="btns"><button type="button" class="del" id="bDel">Apagar esta linha</button></div>
+    </details>
   </form>
   <datalist id="lMarca"></datalist><datalist id="lModelo"></datalist><datalist id="lDureza"></datalist>
 </dialog>
@@ -212,13 +254,12 @@ dialog p{margin:0 0 12px;color:var(--muted)}
 'use strict';
 var KEY='pneus-rc-v1';
 var SUG_MARCAS=['AKA','Beta','Hot Race','JConcepts','Louise','Matrix','Pro-Line','ProCircuit','Sweep','TPRO','6MIK'];
+var FIELDS=[{k:'porColar',l:'Por colar',s:'P/ colar'},{k:'colados',l:'Colados',s:'Colados'},{k:'bom',l:'Bom',s:'Bom'},{k:'meio',l:'Meio',s:'Meio'},{k:'fim',l:'Fim',s:'Fim'}];
 var $=function(id){return document.getElementById(id);};
 var S=load();
-var F={marca:'',modelo:'',dureza:''};
-var FIELDS=[{k:'porColar',l:'Por colar',n:'por colar'},{k:'colados',l:'Colados',n:'colado'},{k:'bom',l:'Bom',n:'usado em bom estado'},{k:'meio',l:'Meio',n:'usado a meio'},{k:'fim',l:'Fim de vida',n:'em fim de vida'}];
-var editing=null, draft={};
-function tot(i){return i.porColar+i.colados+i.bom+i.meio+i.fim;}
-function novos(i){return i.porColar+i.colados;}
+var brand='';                       // '' = home (brands), otherwise the brand being shown
+var F={modelo:'',dureza:''};
+var editing=null, draft={}, base={};
 
 function load(){
   try{ var s=JSON.parse(localStorage.getItem(KEY)); if(s&&Array.isArray(s.items)) return clean(s); }catch(e){}
@@ -243,15 +284,13 @@ function num(v){v=Math.floor(Number(v));return (isFinite(v)&&v>0)?Math.min(v,999
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function norm(v){return v.toLocaleLowerCase('pt');}
 function same(a,b){return norm(a.marca)===norm(b.marca)&&norm(a.modelo)===norm(b.modelo)&&norm(a.dureza)===norm(b.dureza);}
+function addTo(a,b){ FIELDS.forEach(function(f){ a[f.k]=Math.min(999,a[f.k]+b[f.k]); }); }
 function put(items,it){ // one line per marca+modelo+dureza: same combination adds up
   for(var i=0;i<items.length;i++){ if(same(items[i],it)){ addTo(items[i],it); return items[i]; } }
   items.push(it); return it;
 }
-function addTo(a,b){ FIELDS.forEach(function(f){ a[f.k]=Math.min(999,a[f.k]+b[f.k]); }); }
-/* hardness order chosen per brand; anything not ordered yet goes last, alphabetically */
-function rank(marca,dureza){ var o=S.ordem[norm(marca)]||[], i=o.indexOf(norm(dureza)); return i<0?9999:i; }
-function cmpHard(marca){ return function(a,b){ return (rank(marca,a)-rank(marca,b))||cmp(a,b); }; }
-function hardsOf(marca){ return uniq(S.items.filter(function(i){return norm(i.marca)===norm(marca);}).map(function(i){return i.dureza;})).sort(cmpHard(marca)); }
+function tot(i){return i.porColar+i.colados+i.bom+i.meio+i.fim;}
+function novos(i){return i.porColar+i.colados;}
 function save(){
   try{ localStorage.setItem(KEY,JSON.stringify(S)); }
   catch(e){ toast('Não foi possível guardar neste aparelho.'); }
@@ -260,6 +299,11 @@ function cmp(a,b){return a.localeCompare(b,'pt',{numeric:true,sensitivity:'base'
 function uniq(list){var seen={},out=[];list.forEach(function(v){var k=norm(v);if(!seen[k]){seen[k]=1;out.push(v);}});return out.sort(cmp);}
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
 function jogos(n){return n+(n===1?' jogo':' jogos');}
+function ofBrand(m){return S.items.filter(function(i){return norm(i.marca)===norm(m);});}
+/* hardness order chosen per brand; anything not ordered yet goes last, alphabetically */
+function rank(marca,dureza){ var o=S.ordem[norm(marca)]||[], i=o.indexOf(norm(dureza)); return i<0?9999:i; }
+function cmpHard(marca){ return function(a,b){ return (rank(marca,a)-rank(marca,b))||cmp(a,b); }; }
+function hardsOf(marca){ return uniq(ofBrand(marca).map(function(i){return i.dureza;})).sort(cmpHard(marca)); }
 
 /* ---------- theme ---------- */
 var SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
@@ -271,7 +315,18 @@ function applyTheme(){
 }
 $('bTheme').onclick=function(){ S.theme=isLight()?'dark':'light'; save(); applyTheme(); };
 
-/* ---------- filters ---------- */
+/* ---------- navigation: home (brands) <-> one brand, kept in the URL hash so "back" works ---------- */
+function readHash(){
+  var h=''; try{ h=decodeURIComponent(location.hash.slice(1)); }catch(e){}
+  var hit=uniq(S.items.map(function(i){return i.marca;})).filter(function(m){return norm(m)===norm(h);})[0]||'';
+  if(norm(hit)!==norm(brand)) F={modelo:'',dureza:''};
+  brand=hit;
+}
+function go(m){ var h=m?'#'+encodeURIComponent(m):''; if(location.hash===h||(!h&&!location.hash)){ readHash(); render(); window.scrollTo(0,0); } else location.hash=h; }
+window.addEventListener('hashchange',function(){ readHash(); render(); window.scrollTo(0,0); });
+$('bBack').onclick=function(){ go(''); };
+
+/* ---------- filters (inside a brand) ---------- */
 function fill(sel,all,values,cur){
   sel.textContent='';
   var o=el('option',null,all); o.value=''; sel.appendChild(o);
@@ -280,106 +335,83 @@ function fill(sel,all,values,cur){
   sel.value=hit; sel.classList.toggle('on',!!hit);
   return hit;
 }
-function renderFilters(){
-  F.marca=fill($('fMarca'),'Todas',uniq(S.items.map(function(i){return i.marca;})),F.marca);
-  var inBrand=S.items.filter(function(i){return !F.marca||norm(i.marca)===norm(F.marca);});
-  F.modelo=fill($('fModelo'),'Todos',uniq(inBrand.map(function(i){return i.modelo;})),F.modelo);
-  var hs=uniq(inBrand.map(function(i){return i.dureza;})); if(F.marca) hs.sort(cmpHard(F.marca));
-  F.dureza=fill($('fDureza'),'Todas',hs,F.dureza);
-  $('fStock').checked=S.soStock;
-  $('bClear').hidden=!(F.marca||F.modelo||F.dureza||S.soStock);
-}
-$('fMarca').onchange=function(){F.marca=this.value;F.modelo='';render();};
 $('fModelo').onchange=function(){F.modelo=this.value;render();};
 $('fDureza').onchange=function(){F.dureza=this.value;render();};
 $('fStock').onchange=function(){S.soStock=this.checked;save();render();};
-$('bClear').onclick=function(){F={marca:'',modelo:'',dureza:''};S.soStock=false;save();render();};
+$('bClear').onclick=function(){F={modelo:'',dureza:''};S.soStock=false;save();render();};
 
-/* ---------- list ---------- */
-function visible(){
-  return S.items.filter(function(i){
-    if(F.marca&&norm(i.marca)!==norm(F.marca)) return false;
+/* ---------- screens ---------- */
+function sums(items){
+  var n=0,pc=0,all=0,fim=0; items.forEach(function(i){n+=novos(i);pc+=i.porColar;all+=tot(i);fim+=i.fim;});
+  $('sNew').textContent=n; $('sNewSub').textContent=pc?pc+' por colar':'';
+  $('sUsed').textContent=all-n; $('sUsedSub').textContent=fim?fim+' em fim de vida':'';
+  $('sTot').textContent=all;
+}
+function emptyBox(title,text){ var e=el('div','empty'); e.appendChild(el('b',null,title)); e.appendChild(document.createTextNode(text)); return e; }
+function renderHome(list){
+  sums(S.items);
+  if(!S.items.length){ list.appendChild(emptyBox('Sem pneus registados','Toca em «Adicionar pneus» para registar o primeiro jogo.')); return; }
+  list.appendChild(el('div','sect','Marcas'));
+  uniq(S.items.map(function(i){return i.marca;})).forEach(function(m){
+    var its=ofBrand(m), n=0,all=0; its.forEach(function(i){n+=novos(i);all+=tot(i);});
+    var models=uniq(its.map(function(i){return i.modelo;})).length;
+    var b=el('button','bcard'); b.type='button';
+    var nm=el('div','nm'); nm.appendChild(el('b',null,m));
+    nm.appendChild(el('small',null,n+(n===1?' novo':' novos')+' · '+(all-n)+(all-n===1?' usado':' usados')+' · '+models+(models===1?' modelo':' modelos')));
+    var qt=el('div','qt'); qt.appendChild(el('b',null,String(all))); qt.appendChild(el('small',null,all===1?'jogo':'jogos'));
+    b.appendChild(nm); b.appendChild(qt); b.appendChild(el('span','chev','›'));
+    b.setAttribute('aria-label',m+', '+jogos(all));
+    b.onclick=function(){ go(m); };
+    list.appendChild(b);
+  });
+}
+function row(it){
+  var r=el('button','row'+(tot(it)===0?' zero':'')); r.type='button';
+  var top=el('div','rowtop'); top.appendChild(el('div','hard',it.dureza)); top.appendChild(el('small',null,jogos(tot(it)))); r.appendChild(top);
+  var cells=el('div','cells');
+  FIELDS.forEach(function(f){ var c=el('div','cell k-'+f.k+(it[f.k]?'':' z')); c.appendChild(el('b',null,String(it[f.k]))); c.appendChild(el('small',null,f.s)); cells.appendChild(c); });
+  r.appendChild(cells);
+  r.setAttribute('aria-label',it.modelo+' '+it.dureza+', '+jogos(tot(it))+'. Tocar para alterar.');
+  r.onclick=function(){ openForm(it); };
+  return r;
+}
+function renderBrand(list){
+  var its=ofBrand(brand);
+  $('bName').textContent=brand;
+  $('bOrder').hidden=hardsOf(brand).length<2;
+  F.modelo=fill($('fModelo'),'Todos',uniq(its.map(function(i){return i.modelo;})),F.modelo);
+  F.dureza=fill($('fDureza'),'Todas',hardsOf(brand),F.dureza);
+  $('fStock').checked=S.soStock;
+  $('bClear').hidden=!(F.modelo||F.dureza||S.soStock);
+  var items=its.filter(function(i){
     if(F.modelo&&norm(i.modelo)!==norm(F.modelo)) return false;
     if(F.dureza&&norm(i.dureza)!==norm(F.dureza)) return false;
     if(S.soStock&&tot(i)===0) return false;
     return true;
   });
-}
-function stepper(it,f,onChange){
-  var box=el('div','cnt k-'+f.k);
-  box.appendChild(el('small',null,f.l));
-  var st=el('div','step');
-  var minus=el('button',null,'−'); minus.type='button'; minus.disabled=it[f.k]<=0;
-  minus.setAttribute('aria-label','Menos um jogo '+f.n);
-  minus.onclick=function(){ if(it[f.k]>0){ it[f.k]--; onChange(); } };
-  var out=el('output',null,String(it[f.k]));
-  var plus=el('button',null,'+'); plus.type='button'; plus.disabled=it[f.k]>=999;
-  plus.setAttribute('aria-label','Mais um jogo '+f.n);
-  plus.onclick=function(){ if(it[f.k]<999){ it[f.k]++; onChange(); } };
-  st.appendChild(minus); st.appendChild(out); st.appendChild(plus); box.appendChild(st);
-  return box;
-}
-function move(it,from,to,msg){ if(it[from]>0&&it[to]<999){ it[from]--; it[to]++; save(); render(); toast(msg); } }
-function row(it){
-  var r=el('div','row'+(tot(it)===0?' zero':'')), changed=function(){save();render();};
-  var top=el('div','rowtop');
-  top.appendChild(el('div','hard',it.dureza));
-  var ed=el('button','edit','Editar'); ed.type='button'; ed.onclick=function(){openForm(it);};
-  top.appendChild(ed); r.appendChild(top);
-  r.appendChild(el('div','grp','Novos'));
-  var c=el('div','counts');
-  c.appendChild(stepper(it,FIELDS[0],changed));
-  var mv=el('button','move','→'); mv.type='button'; mv.disabled=it.porColar<=0||it.colados>=999;
-  mv.setAttribute('aria-label','Colar um jogo: passa de por colar a colado'); mv.title='Colar um jogo';
-  mv.onclick=function(){ move(it,'porColar','colados','1 jogo passou a colado'); };
-  c.appendChild(mv);
-  c.appendChild(stepper(it,FIELDS[1],changed));
-  r.appendChild(c);
-  var use=el('button','use','↓ Usar 1 jogo colado'); use.type='button'; use.disabled=it.colados<=0||it.bom>=999;
-  use.onclick=function(){ move(it,'colados','bom','1 jogo colado passou a usado (bom)'); };
-  r.appendChild(use);
-  r.appendChild(el('div','grp','Usados'));
-  var u=el('div','counts three');
-  [2,3,4].forEach(function(k){ var f=FIELDS[k]; u.appendChild(stepper(it,{k:f.k,l:k===4?'Fim':f.l,n:f.n},changed)); });
-  r.appendChild(u);
-  return r;
+  sums(items);
+  if(!items.length){ list.appendChild(emptyBox('Nada com estes filtros','Muda o modelo ou a dureza, ou limpa os filtros.')); return; }
+  uniq(items.map(function(i){return i.modelo;})).forEach(function(modelo){
+    var ofModel=items.filter(function(i){return norm(i.modelo)===norm(modelo);}).sort(function(a,b){return cmpHard(brand)(a.dureza,b.dureza);});
+    var card=el('div','model'), h3=el('h3',null,modelo), mt=0;
+    ofModel.forEach(function(i){mt+=tot(i);});
+    h3.appendChild(el('small',null,jogos(mt))); card.appendChild(h3);
+    ofModel.forEach(function(i){card.appendChild(row(i));});
+    list.appendChild(card);
+  });
 }
 function render(){
-  renderFilters();
-  var items=visible(), list=$('list'), keep=window.scrollY;
-  var n=0,pc=0,all=0; items.forEach(function(i){n+=novos(i);pc+=i.porColar;all+=tot(i);});
-  $('sNew').textContent=n; if(pc){ $('sNew').appendChild(el('em',null,pc+' por colar')); }
-  $('sUsed').textContent=all-n; $('sTot').textContent=all;
+  if(brand&&!ofBrand(brand).length){ brand=''; if(location.hash) history.replaceState(null,'',location.pathname+location.search); }
+  var list=$('list'), keep=window.scrollY;
   list.textContent='';
-  if(!items.length){
-    var e=el('div','empty');
-    if(!S.items.length){ e.appendChild(el('b',null,'Sem pneus registados')); e.appendChild(document.createTextNode('Toca em «Adicionar pneus» para registar o primeiro jogo.')); }
-    else { e.appendChild(el('b',null,'Nada com estes filtros')); e.appendChild(document.createTextNode('Muda a marca, o modelo ou a dureza, ou limpa os filtros.')); }
-    list.appendChild(e); return;
-  }
-  uniq(items.map(function(i){return i.marca;})).forEach(function(marca){
-    var ofBrand=items.filter(function(i){return norm(i.marca)===norm(marca);});
-    var sec=el('section','brand'), h=el('h2'), t=0;
-    h.appendChild(el('span',null,marca));
-    if(hardsOf(marca).length>1){ var ob=el('button','order','Ordem'); ob.type='button'; ob.setAttribute('aria-label','Ordem das durezas de '+marca); ob.onclick=function(){openOrder(marca);}; h.appendChild(ob); }
-    ofBrand.forEach(function(i){t+=tot(i);});
-    h.appendChild(el('small',null,jogos(t))); sec.appendChild(h);
-    uniq(ofBrand.map(function(i){return i.modelo;})).forEach(function(modelo){
-      var ofModel=ofBrand.filter(function(i){return norm(i.modelo)===norm(modelo);}).sort(function(a,b){return cmpHard(marca)(a.dureza,b.dureza);});
-      var card=el('div','model'), h3=el('h3',null,modelo), mt=0;
-      ofModel.forEach(function(i){mt+=tot(i);});
-      h3.appendChild(el('small',null,jogos(mt))); card.appendChild(h3);
-      ofModel.forEach(function(i){card.appendChild(row(i));});
-      sec.appendChild(card);
-    });
-    list.appendChild(sec);
-  });
+  $('bhead').hidden=!brand; $('brandTools').hidden=!brand;
+  if(brand) renderBrand(list); else renderHome(list);
   window.scrollTo(0,keep);
 }
 
 /* ---------- hardness order ---------- */
-function openOrder(marca){
-  var list=hardsOf(marca);
+$('bOrder').onclick=function(){
+  var marca=brand, list=hardsOf(marca);
   function draw(){
     var box=$('ordList'); box.textContent='';
     list.forEach(function(d,i){
@@ -394,55 +426,87 @@ function openOrder(marca){
   function swap(a,b){ var t=list[a]; list[a]=list[b]; list[b]=t; S.ordem[norm(marca)]=list.map(norm); save(); draw(); }
   $('ordTitle').textContent='Durezas · '+marca;
   draw(); $('dOrder').showModal();
-}
+};
 $('bOrdClose').onclick=function(){ $('dOrder').close(); render(); };
 $('dOrder').addEventListener('close',render);
 
-/* ---------- add / edit ---------- */
+/* ---------- add / change: nothing touches the stock until "Guardar" ---------- */
 function options(id,values){ var d=$(id); d.textContent=''; values.forEach(function(v){var o=el('option');o.value=v;d.appendChild(o);}); }
 function refreshLists(){
-  var m=txt($('iMarca').value);
+  var m=txt($('iMarca').value), its=m?ofBrand(m):[];
   options('lMarca',uniq(S.items.map(function(i){return i.marca;}).concat(SUG_MARCAS)));
-  var ofBrand=S.items.filter(function(i){return m&&norm(i.marca)===norm(m);});
-  options('lModelo',uniq(ofBrand.map(function(i){return i.modelo;})));
-  options('lDureza',uniq((ofBrand.length?ofBrand:S.items).map(function(i){return i.dureza;})));
+  options('lModelo',uniq(its.map(function(i){return i.modelo;})));
+  options('lDureza',uniq((its.length?its:S.items).map(function(i){return i.dureza;})));
+}
+function stepper(f){
+  var box=el('div','cnt k-'+f.k); box.appendChild(el('small',null,f.l));
+  var st=el('div','step');
+  var minus=el('button',null,'−'); minus.type='button'; minus.disabled=draft[f.k]<=0; minus.setAttribute('aria-label','Menos um: '+f.l);
+  minus.onclick=function(){ if(draft[f.k]>0){ draft[f.k]--; drawCounts(); } };
+  var plus=el('button',null,'+'); plus.type='button'; plus.disabled=draft[f.k]>=999; plus.setAttribute('aria-label','Mais um: '+f.l);
+  plus.onclick=function(){ if(draft[f.k]<999){ draft[f.k]++; drawCounts(); } };
+  st.appendChild(minus); st.appendChild(el('output',null,String(draft[f.k]))); st.appendChild(plus); box.appendChild(st);
+  return box;
+}
+function mv(id,from,to){ var b=$(id); b.disabled=draft[from]<=0||draft[to]>=999; b.onclick=function(){ if(draft[from]>0&&draft[to]<999){ draft[from]--; draft[to]++; drawCounts(); } }; }
+function namesChanged(){ return editing&&(txt($('iMarca').value)!==editing.marca||txt($('iModelo').value)!==editing.modelo||txt($('iDureza').value)!==editing.dureza); }
+function drawCounts(){
+  $('formNovos').textContent=''; $('formUsados').textContent='';
+  FIELDS.forEach(function(f,k){ $(k<2?'formNovos':'formUsados').appendChild(stepper(f)); });
+  mv('mColar','porColar','colados'); mv('mUsar','colados','bom'); mv('mMeio','bom','meio'); mv('mFim','meio','fim');
+  drawDiff();
+}
+function drawDiff(){
+  var d=$('diff'); d.textContent='';
+  if(!editing){ d.hidden=true; $('bSave').disabled=false; return; }
+  d.hidden=false;
+  var ch=FIELDS.filter(function(f){return draft[f.k]!==base[f.k];});
+  var t0=0,t1=0; FIELDS.forEach(function(f){t0+=base[f.k];t1+=draft[f.k];});
+  d.classList.toggle('on',ch.length>0);
+  if(!ch.length){ d.textContent='Sem alterações. O stock só muda quando tocares em «Guardar».'; }
+  else {
+    d.appendChild(el('b',null,'Vais guardar'));
+    ch.forEach(function(f){ d.appendChild(el('span',null,f.l+': '+base[f.k]+' → '+draft[f.k])); });
+    d.appendChild(el('span',null,'Total da linha: '+jogos(t0)+(t1===t0?' (não muda)':' → '+jogos(t1))));
+  }
+  $('bSave').disabled=!(ch.length||namesChanged());
 }
 function openForm(it){
   editing=it||null;
-  $('formTitle').textContent=it?'Editar pneus':'Adicionar pneus';
-  $('iMarca').value=it?it.marca:(F.marca||'');
-  $('iModelo').value=it?it.modelo:(F.modelo||'');
+  $('formTitle').textContent=it?it.modelo:'Adicionar pneus';
+  $('formSub').textContent=it?it.marca+' · '+it.dureza:''; $('formSub').hidden=!it;
+  // name fields: on top when adding, tucked under "Mudar nome ou apagar" when changing stock
+  var names=$('names'); (it?$('namesEdit'):$('form')).insertBefore(names,it?null:$('form').children[2]);
+  $('more').hidden=!it; $('more').open=false;
+  $('iMarca').value=it?it.marca:(brand||'');
+  $('iModelo').value=it?it.modelo:(brand?F.modelo:'');
   $('iDureza').value=it?it.dureza:'';
-  draft={}; FIELDS.forEach(function(f){ draft[f.k]=it?it[f.k]:0; });
-  $('formNovos').textContent=''; $('formUsados').textContent='';
-  FIELDS.forEach(function(f,k){ $(k<2?'formNovos':'formUsados').appendChild(stepper(draft,{k:f.k,l:k===4?'Fim':f.l,n:f.n},function(){openFormCounts();})); });
-  $('formErr').textContent=''; $('delWrap').hidden=!it;
-  refreshLists();
+  draft={}; base={}; FIELDS.forEach(function(f){ draft[f.k]=base[f.k]=it?it[f.k]:0; });
+  $('formErr').textContent='';
+  refreshLists(); drawCounts();
   $('dForm').showModal();
 }
-function openFormCounts(){ // redraw the counters of the form after a tap
-  $('formNovos').textContent=''; $('formUsados').textContent='';
-  FIELDS.forEach(function(f,k){ $(k<2?'formNovos':'formUsados').appendChild(stepper(draft,{k:f.k,l:k===4?'Fim':f.l,n:f.n},openFormCounts)); });
-}
-$('iMarca').oninput=refreshLists;
+['iMarca','iModelo','iDureza'].forEach(function(id){ $(id).addEventListener('input',function(){ if(id==='iMarca') refreshLists(); drawDiff(); }); });
 $('bCancel').onclick=function(){$('dForm').close();};
 $('form').addEventListener('submit',function(e){
   e.preventDefault();
   var it={marca:txt($('iMarca').value),modelo:txt($('iModelo').value),dureza:txt($('iDureza').value)}; FIELDS.forEach(function(f){it[f.k]=draft[f.k];});
-  if(!it.marca||!it.modelo||!it.dureza){ $('formErr').textContent='Preenche a marca, o modelo e a dureza.'; return; }
+  if(!it.marca||!it.modelo||!it.dureza){ $('formErr').textContent='Preenche a marca, o modelo e a dureza.'; if(editing) $('more').open=true; return; }
   // reuse the spelling already in stock, so "aka" and "AKA" stay the same brand
   ['marca','modelo','dureza'].forEach(function(k){ var hit=S.items.filter(function(i){return i!==editing&&norm(i[k])===norm(it[k]);})[0]; if(hit) it[k]=hit[k]; });
-  var msg;
+  var msg, wasBrand=editing?editing.marca:'';
   if(editing){
     var clash=S.items.filter(function(i){return i!==editing&&same(i,it);})[0];
     if(clash){ S.items=S.items.filter(function(i){return i!==editing;}); addTo(clash,it); msg='Já existia essa linha: as quantidades foram somadas.'; }
-    else { editing.marca=it.marca; editing.modelo=it.modelo; editing.dureza=it.dureza; FIELDS.forEach(function(f){editing[f.k]=it[f.k];}); msg='Alterações guardadas'; }
+    else { editing.marca=it.marca; editing.modelo=it.modelo; editing.dureza=it.dureza; FIELDS.forEach(function(f){editing[f.k]=it[f.k];}); msg='Stock guardado'; }
   } else {
     var existed=S.items.some(function(i){return same(i,it);});
     it.id=uid(); put(S.items,it);
-    msg=existed?'Já existia: quantidades somadas à linha.':'Pneus adicionados';
+    msg=existed?'Já existia: quantidades somadas à linha.':'Pneus adicionados a '+it.marca;
   }
-  save(); $('dForm').close(); render(); toast(msg);
+  save(); $('dForm').close();
+  if(brand&&wasBrand&&norm(wasBrand)===norm(brand)&&norm(it.marca)!==norm(brand)) go(it.marca); else render();
+  toast(msg);
 });
 $('bDel').onclick=function(){
   var it=editing; if(!it) return;
@@ -465,7 +529,7 @@ $('bBackup').onclick=function(){$('dBackup').showModal();};
 $('bCloseBackup').onclick=function(){$('dBackup').close();};
 $('bExport').onclick=function(){
   var d=new Date(), p=function(x){return (x<10?'0':'')+x;};
-  var name='pneus-rc-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json';
+  var name='notyres-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json';
   var data=JSON.stringify({app:'pneus-rc',v:2,exportado:d.toISOString(),items:S.items,ordem:S.ordem},null,2);
   var file=null; try{ file=new File([data],name,{type:'application/json'}); }catch(e){}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
@@ -485,13 +549,13 @@ $('file').onchange=function(){
     if(!data||data.app!=='pneus-rc'||!Array.isArray(data.items)){ toast('Este ficheiro não é uma cópia do stock de pneus.'); return; }
     var next=clean({items:data.items,ordem:data.ordem,theme:S.theme,soStock:S.soStock});
     confirmBox('Restaurar cópia?','O stock atual ('+S.items.length+' linhas) é substituído pelo da cópia ('+next.items.length+' linhas).','Substituir',function(){
-      S=next; F={marca:'',modelo:'',dureza:''}; save(); $('dBackup').close(); render(); toast('Stock restaurado');
+      S=next; save(); $('dBackup').close(); go(''); toast('Stock restaurado');
     });
   };
   r.readAsText(f);
 };
 
 if(navigator.storage&&navigator.storage.persist){ navigator.storage.persist().catch(function(){}); }
-applyTheme(); render();
+applyTheme(); readHash(); render();
 })();
 </script>

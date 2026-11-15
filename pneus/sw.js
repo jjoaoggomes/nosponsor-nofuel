@@ -1,5 +1,5 @@
-// NOSPONSOR NOTYRES · service worker · build 0048c0ea19
-const CACHE='pneus-0048c0ea19';
+// NOSPONSOR NOTYRES · service worker · build 932dc482c6
+const CACHE='pneus-932dc482c6';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('pneus-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
