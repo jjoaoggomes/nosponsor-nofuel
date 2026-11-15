@@ -77,6 +77,7 @@ select.on{border-color:var(--accent)}
 .brand{margin-bottom:18px}
 .brand>h2{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--accent);
   font-family:var(--font-display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase}
+.brand>h2 span{flex:0 1 auto}
 .brand>h2 small{margin-left:auto;font-weight:600;font-size:14px;letter-spacing:.06em;color:var(--muted)}
 .model{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
 .model>h3{margin:0;padding:8px 12px;background:var(--panel2);font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:.03em;
@@ -95,8 +96,27 @@ select.on{border-color:var(--accent)}
 .step button:active{background:var(--accent);color:var(--accent-fg)}
 .step button:disabled{opacity:.3}
 .step output{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
-.cnt.new output{color:var(--ok)}
-.cnt.used output{color:var(--warn)}
+.cnt.k-porColar output{color:var(--fg)}
+.cnt.k-colados output{color:var(--accent)}
+.cnt.k-bom output{color:var(--ok)}
+.cnt.k-meio output{color:var(--warn)}
+.cnt.k-fim output{color:var(--crit)}
+.grp{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:8px 0 2px}
+.counts.three{gap:6px}
+.counts.three .step button{width:36px}
+.use{display:block;width:100%;min-height:40px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);
+  font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase}
+.use:disabled{opacity:.3}
+.use:active{background:var(--accent);color:var(--accent-fg)}
+.order{margin-left:10px;background:none;border:1px solid var(--line);border-radius:8px;min-height:32px;padding:0 10px;color:var(--muted);
+  font-family:var(--font-display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.ord{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.ord:first-child{border-top:0}
+.ord span{flex:1;font-family:var(--font-display);font-weight:700;font-size:20px;text-transform:uppercase;overflow-wrap:anywhere}
+.ord i{font-style:normal;color:var(--muted);font-size:13px;width:20px;text-align:right}
+.ord button{width:48px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:20px}
+.ord button:disabled{opacity:.3}
+.sum b em{font-style:normal;font-family:var(--font-body);font-weight:500;font-size:12px;color:var(--muted);margin-left:6px;letter-spacing:0}
 .row.zero .cnt output{color:var(--muted)}
 .move{width:40px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:18px;padding:0}
 .move:disabled{opacity:.3}
@@ -158,7 +178,7 @@ dialog p{margin:0 0 12px;color:var(--muted)}
   </div>
 
   <div id="list"></div>
-  <div class="foot">NOSPONSOR NOTYRES · pneus RC 1/8 TT · contagem em jogos de 4 · dados guardados neste aparelho · build 02253dc09d</div>
+  <div class="foot">NOSPONSOR NOTYRES · pneus RC 1/8 TT · contagem em jogos de 4 · dados guardados neste aparelho · build 0048c0ea19</div>
 </div>
 
 <div class="fab"><button id="bAdd">+ Adicionar pneus</button></div>
@@ -170,10 +190,10 @@ dialog p{margin:0 0 12px;color:var(--muted)}
     <div class="field"><label for="iMarca">Marca</label><input type="text" id="iMarca" list="lMarca" maxlength="40" autocapitalize="words"></div>
     <div class="field"><label for="iModelo">Modelo do pneu</label><input type="text" id="iModelo" list="lModelo" maxlength="40" autocapitalize="words"></div>
     <div class="field"><label for="iDureza">Dureza</label><input type="text" id="iDureza" list="lDureza" maxlength="30" autocapitalize="words"></div>
-    <div class="two">
-      <div class="cnt new"><small>Jogos novos</small><div class="step"><button type="button" data-f="novos" data-d="-1" aria-label="Menos um jogo novo">−</button><output id="oNovos">0</output><button type="button" data-f="novos" data-d="1" aria-label="Mais um jogo novo">+</button></div></div>
-      <div class="cnt used"><small>Jogos usados</small><div class="step"><button type="button" data-f="usados" data-d="-1" aria-label="Menos um jogo usado">−</button><output id="oUsados">0</output><button type="button" data-f="usados" data-d="1" aria-label="Mais um jogo usado">+</button></div></div>
-    </div>
+    <div class="grp">Novos</div>
+    <div class="two" id="formNovos"></div>
+    <div class="grp">Usados</div>
+    <div class="counts three" id="formUsados"></div>
     <p class="err" id="formErr" role="alert"></p>
     <div class="btns"><button type="button" id="bCancel">Cancelar</button><button type="submit" class="pri" id="bSave">Guardar</button></div>
     <div class="btns" id="delWrap" hidden><button type="button" class="del" id="bDel">Apagar esta linha</button></div>
@@ -185,6 +205,13 @@ dialog p{margin:0 0 12px;color:var(--muted)}
   <h2 id="cTitle"></h2>
   <p id="cText"></p>
   <div class="btns"><button type="button" id="cNo">Cancelar</button><button type="button" class="del" id="cYes">Apagar</button></div>
+</dialog>
+
+<dialog id="dOrder">
+  <h2 id="ordTitle"></h2>
+  <p>Põe as durezas pela ordem que queres ver, da mais mole à mais dura.</p>
+  <div id="ordList"></div>
+  <div class="btns"><button type="button" class="pri" id="bOrdClose">Fechar</button></div>
 </dialog>
 
 <dialog id="dBackup">
@@ -206,20 +233,27 @@ var SUG_MARCAS=['AKA','Beta','Hot Race','JConcepts','Louise','Matrix','Pro-Line'
 var $=function(id){return document.getElementById(id);};
 var S=load();
 var F={marca:'',modelo:'',dureza:''};
-var editing=null, draft={novos:0,usados:0};
+var FIELDS=[{k:'porColar',l:'Por colar',n:'por colar'},{k:'colados',l:'Colados',n:'colado'},{k:'bom',l:'Bom',n:'usado em bom estado'},{k:'meio',l:'Meio',n:'usado a meio'},{k:'fim',l:'Fim de vida',n:'em fim de vida'}];
+var editing=null, draft={};
+function tot(i){return i.porColar+i.colados+i.bom+i.meio+i.fim;}
+function novos(i){return i.porColar+i.colados;}
 
 function load(){
   try{ var s=JSON.parse(localStorage.getItem(KEY)); if(s&&Array.isArray(s.items)) return clean(s); }catch(e){}
-  return {v:1,items:[],theme:'',soStock:false};
+  return {v:2,items:[],ordem:{},theme:'',soStock:false};
 }
 function clean(s){
-  var out={v:1,items:[],theme:(s.theme==='light'||s.theme==='dark')?s.theme:'',soStock:!!s.soStock};
+  var out={v:2,items:[],ordem:{},theme:(s.theme==='light'||s.theme==='dark')?s.theme:'',soStock:!!s.soStock};
   s.items.forEach(function(it){
     if(!it) return;
     var m=txt(it.marca),o=txt(it.modelo),d=txt(it.dureza);
     if(!m||!o||!d) return;
-    put(out.items,{id:String(it.id||uid()),marca:m,modelo:o,dureza:d,novos:num(it.novos),usados:num(it.usados)});
+    // first version only had novos/usados: they become colados and usados em bom estado
+    var old=it.colados==null&&it.porColar==null&&it.bom==null;
+    put(out.items,{id:String(it.id||uid()),marca:m,modelo:o,dureza:d,
+      porColar:num(it.porColar),colados:num(old?it.novos:it.colados),bom:num(old?it.usados:it.bom),meio:num(it.meio),fim:num(it.fim)});
   });
+  if(s.ordem&&typeof s.ordem==='object'){ Object.keys(s.ordem).forEach(function(b){ if(Array.isArray(s.ordem[b])) out.ordem[norm(txt(b))]=s.ordem[b].map(function(x){return norm(txt(x));}).filter(Boolean).slice(0,60); }); }
   return out;
 }
 function txt(v){return String(v==null?'':v).replace(/\s+/g,' ').trim().slice(0,40);}
@@ -228,9 +262,14 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function norm(v){return v.toLocaleLowerCase('pt');}
 function same(a,b){return norm(a.marca)===norm(b.marca)&&norm(a.modelo)===norm(b.modelo)&&norm(a.dureza)===norm(b.dureza);}
 function put(items,it){ // one line per marca+modelo+dureza: same combination adds up
-  for(var i=0;i<items.length;i++){ if(same(items[i],it)){ items[i].novos=Math.min(999,items[i].novos+it.novos); items[i].usados=Math.min(999,items[i].usados+it.usados); return items[i]; } }
+  for(var i=0;i<items.length;i++){ if(same(items[i],it)){ addTo(items[i],it); return items[i]; } }
   items.push(it); return it;
 }
+function addTo(a,b){ FIELDS.forEach(function(f){ a[f.k]=Math.min(999,a[f.k]+b[f.k]); }); }
+/* hardness order chosen per brand; anything not ordered yet goes last, alphabetically */
+function rank(marca,dureza){ var o=S.ordem[norm(marca)]||[], i=o.indexOf(norm(dureza)); return i<0?9999:i; }
+function cmpHard(marca){ return function(a,b){ return (rank(marca,a)-rank(marca,b))||cmp(a,b); }; }
+function hardsOf(marca){ return uniq(S.items.filter(function(i){return norm(i.marca)===norm(marca);}).map(function(i){return i.dureza;})).sort(cmpHard(marca)); }
 function save(){
   try{ localStorage.setItem(KEY,JSON.stringify(S)); }
   catch(e){ toast('Não foi possível guardar neste aparelho.'); }
@@ -263,7 +302,8 @@ function renderFilters(){
   F.marca=fill($('fMarca'),'Todas',uniq(S.items.map(function(i){return i.marca;})),F.marca);
   var inBrand=S.items.filter(function(i){return !F.marca||norm(i.marca)===norm(F.marca);});
   F.modelo=fill($('fModelo'),'Todos',uniq(inBrand.map(function(i){return i.modelo;})),F.modelo);
-  F.dureza=fill($('fDureza'),'Todas',uniq(inBrand.map(function(i){return i.dureza;})),F.dureza);
+  var hs=uniq(inBrand.map(function(i){return i.dureza;})); if(F.marca) hs.sort(cmpHard(F.marca));
+  F.dureza=fill($('fDureza'),'Todas',hs,F.dureza);
   $('fStock').checked=S.soStock;
   $('bClear').hidden=!(F.marca||F.modelo||F.dureza||S.soStock);
 }
@@ -279,45 +319,55 @@ function visible(){
     if(F.marca&&norm(i.marca)!==norm(F.marca)) return false;
     if(F.modelo&&norm(i.modelo)!==norm(F.modelo)) return false;
     if(F.dureza&&norm(i.dureza)!==norm(F.dureza)) return false;
-    if(S.soStock&&i.novos+i.usados===0) return false;
+    if(S.soStock&&tot(i)===0) return false;
     return true;
   });
 }
-function stepper(it,field,label){
-  var box=el('div','cnt '+(field==='novos'?'new':'used'));
-  box.appendChild(el('small',null,label));
+function stepper(it,f,onChange){
+  var box=el('div','cnt k-'+f.k);
+  box.appendChild(el('small',null,f.l));
   var st=el('div','step');
-  var minus=el('button',null,'−'); minus.type='button'; minus.disabled=it[field]<=0;
-  minus.setAttribute('aria-label','Menos um jogo '+(field==='novos'?'novo':'usado'));
-  minus.onclick=function(){ if(it[field]>0){ it[field]--; save(); render(); } };
-  var out=el('output',null,String(it[field]));
-  var plus=el('button',null,'+'); plus.type='button'; plus.disabled=it[field]>=999;
-  plus.setAttribute('aria-label','Mais um jogo '+(field==='novos'?'novo':'usado'));
-  plus.onclick=function(){ if(it[field]<999){ it[field]++; save(); render(); } };
+  var minus=el('button',null,'−'); minus.type='button'; minus.disabled=it[f.k]<=0;
+  minus.setAttribute('aria-label','Menos um jogo '+f.n);
+  minus.onclick=function(){ if(it[f.k]>0){ it[f.k]--; onChange(); } };
+  var out=el('output',null,String(it[f.k]));
+  var plus=el('button',null,'+'); plus.type='button'; plus.disabled=it[f.k]>=999;
+  plus.setAttribute('aria-label','Mais um jogo '+f.n);
+  plus.onclick=function(){ if(it[f.k]<999){ it[f.k]++; onChange(); } };
   st.appendChild(minus); st.appendChild(out); st.appendChild(plus); box.appendChild(st);
   return box;
 }
+function move(it,from,to,msg){ if(it[from]>0&&it[to]<999){ it[from]--; it[to]++; save(); render(); toast(msg); } }
 function row(it){
-  var r=el('div','row'+(it.novos+it.usados===0?' zero':''));
+  var r=el('div','row'+(tot(it)===0?' zero':'')), changed=function(){save();render();};
   var top=el('div','rowtop');
   top.appendChild(el('div','hard',it.dureza));
   var ed=el('button','edit','Editar'); ed.type='button'; ed.onclick=function(){openForm(it);};
   top.appendChild(ed); r.appendChild(top);
+  r.appendChild(el('div','grp','Novos'));
   var c=el('div','counts');
-  c.appendChild(stepper(it,'novos','Novos'));
-  var mv=el('button','move','→'); mv.type='button'; mv.disabled=it.novos<=0||it.usados>=999;
-  mv.setAttribute('aria-label','Passar um jogo novo a usado'); mv.title='Passar um jogo novo a usado';
-  mv.onclick=function(){ if(it.novos>0&&it.usados<999){ it.novos--; it.usados++; save(); render(); toast('1 jogo passou de novo a usado'); } };
+  c.appendChild(stepper(it,FIELDS[0],changed));
+  var mv=el('button','move','→'); mv.type='button'; mv.disabled=it.porColar<=0||it.colados>=999;
+  mv.setAttribute('aria-label','Colar um jogo: passa de por colar a colado'); mv.title='Colar um jogo';
+  mv.onclick=function(){ move(it,'porColar','colados','1 jogo passou a colado'); };
   c.appendChild(mv);
-  c.appendChild(stepper(it,'usados','Usados'));
+  c.appendChild(stepper(it,FIELDS[1],changed));
   r.appendChild(c);
+  var use=el('button','use','↓ Usar 1 jogo colado'); use.type='button'; use.disabled=it.colados<=0||it.bom>=999;
+  use.onclick=function(){ move(it,'colados','bom','1 jogo colado passou a usado (bom)'); };
+  r.appendChild(use);
+  r.appendChild(el('div','grp','Usados'));
+  var u=el('div','counts three');
+  [2,3,4].forEach(function(k){ var f=FIELDS[k]; u.appendChild(stepper(it,{k:f.k,l:k===4?'Fim':f.l,n:f.n},changed)); });
+  r.appendChild(u);
   return r;
 }
 function render(){
   renderFilters();
   var items=visible(), list=$('list'), keep=window.scrollY;
-  var n=0,u=0; items.forEach(function(i){n+=i.novos;u+=i.usados;});
-  $('sNew').textContent=n; $('sUsed').textContent=u; $('sTot').textContent=n+u;
+  var n=0,pc=0,all=0; items.forEach(function(i){n+=novos(i);pc+=i.porColar;all+=tot(i);});
+  $('sNew').textContent=n; if(pc){ $('sNew').appendChild(el('em',null,pc+' por colar')); }
+  $('sUsed').textContent=all-n; $('sTot').textContent=all;
   list.textContent='';
   if(!items.length){
     var e=el('div','empty');
@@ -327,13 +377,15 @@ function render(){
   }
   uniq(items.map(function(i){return i.marca;})).forEach(function(marca){
     var ofBrand=items.filter(function(i){return norm(i.marca)===norm(marca);});
-    var sec=el('section','brand'), h=el('h2',null,marca), t=0;
-    ofBrand.forEach(function(i){t+=i.novos+i.usados;});
+    var sec=el('section','brand'), h=el('h2'), t=0;
+    h.appendChild(el('span',null,marca));
+    if(hardsOf(marca).length>1){ var ob=el('button','order','Ordem'); ob.type='button'; ob.setAttribute('aria-label','Ordem das durezas de '+marca); ob.onclick=function(){openOrder(marca);}; h.appendChild(ob); }
+    ofBrand.forEach(function(i){t+=tot(i);});
     h.appendChild(el('small',null,jogos(t))); sec.appendChild(h);
     uniq(ofBrand.map(function(i){return i.modelo;})).forEach(function(modelo){
-      var ofModel=ofBrand.filter(function(i){return norm(i.modelo)===norm(modelo);}).sort(function(a,b){return cmp(a.dureza,b.dureza);});
+      var ofModel=ofBrand.filter(function(i){return norm(i.modelo)===norm(modelo);}).sort(function(a,b){return cmpHard(marca)(a.dureza,b.dureza);});
       var card=el('div','model'), h3=el('h3',null,modelo), mt=0;
-      ofModel.forEach(function(i){mt+=i.novos+i.usados;});
+      ofModel.forEach(function(i){mt+=tot(i);});
       h3.appendChild(el('small',null,jogos(mt))); card.appendChild(h3);
       ofModel.forEach(function(i){card.appendChild(row(i));});
       sec.appendChild(card);
@@ -342,6 +394,27 @@ function render(){
   });
   window.scrollTo(0,keep);
 }
+
+/* ---------- hardness order ---------- */
+function openOrder(marca){
+  var list=hardsOf(marca);
+  function draw(){
+    var box=$('ordList'); box.textContent='';
+    list.forEach(function(d,i){
+      var r=el('div','ord'); r.appendChild(el('i',null,String(i+1))); r.appendChild(el('span',null,d));
+      var up=el('button',null,'↑'); up.type='button'; up.disabled=i===0; up.setAttribute('aria-label','Subir '+d);
+      up.onclick=function(){ swap(i,i-1); };
+      var dn=el('button',null,'↓'); dn.type='button'; dn.disabled=i===list.length-1; dn.setAttribute('aria-label','Descer '+d);
+      dn.onclick=function(){ swap(i,i+1); };
+      r.appendChild(up); r.appendChild(dn); box.appendChild(r);
+    });
+  }
+  function swap(a,b){ var t=list[a]; list[a]=list[b]; list[b]=t; S.ordem[norm(marca)]=list.map(norm); save(); draw(); }
+  $('ordTitle').textContent='Durezas · '+marca;
+  draw(); $('dOrder').showModal();
+}
+$('bOrdClose').onclick=function(){ $('dOrder').close(); render(); };
+$('dOrder').addEventListener('close',render);
 
 /* ---------- add / edit ---------- */
 function options(id,values){ var d=$(id); d.textContent=''; values.forEach(function(v){var o=el('option');o.value=v;d.appendChild(o);}); }
@@ -358,30 +431,30 @@ function openForm(it){
   $('iMarca').value=it?it.marca:(F.marca||'');
   $('iModelo').value=it?it.modelo:(F.modelo||'');
   $('iDureza').value=it?it.dureza:'';
-  draft={novos:it?it.novos:1,usados:it?it.usados:0};
-  $('oNovos').textContent=draft.novos; $('oUsados').textContent=draft.usados;
+  draft={}; FIELDS.forEach(function(f){ draft[f.k]=it?it[f.k]:0; });
+  $('formNovos').textContent=''; $('formUsados').textContent='';
+  FIELDS.forEach(function(f,k){ $(k<2?'formNovos':'formUsados').appendChild(stepper(draft,{k:f.k,l:k===4?'Fim':f.l,n:f.n},function(){openFormCounts();})); });
   $('formErr').textContent=''; $('delWrap').hidden=!it;
   refreshLists();
   $('dForm').showModal();
 }
+function openFormCounts(){ // redraw the counters of the form after a tap
+  $('formNovos').textContent=''; $('formUsados').textContent='';
+  FIELDS.forEach(function(f,k){ $(k<2?'formNovos':'formUsados').appendChild(stepper(draft,{k:f.k,l:k===4?'Fim':f.l,n:f.n},openFormCounts)); });
+}
 $('iMarca').oninput=refreshLists;
-$('form').addEventListener('click',function(e){
-  var b=e.target.closest('button[data-f]'); if(!b) return;
-  var f=b.getAttribute('data-f'); draft[f]=Math.max(0,Math.min(999,draft[f]+Number(b.getAttribute('data-d'))));
-  $(f==='novos'?'oNovos':'oUsados').textContent=draft[f];
-});
 $('bCancel').onclick=function(){$('dForm').close();};
 $('form').addEventListener('submit',function(e){
   e.preventDefault();
-  var it={marca:txt($('iMarca').value),modelo:txt($('iModelo').value),dureza:txt($('iDureza').value),novos:draft.novos,usados:draft.usados};
+  var it={marca:txt($('iMarca').value),modelo:txt($('iModelo').value),dureza:txt($('iDureza').value)}; FIELDS.forEach(function(f){it[f.k]=draft[f.k];});
   if(!it.marca||!it.modelo||!it.dureza){ $('formErr').textContent='Preenche a marca, o modelo e a dureza.'; return; }
   // reuse the spelling already in stock, so "aka" and "AKA" stay the same brand
   ['marca','modelo','dureza'].forEach(function(k){ var hit=S.items.filter(function(i){return i!==editing&&norm(i[k])===norm(it[k]);})[0]; if(hit) it[k]=hit[k]; });
   var msg;
   if(editing){
     var clash=S.items.filter(function(i){return i!==editing&&same(i,it);})[0];
-    if(clash){ S.items=S.items.filter(function(i){return i!==editing;}); clash.novos=Math.min(999,clash.novos+it.novos); clash.usados=Math.min(999,clash.usados+it.usados); msg='Já existia essa linha: as quantidades foram somadas.'; }
-    else { editing.marca=it.marca; editing.modelo=it.modelo; editing.dureza=it.dureza; editing.novos=it.novos; editing.usados=it.usados; msg='Alterações guardadas'; }
+    if(clash){ S.items=S.items.filter(function(i){return i!==editing;}); addTo(clash,it); msg='Já existia essa linha: as quantidades foram somadas.'; }
+    else { editing.marca=it.marca; editing.modelo=it.modelo; editing.dureza=it.dureza; FIELDS.forEach(function(f){editing[f.k]=it[f.k];}); msg='Alterações guardadas'; }
   } else {
     var existed=S.items.some(function(i){return same(i,it);});
     it.id=uid(); put(S.items,it);
@@ -391,7 +464,7 @@ $('form').addEventListener('submit',function(e){
 });
 $('bDel').onclick=function(){
   var it=editing; if(!it) return;
-  confirmBox('Apagar linha?',it.marca+' · '+it.modelo+' · '+it.dureza+' ('+jogos(it.novos+it.usados)+'). Isto não se pode desfazer.','Apagar',function(){
+  confirmBox('Apagar linha?',it.marca+' · '+it.modelo+' · '+it.dureza+' ('+jogos(tot(it))+'). Isto não se pode desfazer.','Apagar',function(){
     S.items=S.items.filter(function(i){return i!==it;}); save(); $('dForm').close(); render(); toast('Linha apagada');
   });
 };
@@ -411,7 +484,7 @@ $('bCloseBackup').onclick=function(){$('dBackup').close();};
 $('bExport').onclick=function(){
   var d=new Date(), p=function(x){return (x<10?'0':'')+x;};
   var name='pneus-rc-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json';
-  var data=JSON.stringify({app:'pneus-rc',v:1,exportado:d.toISOString(),items:S.items},null,2);
+  var data=JSON.stringify({app:'pneus-rc',v:2,exportado:d.toISOString(),items:S.items,ordem:S.ordem},null,2);
   var file=null; try{ file=new File([data],name,{type:'application/json'}); }catch(e){}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
     navigator.share({files:[file],title:'NOSPONSOR NOTYRES'}).catch(function(){});
@@ -428,7 +501,7 @@ $('file').onchange=function(){
   r.onload=function(){
     var data=null; try{ data=JSON.parse(r.result); }catch(e){}
     if(!data||data.app!=='pneus-rc'||!Array.isArray(data.items)){ toast('Este ficheiro não é uma cópia do stock de pneus.'); return; }
-    var next=clean({items:data.items,theme:S.theme,soStock:S.soStock});
+    var next=clean({items:data.items,ordem:data.ordem,theme:S.theme,soStock:S.soStock});
     confirmBox('Restaurar cópia?','O stock atual ('+S.items.length+' linhas) é substituído pelo da cópia ('+next.items.length+' linhas).','Substituir',function(){
       S=next; F={marca:'',modelo:'',dureza:''}; save(); $('dBackup').close(); render(); toast('Stock restaurado');
     });
